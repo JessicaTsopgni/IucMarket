@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{50A5E768-2C52-4DEE-91FC-EFA1A07D53CA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Rapport_Projet_Tutore_IucMarket_Cs2i5.docx = Docs\Rapport_Projet_Tutore_IucMarket_Cs2i5.docx
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{F33F4E58-B42F-4C7B-A9FE-D5966087168A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IucMarket.Web", "IucMarket.Web\IucMarket.Web.csproj", "{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6FB6ED71-D2A0-40F9-82D2-3D77B21BB065} = {F33F4E58-B42F-4C7B-A9FE-D5966087168A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BD407564-AC85-4A4C-BD83-F1006D77DAF8}
+	EndGlobalSection
+EndGlobal
