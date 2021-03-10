@@ -1,0 +1,78 @@
+﻿@page "/user/create"
+@inject HttpClient Http
+<h1>Create a user</h1>
+<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="offset-sm-3">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Email"><i class="icon-user"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Fullname"><i class="icon-male"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Fullname" class="form-control" placeholder="Enter your full name" aria-label="Fullname" aria-describedby="Fullname" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Fullname)" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Password"><i class="icon-lock"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="Password" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Password)" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="CPassword"><i class="icon-lock"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" aria-label="CPassword" aria-describedby="CPassword" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.ConfirmPassword)" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="input-group">
+                    <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                        <i class="icon-save"></i> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+@code{
+    bool isBusy = false;
+    UserCreateModel model = new UserCreateModel();
+
+    private async Task HandleValidSubmit()
+    {
+        isBusy = true;
+        await Task.Delay(2000);
+        isBusy = false;
+    }
+}

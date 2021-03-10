@@ -1,0 +1,47 @@
+﻿@page "/forgotten"
+@layout AuthLayout
+@inject HttpClient Http
+<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" class="mt-sm-5">
+    <DataAnnotationsValidator />
+    <div class="offset-sm-3">
+        <div class="row small">
+            <div class="col-sm-6">
+                <h1>Forgotten password</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Email"><i class="icon-user"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <button type="submit" disabled="@isBusy" class="btn btn-success btn-block"><i class="icon-signin"></i> Send</button>
+                </div>
+            </div>
+        </div>
+        <div class="row small">
+            <div class="col-sm-6 text-center text-warning">
+                Your will receive an email with reset password link.
+            </div>
+        </div>
+    </div>
+</EditForm>
+@code{
+    bool isBusy = false;
+    ForgottenPasswordModel model = new ForgottenPasswordModel();
+
+    private async Task HandleValidSubmit()
+    {
+        isBusy = true;
+        await Task.Delay(2000);
+        isBusy = false;
+    }
+}

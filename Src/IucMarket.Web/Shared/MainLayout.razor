@@ -1,0 +1,65 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager navigationManager
+@inject TokenAuthenticationStateProvider authStateProvider
+<CascadingValue Value="this">
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+        <div class="main">
+            <div class="top-row px-4">
+                <AuthorizeView>
+                    <Authorized>
+                        Hello, @context.User.Identity.Name!
+                        <a href="javascript:;" @onclick="HandleLogout" class="ml-md-auto" disabled="@isBusy">Log out</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/login" class="ml-md-auto">Log in</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <div class="content px-4">
+                @Body
+                <div class="d-none" aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+                    <!-- Position it -->
+                    <div style="position: absolute; top: 0; right: 0;">
+                        <Toast Message="Hello"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+@code
+{
+    private bool isBusy = false;
+
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!(await AuthenticationState).User.Identity.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("/login");
+        }
+    }
+    private async Task HandleLogout()
+    {
+        try
+        {
+            isBusy = true;
+            await authStateProvider.SetTokenAsync(null);
+            isBusy = false;
+            navigationManager.NavigateTo("/login");
+        }
+        catch(Exception ex)
+        {
+
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

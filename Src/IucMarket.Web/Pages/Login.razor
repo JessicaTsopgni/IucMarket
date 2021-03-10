@@ -1,0 +1,95 @@
+﻿@page "/login"
+@layout AuthLayout
+@inject HttpClient Http
+@inject TokenAuthenticationStateProvider authStateProvider
+@inject NavigationManager navigationManager
+
+<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" class="mt-sm-5">
+    <DataAnnotationsValidator />
+    <div class="offset-sm-3">
+        <div class="row small">
+            <div class="col-sm-6">
+                <h1>Sign in</h1>
+            </div>
+        </div>
+        <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+            <div class="col-sm-6">
+                <div class="alert alert-danger">
+                     @message
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Email"><i class="icon-user"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="Password"><i class="icon-lock"></i></span>
+                        </div>
+                        <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="Password" />
+                    </div>
+                    <div class="small">
+                        <ValidationMessage For="@(() => model.Password)" />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                        <span class="oi oi-account-login"></span> Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row small">
+            <div class="col-sm-6 text-right">
+                <a href="/forgotten">Forgotten password</a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+@code{
+    bool isBusy = false;
+    string message = string.Empty;
+    LoginModel model = new LoginModel();
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            isBusy = true;
+            message = string.Empty;
+            var response = await Http.GetAsync($"user/login?email={model.Email}&password={model.Password}");
+            if(response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonConvert.DeserializeObject<Entities.User>(json);
+                var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, DateTime.UtcNow.AddSeconds(user.ExpiresIn));
+                await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresIn);
+                navigationManager.NavigateTo("");
+            }
+            else
+            {
+                message = await response.Content.ReadAsStringAsync();
+            }
+
+        }
+        catch(Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}
