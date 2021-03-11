@@ -30,11 +30,14 @@ namespace IucMarket.Service
                 Person person = await GetPersonAsync(firebaseLink.User.LocalId);
                 return new User
                 (
+                    person?.Key,
                     firebaseLink.User.LocalId,
                     person?.FullName,
                     person?.CreatedAt ?? DateTime.MinValue,
+                    person?.Role ?? Person.RoleOptions.Customer,
                     firebaseLink.User.IsEmailVerified,
                     firebaseLink.User.Email,
+                    null,
                     firebaseLink.FirebaseToken,
                     firebaseLink.ExpiresIn
                 );
@@ -59,9 +62,11 @@ namespace IucMarket.Service
                        .EqualTo(uid)
                        .OnceAsync<Person>();
 
-                return persons?.FirstOrDefault()?.Object;
+                var person = persons?.FirstOrDefault()?.Object;
+                person.Key = persons?.FirstOrDefault()?.Key;
+                return person;
             }
-            catch (FirebaseException)
+            catch (Exception)
             {
                 return null;
             }
@@ -72,8 +77,8 @@ namespace IucMarket.Service
             
             try
             {
-                if(await IsUserExistsAsync(command.Email))
-                    throw new DuplicateWaitObjectException("Email already exists !");
+                if(await GetUserByEmailAsync(command.Email) != null)
+                    throw new DuplicateWaitObjectException($"{nameof(command.Email)} already exists !");
 
                 // Create User
                 var firebaseAuthLink = await FirebaseAuthProvider.CreateUserWithEmailAndPasswordAsync
@@ -86,23 +91,29 @@ namespace IucMarket.Service
 
                 var person = new Person
                 (
+                    null,
                     firebaseAuthLink.User.LocalId,
                     firebaseAuthLink.User.DisplayName,
                     command.CreatedAt,
+                    command.Role,
                     command.Status
                 );
 
                 var result = await FirebaseClient
                   .Child(Table)
                   .PostAsync(JsonConvert.SerializeObject(person));
+                person.Key = result.Key;
 
                 return new User
                 (
+                    person.Key,
                     person.Id,
                     person.FullName,
                     person.CreatedAt,
+                    person.Role,
                     person.Status,
-                    firebaseAuthLink.User.Email
+                    firebaseAuthLink.User.Email,
+                    null
                 );
             }
             catch (Exception ex)
@@ -111,17 +122,101 @@ namespace IucMarket.Service
             }
         }
 
-        public async Task<bool> IsUserExistsAsync(string email)
+        public async Task<User> EditAsync(string uid, RegisterCommand command)
+        {
+
+            try
+            {
+                var user = await GetUserByEmailAsync(command.Email);
+
+                if (user == null)
+                    throw new KeyNotFoundException($"{nameof(User)} {command.Email} not found");
+                if (user != null &&  user.Id != uid)
+                    throw new DuplicateWaitObjectException($"{nameof(command.Email)} {command.Email} already exists !");
+
+                // Create User
+                var userRecord = await FirebaseAuthAdmin.UpdateUserAsync
+                (
+                    new FirebaseAdmin.Auth.UserRecordArgs
+                    {
+                        Uid = uid,
+                        Email = command.Email,
+                        Password = command.Password,
+                        DisplayName = command.Name
+                    }
+                );
+
+                var person = await GetPersonAsync(uid);
+                if(person == null)
+                {
+                    person = new Person
+                    (
+                        null,
+                        uid,
+                        command.Name,
+                        command.CreatedAt,
+                        command.Role,
+                        command.Status
+                    );
+
+                    var result = await FirebaseClient
+                      .Child(Table)
+                      .PostAsync(JsonConvert.SerializeObject(person));
+
+                    person.Key = result.Key;
+                }
+                else
+                {
+                    person.FullName = command.Name;
+                    person.Status = command.Status;
+
+                    await FirebaseClient
+                      .Child(Table)
+                      .Child(person.Key)
+                      .PutAsync(JsonConvert.SerializeObject(person));
+                }
+
+                return new User
+                (
+                    person.Key,
+                    person.Id,
+                    person.FullName,
+                    person.CreatedAt,
+                    person.Role,
+                    person.Status,
+                    userRecord.Email,
+                    null
+                );
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public async Task<User> GetUserByEmailAsync(string email)
         {
             // Get User
             try
             {
                 var provider = await FirebaseAuthAdmin.GetUserByEmailAsync(email);
-                return true;
+                Person person = await GetPersonAsync(provider.Uid);
+                return new User
+                (
+                    person?.Key,
+                    provider.Uid,
+                    person?.FullName,
+                    person?.CreatedAt ?? DateTime.UtcNow,
+                    person?.Role ?? Person.RoleOptions.Customer,
+                    person?.Status ?? false,
+                    provider.Email,
+                    null
+                );
             }
             catch (FirebaseAdmin.Auth.FirebaseAuthException)
             {
-                return false;
+                return null;
             }
             catch(Exception ex)
             {
@@ -156,11 +251,14 @@ namespace IucMarket.Service
                         (
                             new User
                             (
+                                person?.Key,
                                 user.Uid, 
                                 person?.FullName, 
                                 person?.CreatedAt ?? DateTime.MinValue, 
+                                person?.Role ?? Person.RoleOptions.Customer,
                                 person?.Status ?? true, 
-                                user.Email
+                                user.Email,
+                                null
                             ) 
                         );
                     }
@@ -181,12 +279,19 @@ namespace IucMarket.Service
                 var person = await GetPersonAsync(user.Uid);
                 return new User
                 (
+                    person?.Key,
                     user.Uid,
                     person?.FullName,
                     person?.CreatedAt ?? DateTime.MinValue,
+                    person?.Role ?? Person.RoleOptions.Customer,
                     person?.Status ?? true,
-                    user.Email
+                    user.Email,
+                    null
                 );
+            }
+            catch(FirebaseAdmin.Auth.FirebaseAuthException)
+            {
+                return null;
             }
             catch (Exception ex)
             {
@@ -201,6 +306,10 @@ namespace IucMarket.Service
             {
                await FirebaseAuthAdmin.DeleteUserAsync(uid);
             }
+            catch (FirebaseAdmin.Auth.FirebaseAuthException)
+            {
+                throw new KeyNotFoundException($"{nameof(User)} {uid} not found");
+            }
             catch (Exception ex)
             {
                 throw ex;
@@ -212,10 +321,40 @@ namespace IucMarket.Service
 
             try
             {
-                if(!await IsUserExistsAsync(command.Email))
-                    throw new EntryPointNotFoundException("Email doesn't exists !");
+                if(await GetUserByEmailAsync(command.Email) == null)
+                    throw new KeyNotFoundException($"{nameof(command.Email)} {command.Email} doesn't exists !");
 
                 await FirebaseAuthProvider.SendPasswordResetEmailAsync(command.Email);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public async Task<IEnumerable<User>> GetOwnersAsync()
+        {
+            try
+            {
+                var persons = await FirebaseClient
+                       .Child(Table)
+                       .OnceAsync<Person>();
+                return persons.Select
+                (
+                    x =>
+                    new User
+                    (
+                        x.Key,
+                        x.Object.Id,
+                        x.Object.FullName,
+                        x.Object.CreatedAt,
+                        x.Object.Role,
+                        x.Object.Status,
+                        null,
+                        null
+                    )
+                ).ToArray();
             }
             catch (Exception ex)
             {
@@ -242,16 +381,18 @@ namespace IucMarket.Service
         public string Name { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public bool SendVerificationEmail { get; private set; }
+        public Person.RoleOptions Role { get; private set; }
         public bool Status { get; private set; }
 
-        public RegisterCommand(string email, string password, string name, DateTime createdAt,
-            bool sendVerificationEmail, bool status)
+        public RegisterCommand(string email, string password, string name,
+            bool sendVerificationEmail, Person.RoleOptions role, bool status)
         {
             Email = email;
             Password = password;
             Name = name;
-            CreatedAt = createdAt;
+            CreatedAt = DateTime.UtcNow;
             SendVerificationEmail = sendVerificationEmail;
+            Role = role;
             Status = status;
         }
     }

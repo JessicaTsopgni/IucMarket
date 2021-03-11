@@ -1,6 +1,7 @@
 using Firebase.Database.Query;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -80,8 +81,8 @@ namespace IucMarket.IntegratedTests
                 email,
                 "admin12345",
                 "Jessica TSOPGNI",
-                DateTime.UtcNow,
                 false,
+                Entities.Person.RoleOptions.Admin,
                 true
             );
 
@@ -109,8 +110,8 @@ namespace IucMarket.IntegratedTests
                          "willyjoeltchana@gmail.com",
                          "",
                          "",
-                         DateTime.UtcNow,
                          false,
+                         Entities.Person.RoleOptions.Admin,
                          true
                      )
                  )
@@ -130,10 +131,10 @@ namespace IucMarket.IntegratedTests
         //}
 
         [Test]
-        public void FirebaseForgottenPasswordWithNotExistingEmailReturnEntryPointNotFoundException()
+        public void FirebaseForgottenPasswordWithNotExistingEmailReturnKeyNotFoundException()
         {
 
-            Assert.ThrowsAsync<EntryPointNotFoundException>
+            Assert.ThrowsAsync<KeyNotFoundException>
              (
                  async () => await service.ForgottenPasswordAsync
                  (

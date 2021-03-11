@@ -1,0 +1,166 @@
+﻿@page "/product"
+@page "/product/index"
+@inject HttpClient Http
+@inject IJSRuntime JS
+<h2>Product list</h2>
+<div class="text-right mb-2">
+    <NavLink class="btn btn-success" href="product/edit">
+        <span class="icon icon-plus" aria-hidden="true"></span> New
+    </NavLink>
+</div>
+<div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+    <div class="col-sm-12">
+        <div class="alert alert-@messageType">
+            @message
+        </div>
+    </div>
+</div>
+<div class="row @(!isBusy ? "d-none": "")">
+    <div class="col-sm-12">
+        <div class="alert alert-info">
+            Processing...
+        </div>
+    </div>
+</div>
+@if (isLoadingData)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<div class="row">
+    @if (products != null && products.Count() != 0)
+    {
+        @foreach (var product in products)
+        {
+            <div class="col-sm-3">
+                <div class="card" style="height:300px">
+                    <img class="card-img-top" src="@product.PictureLink" alt="@product.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @product.Name
+                            <em class="small">By @product.Owner.Fullname</em>
+                        </h5>
+                        <p class="card-text text-truncate">
+                            @product.Description
+                        </p>
+                        <p><strong>@product.Price @product.Currency</strong></p>
+                        <a href="product/edit/@product.Id" class="text-primary"><span class="oi oi-pencil" aria-hidden="true"></span></a>
+                        <a href="javascript:;" @onclick="(() => HandleDelete(product.Id, product.Name))" class="text-danger"><sapn class="oi oi-trash" aria-hidden="true"></sapn></a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <em>Product not found !</em>
+    }
+</div>
+}
+
+@code {
+    private IEnumerable<ProductListModel> products;
+    private string message = string.Empty;
+    private MessageType messageType = MessageType.danger;
+    private bool isBusy = false;
+    private bool isLoadingData = false;
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch(Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoadingData = true;
+
+            var response = await Http.GetAsync($"article/index");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var productList = JsonConvert.DeserializeObject<Entities.ProductList>(json);
+                products = productList.Products.Select
+                (
+                    x => new ProductListModel
+                    (
+                        x.Key,
+                        x.Reference,
+                        x.Name,
+                        x.Description,
+                        x.Price,
+                        x.Currency,
+                        $"images/{x.PictureNames}",
+                        x.CreatedAt,
+                        new UserListModel
+                        (
+                            x.Owner?.Id,
+                            x.Owner?.Email,
+                            x.Owner?.FullName,
+                            x.Owner?.CreatedAt ?? DateTime.MinValue,
+                            x.Owner?.Role ?? Entities.Person.RoleOptions.Customer,
+                            x.Owner?.Status ?? false
+                        ),
+                        x.Status
+                    )
+                ).ToArray();
+            }
+            else
+            {
+                messageType = MessageType.danger;
+                message = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            isLoadingData = false;
+        }
+    }
+
+    private async Task HandleDelete(string id, string name)
+    {
+        try
+        {
+            isBusy = true;
+
+            var result = await JS.InvokeAsync<bool>("confirmDelete", name);
+            if (result)
+            {
+                var response = await Http.DeleteAsync($"product/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    messageType = MessageType.success;
+                    message = "Delete done !";
+                    await LoadData();
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

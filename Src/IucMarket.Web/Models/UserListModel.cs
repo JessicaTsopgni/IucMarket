@@ -8,9 +8,10 @@ namespace IucMarket.Web.Models
 {
     public class UserListModel
     {
-        public string Uid { get; set; }
+        public string Id { get; set; }
         public string Email { get; set; }
         public string Fullname { get; set; }
+        public Entities.Person.RoleOptions Role { get; set; }
         public DateTime CreatedDate { get; set; }
         public string Status { get; set; }
         public UserListModel()
@@ -18,13 +19,15 @@ namespace IucMarket.Web.Models
 
         }
 
-        public UserListModel(string uid, string email, string fullname, DateTime createdDate, bool status)
+        public UserListModel(string id, string email, string fullname, DateTime createdDate,
+            Entities.Person.RoleOptions role, bool status)
         {
-            Uid = uid;
+            Id = id;
             Email = email;
             Fullname = fullname;
             CreatedDate = createdDate;
-            Status = status ? "Enable" : "Disabled";
+            Role = role;
+            Status = status ? "Enabled" : "Disabled";
         }
     }
 }

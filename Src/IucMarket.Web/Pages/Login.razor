@@ -45,14 +45,16 @@
                 </div>
                 <div class="input-group">
                     <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
-                        <span class="oi oi-account-login"></span> Connect
+                        <span class="oi oi-account-login" aria-hidden="true"></span> Connect
                     </button>
                 </div>
             </div>
         </div>
         <div class="row small">
             <div class="col-sm-6 text-right">
-                <a href="/forgotten">Forgotten password</a>
+                <NavLink href="forgotten">
+                    Forgotten password
+                </NavLink>
             </div>
         </div>
     </div>
@@ -68,7 +70,7 @@
         {
             isBusy = true;
             message = string.Empty;
-            var response = await Http.GetAsync($"user/login?email={model.Email}&password={model.Password}");
+            var response = await Http.GetAsync($"account/login?email={model.Email}&password={model.Password}");
             if(response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();

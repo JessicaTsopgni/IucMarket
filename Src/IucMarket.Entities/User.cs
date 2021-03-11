@@ -5,6 +5,7 @@ namespace IucMarket.Entities
     public class User:Person
     {
         public string Email { get; set; }
+        public string Password { get; set; }
         public string Token { get; set; }
         public int ExpiresIn { get; set; }
 
@@ -13,15 +14,16 @@ namespace IucMarket.Entities
 
         }
 
-        public User(string uid, string fullName, DateTime createdAt, bool status, string email) :
-           base(uid, fullName, createdAt, status)
+        public User(string key, string id, string fullName, DateTime createdAt, RoleOptions role, bool status, string email, string password) :
+           base(key, id, fullName, createdAt, role, status)
         {
             Email = email;
+            Password = password;
         }
 
-        public User(string uid, string fullName, DateTime createdAt, bool status, string email,
-            string token, int expiresIn):
-            this(uid, fullName, createdAt, status, email)
+        public User(string key, string id, string fullName, DateTime createdAt, RoleOptions role, bool status, string email,
+           string password, string token, int expiresIn):
+            this(key, id, fullName, createdAt, role, status, email, password)
         {
             Token = token;
             ExpiresIn = expiresIn;

@@ -1,0 +1,241 @@
+﻿@page "/user/edit/{id?}"
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+<h2><a href="user" class="text-dark" style="text-decoration:none">
+    <span class="icon icon-circle-arrow-left"></span></a> Edit a user</h2>
+@if (!isLoaded)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <div>
+            <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+                <div class="col-sm-10">
+                    <div class="alert alert-@messageType">
+                        @message
+                    </div>
+                </div>
+            </div>
+            <div class="row @(!isBusy ? "d-none": "")">
+                <div class="col-sm-10">
+                    <div class="alert alert-info">
+                        Processing...
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-5">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Email"><i class="icon-user"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Fullname"><i class="icon-male"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Fullname" class="form-control" placeholder="Enter your full name" aria-label="Fullname" aria-describedby="Fullname" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Fullname)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Role"><i class="icon-eye-open"></i></span>
+                            </div>
+                            <InputSelect @bind-Value="model.Role" class="custom-select" aria-label="Role" aria-describedby="Role">
+                                @foreach (var value in Enum.GetValues(typeof(Entities.Person.RoleOptions)))
+                                    {
+                                    <option>@value</option>
+                                    }
+                            </InputSelect>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Role)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-5">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Password"><i class="icon-lock"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="Password" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="ConfirmPassword"><i class="icon-lock"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" aria-label="ConfirmPassword" aria-describedby="ConfirmPassword" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.ConfirmPassword)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="custom-control custom-checkbox mt-4">
+                            <InputCheckbox class="custom-control-input" id="Status" @bind-Value="model.Status" />
+                            <label class="custom-control-label" for="Status">Enable/Disable</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-10">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                                <i class="icon-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
+}
+@code{
+    private bool isBusy = false;
+    private bool isLoaded = true;
+    private MessageType messageType = MessageType.danger;
+    private string message = string.Empty;
+    private UserCreateModel model = new UserCreateModel();
+    private Entities.User user = null;
+    private EditContext context;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoaded = false;
+            if (!string.IsNullOrEmpty(Id))
+            {
+                var response = await Http.GetAsync($"account/{Id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    user = JsonConvert.DeserializeObject<Entities.User>(json);
+                    model = new UserCreateModel(user.Id, user.Email, null, null, user.FullName, user.Role, user.Status);
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isLoaded = true;
+            context = new EditContext(model);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (context.Validate())
+            {
+                isBusy = true;
+                if (string.IsNullOrEmpty(Id))
+                {
+                    var response = await Http.PostAsJsonAsync
+                    (
+                        $"account",
+                        new Entities.User
+                        (
+                            null,
+                            null,
+                            model.Fullname,
+                            DateTime.UtcNow,
+                            model.Role,
+                            model.Status,
+                            model.Email,
+                            model.Password
+                        )
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        model = new UserCreateModel();
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await Task.Delay(2000);
+                        message = string.Empty;
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+                else
+                {
+                    var response = await Http.PutAsJsonAsync
+                    (
+                        $"account/{Id}",
+                        new Entities.User
+                        (
+                            user.Key,
+                            Id,
+                            model.Fullname,
+                            user.CreatedAt,
+                            model.Role,
+                            model.Status,
+                            model.Email,
+                            model.Password
+                        )
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await Task.Delay(2000);
+                        navigationManager.NavigateTo("user");
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

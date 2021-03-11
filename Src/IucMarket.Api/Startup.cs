@@ -27,6 +27,7 @@ namespace IucMarket.Api
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddScoped(typeof(UserService));
+            services.AddScoped(typeof(ProductService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

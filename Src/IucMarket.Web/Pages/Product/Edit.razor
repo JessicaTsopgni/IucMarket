@@ -1,0 +1,453 @@
+﻿@page "/product/edit/{id?}"
+@using System.IO
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+<h2><a href="product" class="text-dark" style="text-decoration:none">
+    <span class="icon icon-circle-arrow-left"></span></a> Edit a product</h2>
+@if (!isLoaded)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <div>
+            <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+                <div class="col-sm-12">
+                    <div class="alert alert-@messageType">
+                        @message
+                    </div>
+                </div>
+            </div>
+            <div class="row @(!isBusy ? "d-none": "")">
+                <div class="col-sm-12">
+                    <div class="alert alert-info">
+                        Processing...
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Reference"><i class="icon-picture"></i></span>
+                            </div>
+                            <div class="custom-file">
+                                <InputFile OnChange="@LoadFiles" multiple class="custom-file-input" id="Picture" />
+                                <label class="custom-file-label" for="Picture">Choose picture</label>
+                            </div>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.PictureNames)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div id="carouselExampleControls" class="carousel border" data-ride="carousel">
+                            <div class="carousel-inner text-center" style="height:200px">
+                                @if (isLoadingFile)
+                                {
+                                    <p><em>Loading...</em></p>
+                                }
+                                else
+                                {
+                                    int i = 0;
+                                    @foreach (var (file, content) in loadedFiles)
+                                    {
+                                        <div class="carousel-item @(i == 0 ? "active":"")">
+                                            <img class="img-fluid" style="max-height:200px" src="data:@file.ContentType;base64,@Convert.ToBase64String(content)" alt="@file.Name">
+                                        </div>
+                                        i++;
+                                    }
+                                }
+                            </div>
+                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                        <a href="javascript:;" class="text-danger small" @onclick="clearFiles">Clear</a>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Reference"><i class="icon-code"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Reference" type="text" class="form-control" placeholder="Product code" aria-label="Reference" aria-describedby="Reference" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Reference)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Name">&nbsp;<i class="icon-tag"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Product roduct name" aria-label="Name" aria-describedby="Name" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Name)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Price"><i class="icon-money"></i></span>
+                            </div>
+                            <InputNumber @bind-Value="model.Price" class="form-control" placeholder="Product price" aria-label="Price" aria-describedby="Price" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Price)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Currency">&nbsp;<i class="icon-dollar"></i>&nbsp;</span>
+                            </div>
+                            <InputText @bind-Value="model.Currency" class="form-control" placeholder="Product price currency" aria-label="Currency" aria-describedby="Currency" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Currency)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Owner">&nbsp;<i class="icon-eye-open"></i></span>
+                            </div>
+                            <InputSelect @bind-Value="model.Owner" class="form-control" aria-label="Role" aria-describedby="Owner">
+                                @if (model.Owners != null)
+                                    {
+                                    <option value="">Choose the product owner</option>
+                                        foreach (var owner in model.Owners)
+                                        {
+                                        <option value="@owner.Id">@owner.Fullname</option>
+                                        }
+                                    }
+                            </InputSelect>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Owner)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Descriptioname"><i class="icon-comment"></i></span>
+                            </div>
+                            <InputTextArea style="height:145px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Description)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="custom-control custom-checkbox mt-4">
+                            <InputCheckbox class="custom-control-input" id="Status" @bind-Value="model.Status" />
+                            <label class="custom-control-label" for="Status">Enable/Disable</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group mt-4">
+                            <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                                <i class="icon-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
+}
+@code{
+    private bool isBusy = false;
+    private bool isLoadingFile = false;
+    private bool isLoaded = true;
+    private MessageType messageType = MessageType.danger;
+    private string message = string.Empty;
+    private ProductCreateModel model = new ProductCreateModel();
+    private Entities.Product product = null;
+    private EditContext context;
+    private Dictionary<IBrowserFile, byte[]> loadedFiles = new Dictionary<IBrowserFile, byte[]>();
+    private long maxFileSize = 1024 * 1024 * 5;
+    private int maxAllowedFiles = 3;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoaded = false;
+            var response = await Http.GetAsync($"account/owners");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var users = JsonConvert.DeserializeObject<IEnumerable<Entities.User>>(json);
+                model.Owners = users.Select
+                (
+                    x =>
+                    new UserCreateModel
+                    (
+                        x.Id,
+                        x.Email,
+                        null,
+                        null,
+                        x.FullName,
+                        x.Role,
+                        x.Status
+                    )
+                ).ToArray();
+                if (!string.IsNullOrEmpty(Id))
+                {
+                    response = await Http.GetAsync($"article/{Id}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        json = await response.Content.ReadAsStringAsync();
+                        product = JsonConvert.DeserializeObject<Entities.Product>(json);
+                        model = new ProductCreateModel
+                        (
+                            product.Key,
+                            product.Reference,
+                            product.Name,
+                            product.Description,
+                            product.Price,
+                            product.PictureNames,
+                            new UserCreateModel
+                            (
+                                product.Owner?.Id,
+                                product.Owner?.Email,
+                                null,
+                                null,
+                                product.Owner?.FullName,
+                                product.Owner?.Role ?? Entities.Person.RoleOptions.Customer,
+                                product.Owner?.Status ?? false
+                            ),
+                            model.Owners,
+                            product.Status
+                        );
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+            else
+            {
+                messageType = MessageType.danger;
+                message = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isLoaded = true;
+            context = new EditContext(model);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (context.Validate())
+            {
+                isBusy = true;
+                var content = new MultipartFormDataContent();
+
+                if (string.IsNullOrEmpty(Id))
+                {
+                    foreach (var (file, stream) in loadedFiles)
+                    {
+                        content.Add
+                        (
+                            new StreamContent
+                            (
+                                file.OpenReadStream()
+                            ),
+                            "Pictures",
+                            file.Name
+                        );
+                    }
+                    content.Add
+                    (
+                        new StringContent
+                        (
+                            JsonConvert.SerializeObject
+                            (
+                                new Entities.Product
+                                (
+                                    null,
+                                    model.Reference,
+                                    model.Name,
+                                    model.Description,
+                                    model.Price ?? 0,
+                                    model.Currency,
+                                    loadedFiles.Select(x => $"{Guid.NewGuid().ToString()}{Path.GetExtension(x.Key.Name)}").ToArray(),
+                                    model.Owner?.Id,
+                                    null,
+                                    DateTime.UtcNow,
+                                    model.Status
+                                )
+                            ),
+                            System.Text.Encoding.UTF8, "application/json"
+                        ),
+                        "Product"
+                    );
+                    var response = await Http.PostAsync
+                    (
+                        $"article",
+                        content
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        model = new ProductCreateModel();
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await Task.Delay(2000);
+                        message = string.Empty;
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+                else
+                {
+                    foreach (var (file, stream) in loadedFiles)
+                    {
+                        content.Add
+                        (
+                            new StreamContent
+                            (
+                                file.OpenReadStream()
+                            ),
+                            "Pictures",
+                            file.Name
+                        );
+                    }
+                    content.Add
+                    (
+                        new StringContent
+                        (
+                            JsonConvert.SerializeObject
+                            (
+                                new Entities.Product
+                                (
+                                    product.Key,
+                                    model.Reference,
+                                    model.Name,
+                                    model.Description,
+                                    model.Price ?? 0,
+                                    model.Currency,
+                                    loadedFiles == null || loadedFiles.Count == 0
+                                    ? product.PictureNames
+                                    : loadedFiles.Select(x => $"{Guid.NewGuid().ToString()}{Path.GetExtension(x.Key.Name)}").ToArray(),
+                                    model.Owner?.Id,
+                                    null,
+                                    product.CreatedAt,
+                                    model.Status
+                                )
+                            ),
+                            System.Text.Encoding.UTF8, "application/json"
+                        ),
+                        "Product"
+                    );
+                    var response = await Http.PutAsync
+                    (
+                        $"article/{Id}",
+                        content
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await Task.Delay(2000);
+                        navigationManager.NavigateTo("user");
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            isBusy = true;
+            isLoadingFile = true;
+            //loadedFiles.Clear();
+
+            foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+            {
+                //using var reader =
+                //    new StreamReader(file.OpenReadStream(maxFileSize));
+                //var b = ReadFully(reader.BaseStream);
+                loadedFiles.Add(file, await ReadFully(file.OpenReadStream(maxFileSize)));
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+            isLoadingFile = false;
+        }
+    }
+
+    void clearFiles()
+    {
+        loadedFiles.Clear();
+    }
+
+    private async Task<byte[]> ReadFully(Stream input)
+    {
+        byte[] buffer = new byte[16 * 1024];
+        using (MemoryStream ms = new MemoryStream())
+        {
+            int read;
+            while ((read = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                ms.Write(buffer, 0, read);
+            }
+            return ms.ToArray();
+        }
+    }
+}

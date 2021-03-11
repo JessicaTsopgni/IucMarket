@@ -1,3 +1,3 @@
 ﻿function confirmDelete(name) {
-    return confirm('Do you realy want to delete ' + name + '?');
+    return confirm('Do you really want to delete ' + name + '?');
 }
