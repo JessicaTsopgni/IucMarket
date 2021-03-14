@@ -14,7 +14,7 @@ namespace IucMarket.Web.Models
         public string Description { get; set; }
         public double Price { get; set; }
         public string Currency { get; set; }
-        public string PictureLink { get; set; }
+        public IEnumerable<FileInfoModel> Pictures { get; set; }
         public DateTime CreatedDate { get; set; }
         public UserListModel Owner { get; set; }
         public string Status { get; set; }
@@ -24,7 +24,7 @@ namespace IucMarket.Web.Models
         }
 
         public ProductListModel(string id, string reference,string name, string description, 
-            double price, string currency, string pictureLink, DateTime createdDate, UserListModel owner, bool status)
+            double price, string currency, IEnumerable<FileInfoModel> pictures, DateTime createdDate, UserListModel owner, bool status)
         {
             Id = id;
             Reference = reference;
@@ -32,7 +32,7 @@ namespace IucMarket.Web.Models
             Description = description;
             Price = price;
             Currency = currency;
-            PictureLink = pictureLink;
+            Pictures = pictures;
             CreatedDate = createdDate;
             Owner = owner;
             Status = status ? "Enabled": "Disabled";

@@ -52,18 +52,19 @@ namespace IucMarket.Service
             }
         }
 
-        private async Task<Person> GetPersonAsync(string uid)
+        private async Task<Person> GetPersonAsync(string userId)
         {
             try
             {
                 var persons = await FirebaseClient
                        .Child(Table)
                        .OrderBy("Id")
-                       .EqualTo(uid)
+                       .EqualTo(userId)
                        .OnceAsync<Person>();
 
                 var person = persons?.FirstOrDefault()?.Object;
-                person.Key = persons?.FirstOrDefault()?.Key;
+                if (person != null)
+                    person.Key = persons?.FirstOrDefault()?.Key;
                 return person;
             }
             catch (Exception)
@@ -127,11 +128,12 @@ namespace IucMarket.Service
 
             try
             {
-                var user = await GetUserByEmailAsync(command.Email);
-
-                if (user == null)
+                var user1 = await GetUserAsync(uid);
+                if (user1 == null)
                     throw new KeyNotFoundException($"{nameof(User)} {command.Email} not found");
-                if (user != null &&  user.Id != uid)
+
+                var user2 = await GetUserByEmailAsync(command.Email);
+                if (user2 != null &&  user2.Id != uid)
                     throw new DuplicateWaitObjectException($"{nameof(command.Email)} {command.Email} already exists !");
 
                 // Create User
@@ -152,7 +154,7 @@ namespace IucMarket.Service
                     person = new Person
                     (
                         null,
-                        uid,
+                        userRecord.Uid, // user update change his uidr
                         command.Name,
                         command.CreatedAt,
                         command.Role,
@@ -167,6 +169,7 @@ namespace IucMarket.Service
                 }
                 else
                 {
+                    person.Id = userRecord.Uid; // user update change his uidr
                     person.FullName = command.Name;
                     person.Status = command.Status;
 
@@ -304,7 +307,14 @@ namespace IucMarket.Service
             // Get User
             try
             {
-               await FirebaseAuthAdmin.DeleteUserAsync(uid);
+                await FirebaseAuthAdmin.DeleteUserAsync(uid);
+                var person = await GetPersonAsync(uid);
+                if(person != null)
+                    await FirebaseClient
+                        .Child(Table)
+                        .Child(person.Key)
+                        .DeleteAsync();
+               
             }
             catch (FirebaseAdmin.Auth.FirebaseAuthException)
             {

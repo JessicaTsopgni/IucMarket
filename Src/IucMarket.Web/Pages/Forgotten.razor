@@ -6,7 +6,7 @@
     <div class="offset-sm-3">
         <div class="row small">
             <div class="col-sm-6">
-                <h1>Forgotten password</h1>
+                <h2>Forgotten password</h2>
             </div>
         </div>
         <div class="row">
@@ -14,7 +14,7 @@
                 <div class="mb-3">
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="Email"><i class="icon-user"></i></span>
+                            <span class="input-group-text" id="Email"><i class="fas fa-at"></i></span>
                         </div>
                         <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
                     </div>
@@ -23,7 +23,7 @@
                     </div>
                 </div>
                 <div class="input-group">
-                    <button type="submit" disabled="@isBusy" class="btn btn-success btn-block"><i class="icon-signin"></i> Send</button>
+                    <button type="submit" disabled="@isBusy" class="btn btn-success btn-block"><i class="fas fa-sign-in-alt"></i> Send</button>
                 </div>
             </div>
         </div>

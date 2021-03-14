@@ -5,7 +5,7 @@
 <h2>Product list</h2>
 <div class="text-right mb-2">
     <NavLink class="btn btn-success" href="product/edit">
-        <span class="icon icon-plus" aria-hidden="true"></span> New
+        <span class="fas fa-plus" aria-hidden="true"></span> New
     </NavLink>
 </div>
 <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
@@ -15,48 +15,46 @@
         </div>
     </div>
 </div>
-<div class="row @(!isBusy ? "d-none": "")">
-    <div class="col-sm-12">
-        <div class="alert alert-info">
-            Processing...
-        </div>
-    </div>
-</div>
 @if (isLoadingData)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-<div class="row">
-    @if (products != null && products.Count() != 0)
-    {
-        @foreach (var product in products)
+    <div class="row">
+        @if (products != null && products.Count() != 0)
         {
-            <div class="col-sm-3">
-                <div class="card" style="height:300px">
-                    <img class="card-img-top" src="@product.PictureLink" alt="@product.Name">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            @product.Name
-                            <em class="small">By @product.Owner.Fullname</em>
-                        </h5>
-                        <p class="card-text text-truncate">
-                            @product.Description
-                        </p>
-                        <p><strong>@product.Price @product.Currency</strong></p>
-                        <a href="product/edit/@product.Id" class="text-primary"><span class="oi oi-pencil" aria-hidden="true"></span></a>
-                        <a href="javascript:;" @onclick="(() => HandleDelete(product.Id, product.Name))" class="text-danger"><sapn class="oi oi-trash" aria-hidden="true"></sapn></a>
+            @foreach (var product in products)
+            {
+                <div class="col-sm-3 mb-3">
+                    <div class="card" style="height:300px">
+                        <div class="text-center" style="height:150px">
+                            <img style="height:100%;" src="@product.Pictures.FirstOrDefault()?.Path" alt="@product.Name">
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title" style="line-height:0.1em">
+                                <div class="text-truncate"><h5>@product.Name</h5></div>
+                                <div class="text-primary" style="font-size:10px">By @product.Owner.Fullname</div>
+                            </div>
+                            <div class="card-text text-truncate">
+                                @product.Description
+                            </div>
+                            <div class="text-danger mt-2"><strong>@product.Price.ToString("N0") @product.Currency</strong></div>
+
+                        </div> 
+                        <div class="card-footer text-right">
+                            <a href="product/edit/@product.Id" class="text-primary"><span class="oi oi-pencil" aria-hidden="true"></span></a>
+                            <a href="javascript:;" @onclick="(() => HandleDelete(product.Id, product.Name))" class="text-danger"><sapn class="oi oi-trash" aria-hidden="true"></sapn></a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         }
-    }
-    else
-    {
-        <em>Product not found !</em>
-    }
-</div>
+        else
+        {
+            <em>Product not found !</em>
+        }
+    </div>
 }
 
 @code {
@@ -74,7 +72,7 @@ else
         catch(Exception ex)
         {
             messageType = MessageType.danger;
-            message = $"Error : {ex.Message}";
+            message = $"Error : {ex.GetType()} {ex.Message}";
         }
     }
 
@@ -99,7 +97,7 @@ else
                         x.Description,
                         x.Price,
                         x.Currency,
-                        $"images/{x.PictureNames}",
+                        x.Pictures.Select(x => new FileInfoModel(x.Name, System.IO.Path.GetFileName(x.Name), 0, x.ContentType)).ToArray(),
                         x.CreatedAt,
                         new UserListModel
                         (
@@ -135,7 +133,8 @@ else
         try
         {
             isBusy = true;
-
+            messageType = MessageType.info;
+            message = "Processing...";
             var result = await JS.InvokeAsync<bool>("confirmDelete", name);
             if (result)
             {

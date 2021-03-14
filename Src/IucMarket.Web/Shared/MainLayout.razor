@@ -10,7 +10,7 @@
             <div class="top-row px-4">
                 <AuthorizeView>
                     <Authorized>
-                        Hello, @context.User.Identity.Name!
+                        Hello, @context.User.Identity.Name !
                         <a href="javascript:;" @onclick="HandleLogout" class="ml-md-auto" disabled="@isBusy">Log out</a>
                     </Authorized>
                     <NotAuthorized>

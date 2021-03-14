@@ -114,7 +114,9 @@ a, .btn-link {
         top: 0;
         z-index: 1;
     }
-
+    .main{
+        width:80%;
+    }
     .main > div {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;

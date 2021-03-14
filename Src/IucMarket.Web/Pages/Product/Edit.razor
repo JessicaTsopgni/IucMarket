@@ -1,9 +1,8 @@
 ﻿@page "/product/edit/{id?}"
-@using System.IO
 @inject HttpClient Http
 @inject NavigationManager navigationManager
 <h2><a href="product" class="text-dark" style="text-decoration:none">
-    <span class="icon icon-circle-arrow-left"></span></a> Edit a product</h2>
+    <span class="fas fa-arrow-left"></span></a> Edit a product</h2>
 @if (!isLoaded)
 {
     <p><em>Loading...</em></p>
@@ -20,27 +19,20 @@ else
                     </div>
                 </div>
             </div>
-            <div class="row @(!isBusy ? "d-none": "")">
-                <div class="col-sm-12">
-                    <div class="alert alert-info">
-                        Processing...
-                    </div>
-                </div>
-            </div>
             <div class="row">
                 <div class="col-sm-4">
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Reference"><i class="icon-picture"></i></span>
+                                <span class="input-group-text" id="Pictures"><i style="width:20px" class="fas fa-images"></i></span>
                             </div>
                             <div class="custom-file">
-                                <InputFile OnChange="@LoadFiles" multiple class="custom-file-input" id="Picture" />
+                                <InputFile OnChange="@LoadFiles" multiple accepts="images/*" class="custom-file-input" aria-label="Pictures" aria-describedby="Pictures" />
                                 <label class="custom-file-label" for="Picture">Choose picture</label>
                             </div>
                         </div>
                         <div class="small">
-                            <ValidationMessage For="@(() => model.PictureNames)" />
+                            <ValidationMessage For="@(() => model.Pictures)" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -52,13 +44,15 @@ else
                                 }
                                 else
                                 {
-                                    int i = 0;
-                                    @foreach (var (file, content) in loadedFiles)
+                                    int i = 0;                                   
                                     {
-                                        <div class="carousel-item @(i == 0 ? "active":"")">
-                                            <img class="img-fluid" style="max-height:200px" src="data:@file.ContentType;base64,@Convert.ToBase64String(content)" alt="@file.Name">
-                                        </div>
-                                        i++;
+                                        foreach (var file in model.Pictures)
+                                        {
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img class="img-fluid" style="max-height:200px" src="@file.Path" alt="@file.Name">
+                                            </div>
+                                            i++;
+                                        }
                                     }
                                 }
                             </div>
@@ -78,9 +72,9 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Reference"><i class="icon-code"></i></span>
+                                <span class="input-group-text" id="Reference"><i style="width:20px" class="fas fa-barcode"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Reference" type="text" class="form-control" placeholder="Product code" aria-label="Reference" aria-describedby="Reference" />
+                            <InputText @bind-Value="model.Reference" type="text" maxlength="5" s class="form-control text-uppercase" placeholder="Product code" aria-label="Reference" aria-describedby="Reference" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Reference)" />
@@ -89,7 +83,7 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Name">&nbsp;<i class="icon-tag"></i></span>
+                                <span class="input-group-text" id="Name"><i style="width:20px" class="fas fa-tag"></i></span>
                             </div>
                             <InputText @bind-Value="model.Name" class="form-control" placeholder="Product roduct name" aria-label="Name" aria-describedby="Name" />
                         </div>
@@ -100,7 +94,7 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Price"><i class="icon-money"></i></span>
+                                <span class="input-group-text" id="Price"><i style="width:20px" class="fas fa-money-bill-alt"></i></span>
                             </div>
                             <InputNumber @bind-Value="model.Price" class="form-control" placeholder="Product price" aria-label="Price" aria-describedby="Price" />
                         </div>
@@ -111,9 +105,9 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Currency">&nbsp;<i class="icon-dollar"></i>&nbsp;</span>
+                                <span class="input-group-text" id="Currency"><i style="width:20px" class="fas fa-dollar-sign"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Currency" class="form-control" placeholder="Product price currency" aria-label="Currency" aria-describedby="Currency" />
+                            <InputText @bind-Value="model.Currency" class="form-control text-uppercase" placeholder="Product price currency" aria-label="Currency" aria-describedby="Currency" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Currency)" />
@@ -122,21 +116,21 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Owner">&nbsp;<i class="icon-eye-open"></i></span>
+                                <span class="input-group-text" id="Owner"><i style="width:20px" class="far fa-copyright"></i></span>
                             </div>
-                            <InputSelect @bind-Value="model.Owner" class="form-control" aria-label="Role" aria-describedby="Owner">
+                            <InputSelect @bind-Value="model.OwnerId" class="form-control" aria-label="Role" aria-describedby="Owner">
                                 @if (model.Owners != null)
-                                    {
+                                {
                                     <option value="">Choose the product owner</option>
-                                        foreach (var owner in model.Owners)
-                                        {
+                                    foreach (var owner in model.Owners)
+                                    {
                                         <option value="@owner.Id">@owner.Fullname</option>
-                                        }
                                     }
+                                }
                             </InputSelect>
                         </div>
                         <div class="small">
-                            <ValidationMessage For="@(() => model.Owner)" />
+                            <ValidationMessage For="@(() => model.OwnerId)" />
                         </div>
                     </div>
                 </div>
@@ -144,7 +138,7 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Descriptioname"><i class="icon-comment"></i></span>
+                                <span class="input-group-text" id="Descriptioname"><i style="width:20px" class="fas fa-info-circle"></i></span>
                             </div>
                             <InputTextArea style="height:145px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
                         </div>
@@ -161,7 +155,7 @@ else
                     <div class="mb-3">
                         <div class="input-group mt-4">
                             <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
-                                <i class="icon-save"></i> Save
+                                <i class="fas fa-save"></i> Save
                             </button>
                         </div>
                     </div>
@@ -180,9 +174,10 @@ else
     private ProductCreateModel model = new ProductCreateModel();
     private Entities.Product product = null;
     private EditContext context;
-    private Dictionary<IBrowserFile, byte[]> loadedFiles = new Dictionary<IBrowserFile, byte[]>();
+    private MultipartFormDataContent content = new MultipartFormDataContent();
+
     private long maxFileSize = 1024 * 1024 * 5;
-    private int maxAllowedFiles = 3;
+    private int maxAllowedFiles = 6;
 
     [Parameter]
     public string Id { get; set; }
@@ -225,17 +220,9 @@ else
                             product.Name,
                             product.Description,
                             product.Price,
-                            product.PictureNames,
-                            new UserCreateModel
-                            (
-                                product.Owner?.Id,
-                                product.Owner?.Email,
-                                null,
-                                null,
-                                product.Owner?.FullName,
-                                product.Owner?.Role ?? Entities.Person.RoleOptions.Customer,
-                                product.Owner?.Status ?? false
-                            ),
+                            product.Currency,
+                            product.Pictures.Select(x => new FileInfoModel(x.Name, System.IO.Path.GetFileName(x.Name), 0, x.ContentType)).ToList(),
+                            product.Owner?.Id,
                             model.Owners,
                             product.Status
                         );
@@ -272,22 +259,12 @@ else
             if (context.Validate())
             {
                 isBusy = true;
-                var content = new MultipartFormDataContent();
+                messageType = MessageType.info;
+                message = "Processing...";
 
                 if (string.IsNullOrEmpty(Id))
                 {
-                    foreach (var (file, stream) in loadedFiles)
-                    {
-                        content.Add
-                        (
-                            new StreamContent
-                            (
-                                file.OpenReadStream()
-                            ),
-                            "Pictures",
-                            file.Name
-                        );
-                    }
+
                     content.Add
                     (
                         new StringContent
@@ -302,8 +279,8 @@ else
                                     model.Description,
                                     model.Price ?? 0,
                                     model.Currency,
-                                    loadedFiles.Select(x => $"{Guid.NewGuid().ToString()}{Path.GetExtension(x.Key.Name)}").ToArray(),
-                                    model.Owner?.Id,
+                                    model.Pictures.Select(x => new Entities.FileInfo(x.Name, x.ContentType)),
+                                    model.OwnerId,
                                     null,
                                     DateTime.UtcNow,
                                     model.Status
@@ -311,7 +288,7 @@ else
                             ),
                             System.Text.Encoding.UTF8, "application/json"
                         ),
-                        "Product"
+                        "\"Product\""
                     );
                     var response = await Http.PostAsync
                     (
@@ -320,11 +297,9 @@ else
                     );
                     if (response.IsSuccessStatusCode)
                     {
-                        model = new ProductCreateModel();
+                        model = new ProductCreateModel(model.Owners);
                         messageType = MessageType.success;
                         message = "Save done !";
-                        await Task.Delay(2000);
-                        message = string.Empty;
                     }
                     else
                     {
@@ -334,18 +309,6 @@ else
                 }
                 else
                 {
-                    foreach (var (file, stream) in loadedFiles)
-                    {
-                        content.Add
-                        (
-                            new StreamContent
-                            (
-                                file.OpenReadStream()
-                            ),
-                            "Pictures",
-                            file.Name
-                        );
-                    }
                     content.Add
                     (
                         new StringContent
@@ -360,10 +323,10 @@ else
                                     model.Description,
                                     model.Price ?? 0,
                                     model.Currency,
-                                    loadedFiles == null || loadedFiles.Count == 0
-                                    ? product.PictureNames
-                                    : loadedFiles.Select(x => $"{Guid.NewGuid().ToString()}{Path.GetExtension(x.Key.Name)}").ToArray(),
-                                    model.Owner?.Id,
+                                    model.Pictures.Count == 0
+                                    ? product.Pictures
+                                    : model.Pictures.Select(x => new Entities.FileInfo(x.Name, x.ContentType)).ToArray(),
+                                    model.OwnerId,
                                     null,
                                     product.CreatedAt,
                                     model.Status
@@ -375,7 +338,7 @@ else
                     );
                     var response = await Http.PutAsync
                     (
-                        $"article/{Id}",
+                        $"article/{Id}{model.Pictures == null}",
                         content
                     );
                     if (response.IsSuccessStatusCode)
@@ -383,7 +346,7 @@ else
                         messageType = MessageType.success;
                         message = "Save done !";
                         await Task.Delay(2000);
-                        navigationManager.NavigateTo("user");
+                        navigationManager.NavigateTo("product");
                     }
                     else
                     {
@@ -417,7 +380,25 @@ else
                 //using var reader =
                 //    new StreamReader(file.OpenReadStream(maxFileSize));
                 //var b = ReadFully(reader.BaseStream);
-                loadedFiles.Add(file, await ReadFully(file.OpenReadStream(maxFileSize)));
+                model.Pictures.Add
+                (
+                    new FileInfoModel
+                    {
+                        Name = file.Name,
+                        Size = file.Size,
+                        Path = "data:" + file.ContentType + ";base64," + Convert.ToBase64String(await ReadFully(file.OpenReadStream(maxFileSize))),
+                        ContentType = file.ContentType
+                    }
+                );
+                content.Add
+                (
+                    new StreamContent
+                    (
+                        file.OpenReadStream()
+                    ),
+                    "\"pictures\"",
+                    file.Name
+                );
             }
         }
         catch (Exception ex)
@@ -434,13 +415,14 @@ else
 
     void clearFiles()
     {
-        loadedFiles.Clear();
+        model.Pictures.Clear();
+        content = new MultipartFormDataContent();
     }
 
-    private async Task<byte[]> ReadFully(Stream input)
+    private async Task<byte[]> ReadFully(System.IO.Stream input)
     {
         byte[] buffer = new byte[16 * 1024];
-        using (MemoryStream ms = new MemoryStream())
+        using (var ms = new System.IO.MemoryStream())
         {
             int read;
             while ((read = await input.ReadAsync(buffer, 0, buffer.Length)) > 0)

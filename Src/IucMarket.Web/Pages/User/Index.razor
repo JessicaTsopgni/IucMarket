@@ -4,21 +4,14 @@
 @inject IJSRuntime JS;
 <h2>User list</h2>
 <div class="text-right mb-2">
-    <NavLink class="btn btn-success" href="user/create">
-        <span class="icon icon-plus" aria-hidden="true"></span> New
+    <NavLink class="btn btn-success" href="user/edit">
+        <span class="fas fa-plus" aria-hidden="true"></span> New
     </NavLink>
 </div>
 <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
     <div class="col-sm-12">
         <div class="alert alert-@messageType">
             @message
-        </div>
-    </div>
-</div>
-<div class="row @(!isBusy ? "d-none": "")">
-    <div class="col-sm-12">
-        <div class="alert alert-info">
-            Processing...
         </div>
     </div>
 </div>
@@ -99,9 +92,9 @@ else
                 var userList = JsonConvert.DeserializeObject<Entities.UserList>(json);
                 users = userList.Users.Select(x => new UserListModel
                 (
-                    x.Id, 
-                    x.Email, 
-                    x.FullName, 
+                    x.Id,
+                    x.Email,
+                    x.FullName,
                     x.CreatedAt,
                     x.Role,
                     x.Status
@@ -128,7 +121,8 @@ else
         try
         {
             isBusy = true;
-
+            messageType = MessageType.info;
+            message = "Processing...";
             var result = await JS.InvokeAsync<bool>("confirmDelete", name);
             if (result)
             {

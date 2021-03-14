@@ -11,14 +11,21 @@ namespace IucMarket.Service
 {
     public class ProductService : BaseService
     {
+        
         public readonly string Table = "Products";
+        private readonly UserService userService;
+
+        public ProductService(UserService userService)
+        {
+            this.userService = userService;
+        }
         /// <summary>
         /// Log in with firebase authentication
         /// </summary>
         /// <param name="command">An instance of login command object</param>
         /// <exception cref="System.UnauthorizedAccessException">Thrown when username or password is invalid</exception>
         /// <returns>A Service.Product</returns>
-        public async Task<Product> GetProductAsync(string key)
+        public async Task<Product> GetProductAsync(string key, string path)
         {
             try
             {
@@ -26,6 +33,8 @@ namespace IucMarket.Service
                        .Child(Table)
                        .Child(key)
                        .OnceSingleAsync<Product>();
+
+                await SetProduct(product, key, path);
                 return product;
             }
             catch (Exception)
@@ -34,7 +43,7 @@ namespace IucMarket.Service
             }
         }
 
-        private async Task<Product> GetProductByReferenceAsync(string reference)
+        private async Task<Product> GetProductByReferenceAsync(string reference, string path)
         {
             try
             {
@@ -45,7 +54,7 @@ namespace IucMarket.Service
                        .OnceAsync<Product>();
 
                 var product = products?.FirstOrDefault()?.Object;
-                product.Key = products?.FirstOrDefault()?.Key;
+                await SetProduct(product, products?.FirstOrDefault()?.Key, path);
                 return product;
             }
             catch (Exception)
@@ -54,18 +63,28 @@ namespace IucMarket.Service
             }
         }
 
-        public async Task<Product> AddAsync(Product product)
+        private async Task SetProduct(Product product, string key, string path)
+        {
+            if (product != null)
+            {
+                product.Key = key;
+                product.Pictures = product.Pictures.Select(x => new FileInfo(string.Format(path, x.Name, x.ContentType), x.ContentType)).ToArray();
+                product.Owner = await GetUserAsync(product.UserKey);
+            }
+        }
+
+        public async Task<Product> AddAsync(Product product, string path)
         {            
             try
             {
-                if(await GetProductByReferenceAsync(product.Reference) != null)
+                if(await GetProductByReferenceAsync(product.Reference, path) != null)
                     throw new DuplicateWaitObjectException($"{nameof(product.Reference)} already exists !");
 
                 var result = await FirebaseClient
                   .Child(Table)
                   .PostAsync(JsonConvert.SerializeObject(product));
 
-                product.Key = result.Key;
+                await SetProduct(product, result?.Key, path);
 
                 return product;
             }
@@ -76,15 +95,16 @@ namespace IucMarket.Service
         }
 
 
-        public async Task EditAsync(string uid, Product product)
+        public async Task EditAsync(string uid, Product product, string path)
         {
             try
             {
-                var oldProduct = await GetProductByReferenceAsync(product.Reference);
+                var oldProduct1 = await GetProductAsync(uid, path);
+                if (oldProduct1 == null)
+                    throw new KeyNotFoundException($"{nameof(Product)} {uid} not found");
 
-                if (oldProduct == null)
-                    throw new KeyNotFoundException($"{nameof(Product)} {product.Reference} not found");
-                if (oldProduct != null && oldProduct.Key != uid)
+                var oldProduct2 = await GetProductByReferenceAsync(uid, path);
+                if (oldProduct2 != null && oldProduct2.Key != uid)
                     throw new DuplicateWaitObjectException($"{nameof(Product)} {product.Reference} already exists !");
     
                     await FirebaseClient
@@ -98,7 +118,7 @@ namespace IucMarket.Service
             }
         }
 
-        public async Task<ProductList> GetProductsAsync(int pageIndex = 1, int pageSize = 100)
+        public async Task<ProductList> GetProductsAsync(string path , int pageIndex = 1, int pageSize = 100)
         {
             ProductList productList = new ProductList();
             productList.PageIndex = pageIndex;
@@ -109,26 +129,24 @@ namespace IucMarket.Service
                     .Child(Table)
                     .OnceAsync<Product>();
 
-                UserService userService = new UserService();
                 foreach(var p in products)
                 {
-                    productList.Products.Add
+                    var product = new Product
                     (
-                        new Product
-                        (
-                            p.Key,
-                            p.Object.Reference,
-                            p.Object.Name,
-                            p.Object.Description,
-                            p.Object.Price,
-                            p.Object.Currency,
-                            p.Object.PictureNames,
-                            p.Object.UserKey,
-                            await userService.GetUserAsync(p.Object.UserKey),
-                            p.Object.CreatedAt,
-                            p.Object.Status
-                        )
+                        p.Key,
+                        p.Object.Reference,
+                        p.Object.Name,
+                        p.Object.Description,
+                        p.Object.Price,
+                        p.Object.Currency,
+                        p.Object.Pictures,
+                        p.Object.UserKey,
+                        p.Object.Owner,
+                        p.Object.CreatedAt,
+                        p.Object.Status
                     );
+                    await SetProduct(product, p.Key, path);
+                    productList.Products.Add(product);
                 }
             }
             catch (Exception ex)
@@ -136,6 +154,11 @@ namespace IucMarket.Service
                 throw ex;
             }
             return productList;
+        }
+
+        private async Task<User> GetUserAsync(string userId)
+        {
+            return await userService.GetUserAsync(userId);
         }
 
         public async Task DeleteAsync(string uid)
