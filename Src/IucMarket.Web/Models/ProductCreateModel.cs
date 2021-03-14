@@ -1,4 +1,5 @@
 ﻿using ExpressiveAnnotations.Attributes;
+using Microsoft.AspNetCore.Components.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -32,11 +33,12 @@ namespace IucMarket.Web.Models
         [Required]
         [Display(Name = "Product owner")]
         public string OwnerId { get; set; }
+        public UserCreateModel Owner { set => Owners?.FirstOrDefault(x => x.Id == OwnerId); }
         public IEnumerable<UserCreateModel> Owners { get; set; }
         public bool Status { get; set; }
 
         [RequiredIf("Id==null", ErrorMessage = "You must add an image")]
-        [MinLength(1)]
+        [MinLength(1, ErrorMessage = "You must add an image")]
         public List<FileInfoModel> Pictures { get; set; }
 
         public ProductCreateModel()
@@ -71,23 +73,30 @@ namespace IucMarket.Web.Models
 
     public class FileInfoModel
     {
-        public string Path { get; set; }
-        public string Name { get; set; }
-        public double Size { get; set; }
-        public string ContentType { get; set; }
+        public IBrowserFile File { get; private set; }
+        public string Path { get; private set; }
+        public string FileName { get; private set; }
+        public string ContentType { get; private set; }
 
         public FileInfoModel()
         {
-
+            
         }
-
-        public FileInfoModel(string path, string name, double size, string contentType)
+        public FileInfoModel(string path, string fileName, string contentType)
         {
             Path = path;
-            Name = name;
-            Size = size;
+            FileName = fileName;
             ContentType = contentType;
         }
+
+        public FileInfoModel(IBrowserFile file, string base64Content)
+        {
+            File = file;
+            FileName = file.Name;
+            Path = "data:" + file.ContentType + ";base64," + base64Content;
+            ContentType = file.ContentType;
+        }
+
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using IucMarket.Entities.Common;
 
 namespace IucMarket.Entities
 {
@@ -33,11 +34,11 @@ namespace IucMarket.Entities
             double price, string currency, IEnumerable<FileInfo> pictures, string userKey, User owner, DateTime createdAt, bool status)
         {
             Key = key;
-            Reference = reference?.ToLower();
-            Name = name;
+            Reference = reference?.ToUpper();
+            Name = name?.ToUcFirst();
             Description = description;
             Price = price;
-            Currency = currency;
+            Currency = currency?.ToUpper();
             Pictures = pictures;
             UserKey = userKey;
             Owner = owner;

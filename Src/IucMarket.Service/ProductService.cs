@@ -68,7 +68,7 @@ namespace IucMarket.Service
             if (product != null)
             {
                 product.Key = key;
-                product.Pictures = product.Pictures.Select(x => new FileInfo(string.Format(path, x.Name, x.ContentType), x.ContentType)).ToArray();
+                product.Pictures = product.Pictures?.Select(x => new FileInfo(string.Format(path, x.Name, x.ContentType), x.ContentType)).ToArray();
                 product.Owner = await GetUserAsync(product.UserKey);
             }
         }
@@ -109,7 +109,7 @@ namespace IucMarket.Service
     
                     await FirebaseClient
                       .Child(Table)
-                      .Child(product.Key)
+                      .Child(uid)
                       .PutAsync(JsonConvert.SerializeObject(product));
             }
             catch (Exception ex)

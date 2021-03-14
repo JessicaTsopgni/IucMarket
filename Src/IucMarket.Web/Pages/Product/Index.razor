@@ -29,12 +29,12 @@ else
                 <div class="col-sm-3 mb-3">
                     <div class="card" style="height:300px">
                         <div class="text-center" style="height:150px">
-                            <img style="height:100%;" src="@product.Pictures.FirstOrDefault()?.Path" alt="@product.Name">
+                            <img style="height:100%;" src="@product.Pictures?.FirstOrDefault()?.Path" alt="@product.Name">
                         </div>
                         <div class="card-body">
-                            <div class="card-title" style="line-height:0.1em">
-                                <div class="text-truncate"><h5>@product.Name</h5></div>
-                                <div class="text-primary" style="font-size:10px">By @product.Owner.Fullname</div>
+                            <div class="card-title">
+                                <div><h5 class="text-truncate" title="@product.Name">@product.Name</h5></div>
+                                <div class="text-primary text-truncate"  title="@product.Owner?.Fullname" style="font-size:12px">By @product.Owner?.Fullname</div>
                             </div>
                             <div class="card-text text-truncate">
                                 @product.Description
@@ -97,7 +97,16 @@ else
                         x.Description,
                         x.Price,
                         x.Currency,
-                        x.Pictures.Select(x => new FileInfoModel(x.Name, System.IO.Path.GetFileName(x.Name), 0, x.ContentType)).ToArray(),
+                        x.Pictures?.Select
+                        (
+                            x =>
+                            new FileInfoModel
+                            (
+                                x.Name,
+                                System.IO.Path.GetFileName(new UriBuilder(x.Name).Path),
+                                x.ContentType
+                            )
+                        ).ToList(),
                         x.CreatedAt,
                         new UserListModel
                         (
@@ -138,11 +147,13 @@ else
             var result = await JS.InvokeAsync<bool>("confirmDelete", name);
             if (result)
             {
-                var response = await Http.DeleteAsync($"product/{id}");
+                var response = await Http.DeleteAsync($"article/{id}");
                 if (response.IsSuccessStatusCode)
                 {
                     messageType = MessageType.success;
                     message = "Delete done !";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(1000);
                     await LoadData();
                 }
                 else

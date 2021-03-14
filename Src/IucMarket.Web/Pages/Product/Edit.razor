@@ -12,7 +12,7 @@ else
     <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
         <div>
-            <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+            <div class="row @(string.IsNullOrEmpty(message) ? "d-none" : "")">
                 <div class="col-sm-12">
                     <div class="alert alert-@messageType">
                         @message
@@ -38,34 +38,36 @@ else
                     <div class="mb-3">
                         <div id="carouselExampleControls" class="carousel border" data-ride="carousel">
                             <div class="carousel-inner text-center" style="height:200px">
-                                @if (isLoadingFile)
+                                @if(model.Pictures != null)
                                 {
-                                    <p><em>Loading...</em></p>
-                                }
-                                else
-                                {
-                                    int i = 0;                                   
+                                    int i = 0;
+                                    foreach (var file in model.Pictures)
                                     {
-                                        foreach (var file in model.Pictures)
-                                        {
-                                            <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img class="img-fluid" style="max-height:200px" src="@file.Path" alt="@file.Name">
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <img class="img-fluid" style="max-height:200px" src="@file.Path" alt="@file.FileName">
+                                            <div class="card-img-overlay text-right mr-4" style="opacity:0.5">
+                                                <a href="javascript:;" title="Remove picture" @onclick="(() => deletePicture(file.FileName))">
+                                                    <i class="fas fa-minus-circle text-danger"></i>
+                                                </a>
                                             </div>
-                                            i++;
-                                        }
+                                        </div>
+                                        i++;
                                     }
                                 }
                             </div>
-                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Next</span>
-                            </a>
+                            @if ((model.Pictures?.Count ?? 0) > 1)
+                            {
+                                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                    <span class="fas fa-angle-left text-info" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                    <span class="fas fa-angle-right text-info" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            }
                         </div>
-                        <a href="javascript:;" class="text-danger small" @onclick="clearFiles">Clear</a>
+                        <a href="javascript:;" class="text-danger small" @onclick="clearFiles">Clear all</a>
                     </div>
                 </div>
                 <div class="col-sm-4">
@@ -167,14 +169,12 @@ else
 }
 @code{
     private bool isBusy = false;
-    private bool isLoadingFile = false;
     private bool isLoaded = true;
     private MessageType messageType = MessageType.danger;
     private string message = string.Empty;
     private ProductCreateModel model = new ProductCreateModel();
     private Entities.Product product = null;
     private EditContext context;
-    private MultipartFormDataContent content = new MultipartFormDataContent();
 
     private long maxFileSize = 1024 * 1024 * 5;
     private int maxAllowedFiles = 6;
@@ -221,7 +221,16 @@ else
                             product.Description,
                             product.Price,
                             product.Currency,
-                            product.Pictures.Select(x => new FileInfoModel(x.Name, System.IO.Path.GetFileName(x.Name), 0, x.ContentType)).ToList(),
+                            product.Pictures?.Select
+                            (
+                                x =>
+                                new FileInfoModel
+                                (
+                                    x.Name,
+                                    System.IO.Path.GetFileName(new UriBuilder(x.Name).Path),
+                                    x.ContentType
+                                )
+                            ).ToList() ?? new List<FileInfoModel>(),
                             product.Owner?.Id,
                             model.Owners,
                             product.Status
@@ -264,42 +273,19 @@ else
 
                 if (string.IsNullOrEmpty(Id))
                 {
-
-                    content.Add
-                    (
-                        new StringContent
-                        (
-                            JsonConvert.SerializeObject
-                            (
-                                new Entities.Product
-                                (
-                                    null,
-                                    model.Reference,
-                                    model.Name,
-                                    model.Description,
-                                    model.Price ?? 0,
-                                    model.Currency,
-                                    model.Pictures.Select(x => new Entities.FileInfo(x.Name, x.ContentType)),
-                                    model.OwnerId,
-                                    null,
-                                    DateTime.UtcNow,
-                                    model.Status
-                                )
-                            ),
-                            System.Text.Encoding.UTF8, "application/json"
-                        ),
-                        "\"Product\""
-                    );
                     var response = await Http.PostAsync
                     (
                         $"article",
-                        content
+                        GetContent()
                     );
                     if (response.IsSuccessStatusCode)
                     {
                         model = new ProductCreateModel(model.Owners);
                         messageType = MessageType.success;
                         message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Delay(2000);
+                        message = string.Empty;
                     }
                     else
                     {
@@ -309,42 +295,16 @@ else
                 }
                 else
                 {
-                    content.Add
-                    (
-                        new StringContent
-                        (
-                            JsonConvert.SerializeObject
-                            (
-                                new Entities.Product
-                                (
-                                    product.Key,
-                                    model.Reference,
-                                    model.Name,
-                                    model.Description,
-                                    model.Price ?? 0,
-                                    model.Currency,
-                                    model.Pictures.Count == 0
-                                    ? product.Pictures
-                                    : model.Pictures.Select(x => new Entities.FileInfo(x.Name, x.ContentType)).ToArray(),
-                                    model.OwnerId,
-                                    null,
-                                    product.CreatedAt,
-                                    model.Status
-                                )
-                            ),
-                            System.Text.Encoding.UTF8, "application/json"
-                        ),
-                        "Product"
-                    );
                     var response = await Http.PutAsync
                     (
-                        $"article/{Id}{model.Pictures == null}",
-                        content
+                        $"article/{Id}",
+                        GetContent()
                     );
                     if (response.IsSuccessStatusCode)
                     {
                         messageType = MessageType.success;
                         message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
                         await Task.Delay(2000);
                         navigationManager.NavigateTo("product");
                     }
@@ -367,12 +327,55 @@ else
         }
     }
 
+    MultipartFormDataContent GetContent()
+    {
+        MultipartFormDataContent content = new MultipartFormDataContent();
+        var json = JsonConvert.SerializeObject
+        (
+            new Entities.Product
+            (
+                product?.Key,
+                model.Reference,
+                model.Name,
+                model.Description,
+                model.Price ?? 0,
+                model.Currency,
+                model.Pictures?.Select(x => new Entities.FileInfo(x.FileName, x.ContentType)),
+                model.OwnerId,
+                null,
+                product?.CreatedAt ?? DateTime.UtcNow,
+                model.Status
+            )
+        );
+        content.Add
+        (
+            new StringContent
+            (
+                json,
+                System.Text.Encoding.UTF8, "application/json"
+            ),
+            "\"Product\""
+        );
+        foreach (var picture in model.Pictures)
+            content.Add
+            (
+                new StreamContent
+                (
+                    picture.File?.OpenReadStream() ?? new System.IO.MemoryStream()
+                ),
+                "\"pictures\"",
+                picture.FileName
+            );
+        return content;
+    }
+
     async Task LoadFiles(InputFileChangeEventArgs e)
     {
         try
         {
             isBusy = true;
-            isLoadingFile = true;
+            messageType = MessageType.info;
+            message = "Processing...";
             //loadedFiles.Clear();
 
             foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
@@ -383,23 +386,13 @@ else
                 model.Pictures.Add
                 (
                     new FileInfoModel
-                    {
-                        Name = file.Name,
-                        Size = file.Size,
-                        Path = "data:" + file.ContentType + ";base64," + Convert.ToBase64String(await ReadFully(file.OpenReadStream(maxFileSize))),
-                        ContentType = file.ContentType
-                    }
-                );
-                content.Add
-                (
-                    new StreamContent
                     (
-                        file.OpenReadStream()
-                    ),
-                    "\"pictures\"",
-                    file.Name
+                        file,
+                        Convert.ToBase64String(await ReadFully(file.OpenReadStream(maxFileSize)))
+                    )
                 );
             }
+            message = string.Empty;
         }
         catch (Exception ex)
         {
@@ -409,14 +402,17 @@ else
         finally
         {
             isBusy = false;
-            isLoadingFile = false;
         }
     }
 
     void clearFiles()
     {
         model.Pictures.Clear();
-        content = new MultipartFormDataContent();
+    }
+
+    void deletePicture(string fileName)
+    {
+        model.Pictures.Remove(model.Pictures.First(x => x.FileName == fileName));
     }
 
     private async Task<byte[]> ReadFully(System.IO.Stream input)

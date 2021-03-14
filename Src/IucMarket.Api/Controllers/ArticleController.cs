@@ -85,9 +85,10 @@ namespace IucMarket.Api.Controllers
             {
                 product = JsonConvert.DeserializeObject<Product>(Request.Form["Product"].ToString());
 
-                Dictionary<string, string> fileNames = await UploadProductFiles(pictures, product);
+                Dictionary<string, string> newFileNames = await UploadProductFiles
+                (pictures, null);
 
-                product.Pictures = fileNames.Select(x => new FileInfo(x.Key, x.Value));
+                product.Pictures = newFileNames.Select(x => new FileInfo(x.Key, x.Value)).ToArray();
 
                 return Ok
                 (
@@ -117,15 +118,17 @@ namespace IucMarket.Api.Controllers
             {
                 foreach (var p in product.Pictures)
                 {
-                    var path = System.IO.Path.Combine(env.ContentRootPath, "images", p.Name);
-                    System.IO.File.Delete(path);
+                    var path = System.IO.Path.Combine
+                    (env.ContentRootPath, "images", System.IO.Path.GetFileName(new UriBuilder(p.Name).Path));
+                    if(System.IO.File.Exists(path))
+                        System.IO.File.Delete(path);
                 }
             }
         }
 
         [HttpPut]
-        [Route("{id}/{deleteFile}")]
-        public async Task<IActionResult> Put(string id, bool deleteFile, IEnumerable<IFormFile> pictures)
+        [Route("{id}")]
+        public async Task<IActionResult> Put(string id, [FromForm] IEnumerable<IFormFile> pictures)
         {
             Product product = null;
             try
@@ -140,23 +143,26 @@ namespace IucMarket.Api.Controllers
 
                 product = JsonConvert.DeserializeObject<Product>(Request.Form["Product"].ToString());
                 
-                Dictionary<string, string> fileNames = await UploadProductFiles(pictures, product);
-                
-                if (deleteFile)
-                {
-                    if (fileNames.Count != 0)
-                        DeleteProductFiles(product);
+                Dictionary<string, string> newFileNames = await UploadProductFiles
+                (pictures, oldProduct.Pictures);
 
-                    product.Pictures = fileNames.Count == 0
-                        ? oldProduct.Pictures
-                        : fileNames.Select(x => new FileInfo(x.Key, x.Value));
-                }
-                else
-                {
-                    product.Pictures = fileNames.Count == 0
-                        ? oldProduct.Pictures
-                        : oldProduct.Pictures.Concat(fileNames.Select(x => new FileInfo(x.Key, x.Value)));
-                }
+                product.Pictures = newFileNames.Select(x => new FileInfo(x.Key, x.Value)).ToArray();
+
+                //if (deleteFile)
+                //{
+                //    if (fileNames.Count != 0)
+                //        DeleteProductFiles(product);
+
+                //    product.Pictures = fileNames.Count == 0
+                //        ? oldProduct.Pictures
+                //        : fileNames.Select(x => new FileInfo(x.Key, x.Value));
+                //}
+                //else
+                //{
+                //    product.Pictures = fileNames.Count == 0
+                //        ? oldProduct.Pictures
+                //        : oldProduct.Pictures.Concat(fileNames.Select(x => new FileInfo(x.Key, x.Value)));
+                //}
 
                 await service.EditAsync
                 (
@@ -181,27 +187,46 @@ namespace IucMarket.Api.Controllers
             }
         }
 
-        private async Task<Dictionary<string, string>> UploadProductFiles(IEnumerable<IFormFile> pictures, Product product)
+        private async Task<Dictionary<string, string>> UploadProductFiles
+            (IEnumerable<IFormFile> pictures,  IEnumerable<FileInfo> oldFileInfos)
         {
             var fileNames = new Dictionary<string, string>();
             if (pictures != null)
             {
                 foreach (var picture in pictures)
                 {
-                    var fileName = System.IO.Path.GetRandomFileName();
-                    var path = System.IO.Path.Combine
-                    (
-                        env.ContentRootPath,
-                        "images",
-                        fileName
-                    );
-                    System.IO.FileInfo f = new System.IO.FileInfo(path);
-                    if (!f.Directory.Exists)
-                        f.Directory.Create();
-                    using System.IO.MemoryStream ms = new();
-                    await picture.CopyToAsync(ms);
-                    await System.IO.File.WriteAllBytesAsync(path, ms.ToArray());
-                    fileNames.Add(fileName, product.Pictures.FirstOrDefault(x => x.Name == picture.FileName)?.ContentType ?? "image/jpg");
+                    var fileName = picture.FileName;
+                    if (picture.Length > 0)
+                    {
+                        fileName = System.IO.Path.GetRandomFileName();
+                        var path = System.IO.Path.Combine
+                        (
+                            env.ContentRootPath,
+                            "images",
+                            fileName
+                        );
+                        System.IO.FileInfo f = new System.IO.FileInfo(path);
+                        if (!f.Directory.Exists)
+                            f.Directory.Create();
+                        using System.IO.MemoryStream ms = new();
+                        await picture.CopyToAsync(ms);
+                        await System.IO.File.WriteAllBytesAsync(path, ms.ToArray());
+                    }
+                    fileNames.Add(fileName, pictures.FirstOrDefault(x => x.Name == picture.FileName)?.ContentType ?? "image/jpg");
+               }
+            }
+
+            if (oldFileInfos != null)
+            {
+                foreach (var oldf in oldFileInfos)
+                {
+                    var oldFileName = System.IO.Path.GetFileName(new UriBuilder(oldf.Name).Path);
+                    if (!pictures.Any(x=> x.FileName == oldFileName))
+                    {
+                        var path = System.IO.Path.Combine(env.ContentRootPath, "images", oldFileName);
+                        if(System.IO.File.Exists(path))
+                            System.IO.File.Delete(path);
+                    }
                 }
             }
 
@@ -241,8 +266,7 @@ namespace IucMarket.Api.Controllers
             try
             {     
                 var path = System.IO.Path.Combine(env.ContentRootPath, "images", id);
-                System.IO.FileInfo f = new System.IO.FileInfo(path);
-                if (f.Exists)
+                if (System.IO.File.Exists(path))
                 {
                     var myfile = System.IO.File.ReadAllBytes(path);
                     return new FileContentResult(myfile, contentType ?? "image/jpg");
