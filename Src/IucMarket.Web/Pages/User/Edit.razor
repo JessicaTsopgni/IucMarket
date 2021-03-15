@@ -9,12 +9,12 @@
 }
 else
 {
-    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" autocomplete="off">
         <DataAnnotationsValidator />
         <div>
             <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
                 <div class="col-sm-10">
-                    <div class="alert alert-@messageType">
+                    <div class="alert alert-@messageType text-truncate">
                         @message
                     </div>
                 </div>
@@ -26,10 +26,10 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Email"><i style="width:20px" class="fas fa-at"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                            <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter user email" aria-label="Email" aria-describedby="Email" />
                         </div>
                         <div class="small">
-                            <ValidationMessage For="@(() => model.Email)" />
+                            <ValidationMessage For="@(() => model.Email)" autocomplete="off" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -37,10 +37,21 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Fullname"><i style="width:20px" class="fas fa-user"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Fullname" class="form-control" placeholder="Enter your full name" aria-label="Fullname" aria-describedby="Fullname" />
+                            <InputText @bind-Value="model.Fullname" autocomplete="off" class="form-control" placeholder="Enter user full name" aria-label="Fullname" aria-describedby="Fullname" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Fullname)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="PhoneNumber"><span style="width:20px;font-size:12px">@model.PhoneCountryCode</span></span>
+                            </div>
+                            <InputNumber @bind-Value="model.PhoneNumber" class="form-control"  placeholder="Enter user phone number" aria-label="PhoneNumber" aria-describedby="PhoneNumber"/>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.PhoneNumber)" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -66,7 +77,7 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Password"><i style="width:20px" class="fas fa-lock"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="Password" />
+                            <InputText @bind-Value="model.Password" autocomplete="off" type="password" class="form-control" placeholder="Enter user password" aria-label="Password" aria-describedby="Password" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Password)" />
@@ -77,7 +88,7 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="ConfirmPassword"><i style="width:20px" class="fas fa-lock"></i></span>
                             </div>
-                            <InputText @bind-Value="model.ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" aria-label="ConfirmPassword" aria-describedby="ConfirmPassword" />
+                            <InputText @bind-Value="model.ConfirmPassword" autocomplete="off" type="password" class="form-control" placeholder="Confirm user password" aria-label="ConfirmPassword" aria-describedby="ConfirmPassword" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.ConfirmPassword)" />
@@ -89,10 +100,6 @@ else
                             <label class="custom-control-label" for="Status">Enable/Disable</label>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-10">
                     <div class="mb-3">
                         <div class="input-group">
                             <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
@@ -130,7 +137,7 @@ else
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     user = JsonConvert.DeserializeObject<Entities.User>(json);
-                    model = new UserCreateModel(user.Id, user.Email, null, null, user.FullName, user.Role, user.Status);
+                    model = new UserCreateModel(user.Id, user.Email, null, null, user.FullName, user.PhoneCountryCode, user.PhoneNumber, user.Role, user.Status);
                 }
                 else
                 {
@@ -170,6 +177,8 @@ else
                             null,
                             null,
                             model.Fullname,
+                            model.PhoneCountryCode,
+                            model.PhoneNumber ?? 0,
                             DateTime.UtcNow,
                             model.Role,
                             model.Status,
@@ -182,7 +191,9 @@ else
                         model = new UserCreateModel();
                         messageType = MessageType.success;
                         message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
                         await Task.Delay(2000);
+                        message = string.Empty;
                     }
                     else
                     {
@@ -200,6 +211,8 @@ else
                             user.Key,
                             Id,
                             model.Fullname,
+                            model.PhoneCountryCode,
+                            model.PhoneNumber ?? 0,
                             user.CreatedAt,
                             model.Role,
                             model.Status,
@@ -211,6 +224,7 @@ else
                     {
                         messageType = MessageType.success;
                         message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
                         await Task.Delay(2000);
                         navigationManager.NavigateTo("user");
                     }

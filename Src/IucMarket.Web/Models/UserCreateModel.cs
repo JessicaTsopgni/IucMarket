@@ -30,22 +30,35 @@ namespace IucMarket.Web.Models
         [Display(Name = "Full name")]
         [StringLength(100)]
         public string Fullname { get; set; }
+
+        [Required]
+        [Display(Name = "Phone code")]
+        public string PhoneCountryCode { get; set; }
+
+        [Required]
+        [Display(Name = "Phone number")]
+        public long? PhoneNumber { get; set; }
+
         public Entities.Person.RoleOptions Role { get; set; }
         public bool Status { get; set; }
 
         public UserCreateModel()
         {
             Status = true;
+            PhoneCountryCode = "+237";
         }
 
         public UserCreateModel(string id, string email, string password, 
-            string confirmPassword, string fullname, Entities.Person.RoleOptions role, bool status)
+            string confirmPassword, string fullname, string phoneCountryCode, long? phoneNumber,
+            Entities.Person.RoleOptions role, bool status):this()
         {
             Id = id;
             Email = email;
             Password = password;
             ConfirmPassword = confirmPassword;
             Fullname = fullname;
+            PhoneCountryCode = phoneCountryCode;
+            PhoneNumber = phoneNumber;
             Role = role;
             Status = status;
         }

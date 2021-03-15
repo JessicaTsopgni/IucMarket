@@ -14,7 +14,7 @@ else
         <div>
             <div class="row @(string.IsNullOrEmpty(message) ? "d-none" : "")">
                 <div class="col-sm-12">
-                    <div class="alert alert-@messageType">
+                    <div class="alert alert-@messageType text-truncate">
                         @message
                     </div>
                 </div>
@@ -202,6 +202,8 @@ else
                         null,
                         null,
                         x.FullName,
+                        x.PhoneCountryCode,
+                        x.PhoneNumber,
                         x.Role,
                         x.Status
                     )

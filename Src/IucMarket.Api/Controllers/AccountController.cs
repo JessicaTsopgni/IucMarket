@@ -71,6 +71,8 @@ namespace IucMarket.Api.Controllers
                             user.Email,
                             user.Password,
                             user.FullName,
+                            user.PhoneCountryCode,
+                            user.PhoneNumber,
                             false,
                             user.Role,
                             user.Status
@@ -105,6 +107,8 @@ namespace IucMarket.Api.Controllers
                             user.Email,
                             user.Password,
                             user.FullName,
+                            user.PhoneCountryCode,
+                            user.PhoneNumber,
                             false,
                             user.Role,
                             user.Status

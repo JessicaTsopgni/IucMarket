@@ -26,7 +26,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="Email"><i style="width:20px" class="fas fa-at"></i></span>
                         </div>
-                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter your email" aria-label="Email" aria-describedby="Email" />
+                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter user email" aria-label="Email" aria-describedby="Email" />
                     </div>
                     <div class="small">
                         <ValidationMessage For="@(() => model.Email)" />
@@ -37,7 +37,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="Password"><i style="width:20px" class="fas fa-lock"></i></span>
                         </div>
-                        <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter your password" aria-label="Password" aria-describedby="Password" />
+                        <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter user password" aria-label="Password" aria-describedby="Password" />
                     </div>
                     <div class="small">
                         <ValidationMessage For="@(() => model.Password)" />
@@ -77,7 +77,10 @@
                 var user = JsonConvert.DeserializeObject<Entities.User>(json);
                 var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, DateTime.UtcNow.AddSeconds(user.ExpiresIn));
                 await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresIn);
-                navigationManager.NavigateTo("");
+                if(user.Role == Entities.Person.RoleOptions.Admin)
+                    navigationManager.NavigateTo("");
+                else
+                    message = "Access denied to non administrator !";
             }
             else
             {

@@ -49,38 +49,16 @@ namespace IucMarket.IntegratedTests
         [Test]
         public async Task FirebaseRegisterWithNewAccountReturnNewUserWithPersonAddedInDatabase()
         {
-            string email = "jess.tsopgni@gmail.com";
+            string email = $"{Guid.NewGuid()}@gmail.com";
 
-            try
-            {
-             
-                // Delete old resgister user and person
-                var createdUser = await FirebaseAdmin.Auth.FirebaseAuth
-                    .DefaultInstance.GetUserByEmailAsync(email);
-                await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance.DeleteUserAsync(createdUser.Uid);
-
-                var persons = await service.FirebaseClient
-                   .Child(service.Table)
-                   .OrderBy("Id")
-                   .EqualTo(createdUser.Uid)
-                   .OnceAsync<Entities.Person>();
-
-                foreach(var p in persons)
-                    await service.FirebaseClient
-                    .Child(service.Table)
-                    .Child(p.Key)
-                    .DeleteAsync();
-            }
-            catch (FirebaseAdmin.Auth.FirebaseAuthException)
-            {
-
-            }
-
+          
             var command = new Service.RegisterCommand
             (
                 email,
                 "admin12345",
-                "Jessica TSOPGNI",
+                "Integration test name",
+                "+237",
+                67893936,
                 false,
                 Entities.Person.RoleOptions.Admin,
                 true
@@ -107,9 +85,11 @@ namespace IucMarket.IntegratedTests
                  (
                      new Service.RegisterCommand
                      (
-                         "willyjoeltchana@gmail.com",
+                         "jess.tsopgni@gmail.com",
                          "",
                          "",
+                         "",
+                         0,
                          false,
                          Entities.Person.RoleOptions.Admin,
                          true

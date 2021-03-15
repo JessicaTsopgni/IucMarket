@@ -10,7 +10,7 @@
 </div>
 <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
     <div class="col-sm-12">
-        <div class="alert alert-@messageType">
+        <div class="alert alert-@messageType text-truncate">
             @message
         </div>
     </div>
@@ -114,7 +114,7 @@ else
                             x.Owner?.Email,
                             x.Owner?.FullName,
                             x.Owner?.CreatedAt ?? DateTime.MinValue,
-                            x.Owner?.Role ?? Entities.Person.RoleOptions.Customer,
+                            x.Owner?.Role ?? Entities.Person.RoleOptions.Other,
                             x.Owner?.Status ?? false
                         ),
                         x.Status

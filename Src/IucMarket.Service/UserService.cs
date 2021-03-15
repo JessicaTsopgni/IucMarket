@@ -28,13 +28,19 @@ namespace IucMarket.Service
                     command.Password
                 );
                 Person person = await GetPersonAsync(firebaseLink.User.LocalId);
+
+                if(!person.Status)
+                    throw new UnauthorizedAccessException("This account has been disabled !");
+
                 return new User
                 (
                     person?.Key,
                     firebaseLink.User.LocalId,
                     person?.FullName,
+                    person?.PhoneCountryCode,
+                    person?.PhoneNumber ?? 0,
                     person?.CreatedAt ?? DateTime.MinValue,
-                    person?.Role ?? Person.RoleOptions.Customer,
+                    person?.Role ?? Person.RoleOptions.Other,
                     firebaseLink.User.IsEmailVerified,
                     firebaseLink.User.Email,
                     null,
@@ -95,6 +101,8 @@ namespace IucMarket.Service
                     null,
                     firebaseAuthLink.User.LocalId,
                     firebaseAuthLink.User.DisplayName,
+                    command.PhoneCountryCode,
+                    command.PhoneNumber,
                     command.CreatedAt,
                     command.Role,
                     command.Status
@@ -110,6 +118,8 @@ namespace IucMarket.Service
                     person.Key,
                     person.Id,
                     person.FullName,
+                    person.PhoneCountryCode,
+                    person.PhoneNumber,
                     person.CreatedAt,
                     person.Role,
                     person.Status,
@@ -156,6 +166,8 @@ namespace IucMarket.Service
                         null,
                         userRecord.Uid, // user update change his uidr
                         command.Name,
+                        command.PhoneCountryCode,
+                        command.PhoneNumber,
                         command.CreatedAt,
                         command.Role,
                         command.Status
@@ -169,9 +181,8 @@ namespace IucMarket.Service
                 }
                 else
                 {
-                    person.Id = userRecord.Uid; // user update change his uidr
-                    person.FullName = command.Name;
-                    person.Status = command.Status;
+                    person = new Person(person.Key, userRecord.Uid, command.Name, command.PhoneCountryCode,
+                        command.PhoneNumber, person.CreatedAt, command.Role, command.Status);
 
                     await FirebaseClient
                       .Child(Table)
@@ -184,6 +195,8 @@ namespace IucMarket.Service
                     person.Key,
                     person.Id,
                     person.FullName,
+                    person?.PhoneCountryCode,
+                    person?.PhoneNumber ?? 0,
                     person.CreatedAt,
                     person.Role,
                     person.Status,
@@ -210,8 +223,10 @@ namespace IucMarket.Service
                     person?.Key,
                     provider.Uid,
                     person?.FullName,
+                    person?.PhoneCountryCode,
+                    person?.PhoneNumber ?? 0,
                     person?.CreatedAt ?? DateTime.UtcNow,
-                    person?.Role ?? Person.RoleOptions.Customer,
+                    person?.Role ?? Person.RoleOptions.Other,
                     person?.Status ?? false,
                     provider.Email,
                     null
@@ -256,9 +271,11 @@ namespace IucMarket.Service
                             (
                                 person?.Key,
                                 user.Uid, 
-                                person?.FullName, 
+                                person?.FullName,
+                                person?.PhoneCountryCode,
+                                person?.PhoneNumber ?? 0,
                                 person?.CreatedAt ?? DateTime.MinValue, 
-                                person?.Role ?? Person.RoleOptions.Customer,
+                                person?.Role ?? Person.RoleOptions.Other,
                                 person?.Status ?? true, 
                                 user.Email,
                                 null
@@ -285,8 +302,10 @@ namespace IucMarket.Service
                     person?.Key,
                     user.Uid,
                     person?.FullName,
+                    person?.PhoneCountryCode,
+                    person?.PhoneNumber ?? 0,
                     person?.CreatedAt ?? DateTime.MinValue,
-                    person?.Role ?? Person.RoleOptions.Customer,
+                    person?.Role ?? Person.RoleOptions.Other,
                     person?.Status ?? true,
                     user.Email,
                     null
@@ -358,6 +377,8 @@ namespace IucMarket.Service
                         x.Key,
                         x.Object.Id,
                         x.Object.FullName,
+                        x.Object.PhoneCountryCode,
+                        x.Object.PhoneNumber,
                         x.Object.CreatedAt,
                         x.Object.Role,
                         x.Object.Status,
@@ -389,17 +410,21 @@ namespace IucMarket.Service
         public string Email { get; private set; }
         public string Password { get; private set; }
         public string Name { get; private set; }
+        public string PhoneCountryCode { get; private set; }
+        public long PhoneNumber { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public bool SendVerificationEmail { get; private set; }
         public Person.RoleOptions Role { get; private set; }
         public bool Status { get; private set; }
 
-        public RegisterCommand(string email, string password, string name,
+        public RegisterCommand(string email, string password, string name, string phoneCountryCode, long phoneNumber,
             bool sendVerificationEmail, Person.RoleOptions role, bool status)
         {
             Email = email;
             Password = password;
             Name = name;
+            PhoneCountryCode = phoneCountryCode;
+            PhoneNumber = phoneNumber;
             CreatedAt = DateTime.UtcNow;
             SendVerificationEmail = sendVerificationEmail;
             Role = role;

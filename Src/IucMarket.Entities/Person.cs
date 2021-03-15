@@ -8,14 +8,15 @@ namespace IucMarket.Entities
         public enum RoleOptions
         {
             Admin,
-            Customer,
-            Provider
+            Other
         }
 
         [JsonIgnore]
         public string Key { get; set; }
         public string Id { get; set; }
         public string FullName { get; set; }
+        public string PhoneCountryCode { get; set; }
+        public long PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; }
         public RoleOptions Role { get; set; }
         public bool Status { get; set; }
@@ -24,11 +25,14 @@ namespace IucMarket.Entities
 
         }
 
-        public Person(string key, string id, string fullName, DateTime createdAt, RoleOptions role, bool status)
+        public Person(string key, string id, string fullName, string phoneCountryCode, long phoneNumber,
+            DateTime createdAt, RoleOptions role, bool status)
         {
             Key = key;
             Id = id;
             FullName = fullName;
+            PhoneCountryCode = string.IsNullOrEmpty(phoneCountryCode) ? "+237" : phoneCountryCode;
+            PhoneNumber = phoneNumber;
             CreatedAt = createdAt;
             Role = role;
             Status = status;
