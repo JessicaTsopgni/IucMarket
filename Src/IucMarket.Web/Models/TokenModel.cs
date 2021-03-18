@@ -10,7 +10,7 @@ namespace IucMarket.Web.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
-        public DateTime ExpiresAt { get; private set; }
+        public int ExpiresIn { get; set; }
 
         public TokenModel()
         {
@@ -22,7 +22,7 @@ namespace IucMarket.Web.Models
             Name = name;
             Email = email;
             Token = token;
-            ExpiresAt = DateTime.Now.AddSeconds(expiresIn);
+            ExpiresIn = expiresIn;
         }
     }
 }

@@ -20,29 +20,40 @@ namespace IucMarket.Web.Common
             _jsRuntime = jsRuntime;
         }
 
-        public async Task SetTokenAsync(string token, DateTime expiry = default)
+        public async Task SetTokenAsync(string token, int expiry = default)
         {
             if (token == null)
             {
                 await _jsRuntime.InvokeAsync<object>("localStorage.removeItem", "authToken");
+                await _jsRuntime.InvokeAsync<object>("localStorage.removeItem", "authTokenDate");
                 await _jsRuntime.InvokeAsync<object>("localStorage.removeItem", "authTokenExpiry");
             }
             else
             {
-                await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authToken", token);
-                await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenExpiry", expiry);
+                await RefreshTokenAsync(token, expiry);
             }
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
+        public async Task RefreshTokenAsync(string token, int expiry = default)
+        {
+            await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authToken", token);
+            await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenDate", DateTime.Now);
+            await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenExpiry", expiry);
+        }
 
         public async Task<string> GetTokenAsync()
         {
-            var expiry = await _jsRuntime.InvokeAsync<object>("localStorage.getItem", "authTokenExpiry");
-            if (expiry != null)
+            var tokenObj = await _jsRuntime.InvokeAsync<object>("localStorage.getItem", "authToken");
+            var dateObj = await _jsRuntime.InvokeAsync<object>("localStorage.getItem", "authTokenDate");
+            var expiryObj = await _jsRuntime.InvokeAsync<object>("localStorage.getItem", "authTokenExpiry");
+            if (tokenObj != null && expiryObj != null && dateObj != null)
             {
-                if (DateTime.Parse(expiry.ToString()) > DateTime.UtcNow)
+                var date = DateTime.Parse(dateObj.ToString());
+                var expiry = int.Parse(expiryObj.ToString());
+                if (date.AddSeconds(expiry) > DateTime.Now)
                 {
+                    await RefreshTokenAsync(tokenObj.ToString(), expiry);
                     return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
                 }
                 else
@@ -70,7 +81,7 @@ namespace IucMarket.Web.Common
             claims.Add(new Claim(ClaimTypes.Email, tokenModel.Email));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, tokenModel.Token));
             claims.Add(new Claim(ClaimTypes.Name, tokenModel.Name));
-            claims.Add(new Claim(ClaimTypes.Expiration, tokenModel.ExpiresAt.ToString()));
+            claims.Add(new Claim(ClaimTypes.Expiration, tokenModel.ExpiresIn.ToString()));
             return claims;
             //var payload = token.Split('.')[1];
             //var jsonBytes = ParseBase64WithoutPadding(payload);

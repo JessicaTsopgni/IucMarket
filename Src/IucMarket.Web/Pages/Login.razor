@@ -76,7 +76,7 @@
                 var json = await response.Content.ReadAsStringAsync();
                 var user = JsonConvert.DeserializeObject<UserDto>(json);
                 var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, user.TokenExpiresIn);
-                await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresAt);
+                await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresIn);
                 if(user.Role == RoleOptions.Admin)
                     navigationManager.NavigateTo("");
                 else
