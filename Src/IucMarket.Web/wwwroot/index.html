@@ -4,28 +4,43 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Iuc Market</title>
+    <title>IUC Market</title>
     <base href="/" />
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-    <link href="css/all.min.css" rel="stylesheet" />
-    <link href="css/app.css" rel="stylesheet" />
+    <link href="/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/all.min.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
     <!--<link href="IucMarket.Web.styles.css" rel="stylesheet" />-->
+    <style>
+        html, body {
+            height: 100%;
+        }
+        #app, .container, .row.justify-content-center.align-items-center {
+            height: 100%;
+            min-height: 100%;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div class="container">
+            <div class="row justify-content-center align-items-center">
+                <img src="/images/loading1.gif" class="img-fluid"/>
+            </div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/all.min.js"></script>
+    <script src="/_framework/blazor.webassembly.js"></script>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/all.min.js"></script>
 </body>
 
 </html>

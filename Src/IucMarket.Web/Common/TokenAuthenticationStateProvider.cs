@@ -70,7 +70,7 @@ namespace IucMarket.Web.Common
             claims.Add(new Claim(ClaimTypes.Email, tokenModel.Email));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, tokenModel.Token));
             claims.Add(new Claim(ClaimTypes.Name, tokenModel.Name));
-            claims.Add(new Claim(ClaimTypes.Expiration, tokenModel.ExpiresIn.ToString()));
+            claims.Add(new Claim(ClaimTypes.Expiration, tokenModel.ExpiresAt.ToString()));
             return claims;
             //var payload = token.Split('.')[1];
             //var jsonBytes = ParseBase64WithoutPadding(payload);

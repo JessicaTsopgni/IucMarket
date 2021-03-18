@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IucMarket.Dtos;
+using IucMarket.Common;
 
 namespace IucMarket.IntegratedTests
 {
@@ -21,13 +23,13 @@ namespace IucMarket.IntegratedTests
         {
             var user = await service.LoginAsync
             (
-                new Service.LoginCommand
+                new LoginCommand
                 (
                     "willyjoeltchana@gmail.com", 
                     "Widy@2015"
                 )
             );
-            Assert.AreEqual("dSGNkzxOodeaBEK7pcbOLl0EZ2G3", user.Id);
+            Assert.AreEqual("dSGNkzxOodeaBEK7pcbOLl0EZ2G3", user.PersonId);
         }
 
         [Test]
@@ -37,7 +39,7 @@ namespace IucMarket.IntegratedTests
             (
                 async () => await service.LoginAsync
                 (
-                    new Service.LoginCommand
+                    new LoginCommand
                     ( 
                         "hello@gmail.com", 
                         "xwrta"
@@ -52,7 +54,7 @@ namespace IucMarket.IntegratedTests
             string email = $"{Guid.NewGuid()}@gmail.com";
 
           
-            var command = new Service.RegisterCommand
+            var command = new RegisterCommand
             (
                 email,
                 "admin12345",
@@ -60,19 +62,14 @@ namespace IucMarket.IntegratedTests
                 "+237",
                 67893936,
                 false,
-                Entities.Person.RoleOptions.Admin,
+                RoleOptions.Admin,
                 true
             );
 
             var user = await service.RegisterAsync(command);
-            var person = await service.FirebaseClient
-                .Child(service.Table)
-                .OrderBy("Id")
-                .EqualTo(user.Id)
-                .OnceAsync<Entities.Person>();
 
-            Assert.AreEqual(user.Email, email);
-            Assert.AreEqual(person.FirstOrDefault()?.Object.Id, user.Id);
+            Assert.AreEqual(user.Email, command.Email);
+            Assert.AreEqual(user.PhoneNumber, command.PhoneNumber);
         }
 
         [Test]
@@ -83,7 +80,7 @@ namespace IucMarket.IntegratedTests
              (
                  async () => await service.RegisterAsync
                  (
-                     new Service.RegisterCommand
+                     new RegisterCommand
                      (
                          "jess.tsopgni@gmail.com",
                          "",
@@ -91,7 +88,7 @@ namespace IucMarket.IntegratedTests
                          "",
                          0,
                          false,
-                         Entities.Person.RoleOptions.Admin,
+                         RoleOptions.Admin,
                          true
                      )
                  )
@@ -118,7 +115,7 @@ namespace IucMarket.IntegratedTests
              (
                  async () => await service.ForgottenPasswordAsync
                  (
-                     new Service.ForgottenPasswordCommand
+                     new ForgottenPasswordCommand
                      (
                          "ayiiii@gmail.com"
                      )
@@ -131,7 +128,7 @@ namespace IucMarket.IntegratedTests
 
             var user = await service.GetUserAsync("3LzeMp9yBKa92afiheGkhMdEwWE2");
 
-            Assert.AreEqual(user.Id, "3LzeMp9yBKa92afiheGkhMdEwWE2");
+            Assert.AreEqual(user.PersonId, "3LzeMp9yBKa92afiheGkhMdEwWE2");
         }
 
         [Test]
@@ -140,7 +137,7 @@ namespace IucMarket.IntegratedTests
 
            var userList = await service.GetUsersAsync();
 
-            Assert.GreaterOrEqual(userList.Users.Count, 1);
+            Assert.GreaterOrEqual(userList.Items.Count, 1);
         }
     }
 }

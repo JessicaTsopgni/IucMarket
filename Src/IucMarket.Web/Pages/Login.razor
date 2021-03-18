@@ -26,7 +26,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="Email"><i style="width:20px" class="fas fa-at"></i></span>
                         </div>
-                        <InputText @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter user email" aria-label="Email" aria-describedby="Email" />
+                        <InputText autocomplete="off" @bind-Value="model.Email" type="email" class="form-control" placeholder="Enter user email" aria-label="Email" aria-describedby="Email" />
                     </div>
                     <div class="small">
                         <ValidationMessage For="@(() => model.Email)" />
@@ -37,7 +37,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="Password"><i style="width:20px" class="fas fa-lock"></i></span>
                         </div>
-                        <InputText @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter user password" aria-label="Password" aria-describedby="Password" />
+                        <InputText autocomplete="off" @bind-Value="model.Password" type="password" class="form-control" placeholder="Enter user password" aria-label="Password" aria-describedby="Password" />
                     </div>
                     <div class="small">
                         <ValidationMessage For="@(() => model.Password)" />
@@ -70,14 +70,14 @@
         {
             isBusy = true;
             message = string.Empty;
-            var response = await Http.GetAsync($"account/login?email={model.Email}&password={model.Password}");
+            var response = await Http.GetAsync($"Account/Login?email={model.Email}&password={model.Password}");
             if(response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<Entities.User>(json);
-                var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, DateTime.UtcNow.AddSeconds(user.ExpiresIn));
-                await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresIn);
-                if(user.Role == Entities.Person.RoleOptions.Admin)
+                var user = JsonConvert.DeserializeObject<UserDto>(json);
+                var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, user.TokenExpiresIn);
+                await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresAt);
+                if(user.Role == RoleOptions.Admin)
                     navigationManager.NavigateTo("");
                 else
                     message = "Access denied to non administrator !";

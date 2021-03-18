@@ -14,18 +14,18 @@ namespace IucMarket.Entities
 
         }
 
-        public User(string key, string id, string fullName, string phoneCountryCode, long phoneNumber, DateTime createdAt, 
+        public User(string userId, string fullName, string phoneCountryCode, long phoneNumber, DateTime createdAt, 
             RoleOptions role, bool status, string email, string password) :
-           base(key, id, fullName, phoneCountryCode, phoneNumber, createdAt, role, status)
+           base(userId, fullName, phoneCountryCode, phoneNumber, createdAt, role, status)
         {
             Email = email;
             Password = password;
         }
 
-        public User(string key, string id, string fullName, string phoneCountryCode, long phoneNumber,
+        public User(string userId, string fullName, string phoneCountryCode, long phoneNumber,
             DateTime createdAt, RoleOptions role, bool status, string email,
            string password, string token, int expiresIn):
-            this(key, id, fullName, phoneCountryCode, phoneNumber, createdAt, role, status, email, password)
+            this(userId, fullName, phoneCountryCode, phoneNumber, createdAt, role, status, email, password)
         {
             Token = token;
             ExpiresIn = expiresIn;

@@ -1,17 +1,19 @@
 ﻿@page "/user/edit/{id?}"
 @inject HttpClient Http
 @inject NavigationManager navigationManager
-<h2><a href="user" class="text-dark" style="text-decoration:none">
-    <span class="fas fa-arrow-left"></span></a> Edit a user</h2>
+<h2>
+    <a href="user" class="text-dark" style="text-decoration:none">
+    <span class="fas fa-arrow-left"></span></a> Edit a user
+</h2>
 @if (!isLoaded)
 {
-    <p><em>Loading...</em></p>
+    <Loading></Loading>
 }
 else
 {
     <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" autocomplete="off">
         <DataAnnotationsValidator />
-        <div>
+        <div class="offset-sm-1">
             <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
                 <div class="col-sm-10">
                     <div class="alert alert-@messageType text-truncate">
@@ -60,7 +62,7 @@ else
                                 <span class="input-group-text" id="Role"><i style="width:20px" class="fas fa-users"></i></span>
                             </div>
                             <InputSelect @bind-Value="model.Role" class="custom-select" aria-label="Role" aria-describedby="Role">
-                                @foreach (var value in Enum.GetValues(typeof(Entities.Person.RoleOptions)))
+                                @foreach (var value in Enum.GetValues(typeof(RoleOptions)))
                                     {
                                     <option>@value</option>
                                     }
@@ -94,7 +96,7 @@ else
                             <ValidationMessage For="@(() => model.ConfirmPassword)" />
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <div class="custom-control custom-checkbox mt-4">
                             <InputCheckbox class="custom-control-input" id="Status" @bind-Value="model.Status" />
                             <label class="custom-control-label" for="Status">Enable/Disable</label>
@@ -119,7 +121,7 @@ else
     private MessageType messageType = MessageType.danger;
     private string message = string.Empty;
     private UserCreateModel model = new UserCreateModel();
-    private Entities.User user = null;
+    private UserDto user = null;
     private EditContext context;
 
     [Parameter]
@@ -132,12 +134,12 @@ else
             isLoaded = false;
             if (!string.IsNullOrEmpty(Id))
             {
-                var response = await Http.GetAsync($"account/{Id}");
+                var response = await Http.GetAsync($"Account/{Id}");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    user = JsonConvert.DeserializeObject<Entities.User>(json);
-                    model = new UserCreateModel(user.Id, user.Email, null, null, user.FullName, user.PhoneCountryCode, user.PhoneNumber, user.Role, user.Status);
+                    user = JsonConvert.DeserializeObject<UserDto>(json);
+                    model = new UserCreateModel(user.UserId, user.Email, null, null, user.FullName, user.PhoneCountryCode, user.PhoneNumber, user.Role, user.Status);
                 }
                 else
                 {
@@ -171,19 +173,17 @@ else
                 {
                     var response = await Http.PostAsJsonAsync
                     (
-                        $"account",
-                        new Entities.User
+                        $"Account",
+                        new RegisterCommand
                         (
-                            null,
-                            null,
+                            model.Email,
+                            model.Password,
                             model.Fullname,
                             model.PhoneCountryCode,
                             model.PhoneNumber ?? 0,
-                            DateTime.UtcNow,
+                            false,
                             model.Role,
-                            model.Status,
-                            model.Email,
-                            model.Password
+                            model.Status
                         )
                     );
                     if (response.IsSuccessStatusCode)
@@ -205,19 +205,17 @@ else
                 {
                     var response = await Http.PutAsJsonAsync
                     (
-                        $"account/{Id}",
-                        new Entities.User
+                        $"Account/{Id}",
+                        new RegisterCommand
                         (
-                            user.Key,
-                            Id,
+                            model.Email,
+                            model.Password,
                             model.Fullname,
                             model.PhoneCountryCode,
                             model.PhoneNumber ?? 0,
-                            user.CreatedAt,
+                            false,
                             model.Role,
-                            model.Status,
-                            model.Email,
-                            model.Password
+                            model.Status
                         )
                     );
                     if (response.IsSuccessStatusCode)

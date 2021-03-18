@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+             xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+             xmlns:Component="clr-namespace:IucMarket.Mobile.Components"
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             x:Class="IucMarket.Mobile.Views.RatePopup">
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation 
+            PositionIn="Center"
+            PositionOut="Center"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="400"
+            DurationOut="300"
+            EasingIn="SinOut"
+            EasingOut="SinIn"
+            HasBackgroundAnimation="True"/>
+    </pages:PopupPage.Animation>
+    <StackLayout
+        Spacing="10"
+        VerticalOptions="Center"
+        BackgroundColor="{DynamicResource BackgroundColor}"
+        Padding="20"
+        Margin="20">
+        <Component:RatingBar 
+            x:Name="ratingBar"
+            HorizontalOptions="Center"
+            FillFontFamilyIcon="fas"
+            EmptyFontFamilyIcon="far"
+            FontSizeIcon="30"
+            FillRateIcon="{x:Static helpers:IconFontSolid.Star}"
+            EmptyRateIcon="{x:Static helpers:IconFontRegular.Star}"
+            NumberOfRates="5"
+            Spacing="20"/>
+        <Button VerticalOptions="Center" 
+                ContentLayout="Left,0"
+                Text="Done" 
+                Clicked="Button_Clicked"/>
+    </StackLayout>
+</pages:PopupPage>

@@ -1,9 +1,10 @@
-﻿using IucMarket.Entities;
+﻿using IucMarket.Dtos;
 using IucMarket.Service;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace IucMarket.Api.Controllers
@@ -31,6 +32,10 @@ namespace IucMarket.Api.Controllers
                     await service.GetUsersAsync(pageToken, pageSize)
                 );
             }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
@@ -50,7 +55,11 @@ namespace IucMarket.Api.Controllers
                     await service.GetUserAsync(id)
                 );
             }
-            catch(Exception ex)
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
                 return BadRequest(Error);
@@ -58,31 +67,22 @@ namespace IucMarket.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]User user)
+        public async Task<IActionResult> Post([FromBody]RegisterCommand command)
         {
             try
             {
                 return Ok
                 (
-                    await service.RegisterAsync
-                    (
-                        new RegisterCommand
-                        (
-                            user.Email,
-                            user.Password,
-                            user.FullName,
-                            user.PhoneCountryCode,
-                            user.PhoneNumber,
-                            false,
-                            user.Role,
-                            user.Status
-                        )
-                    )
+                    await service.RegisterAsync(command)
                 );
             }
             catch(DuplicateWaitObjectException ex)
             {
                 return Conflict(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -93,28 +93,12 @@ namespace IucMarket.Api.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] User user)
+        public async Task<IActionResult> Put(string id, [FromBody] RegisterCommand command)
         {
             try
             {
-                return Ok
-                (
-                    await service.EditAsync
-                    (
-                        id,
-                        new RegisterCommand
-                        (
-                            user.Email,
-                            user.Password,
-                            user.FullName,
-                            user.PhoneCountryCode,
-                            user.PhoneNumber,
-                            false,
-                            user.Role,
-                            user.Status
-                        )
-                    )
-                );
+                await service.EditAsync(id, command);
+                return NoContent();
             }
             catch(KeyNotFoundException ex)
             {
@@ -123,6 +107,10 @@ namespace IucMarket.Api.Controllers
             catch (DuplicateWaitObjectException ex)
             {
                 return Conflict(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -143,7 +131,11 @@ namespace IucMarket.Api.Controllers
             {
                 return Unauthorized(ex.Message);
             }
-            catch(Exception ex)
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
                 return BadRequest(Error);
@@ -157,6 +149,10 @@ namespace IucMarket.Api.Controllers
             try
             {
                 return Ok(await service.GetOwnersAsync());
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -172,11 +168,15 @@ namespace IucMarket.Api.Controllers
             try
             {
                 await service.DeleteAsync(id);
-                return Ok();
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

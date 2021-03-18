@@ -1,0 +1,12 @@
+﻿    <div class="row justify-content-center align-items-center">
+        <img src="/images/loading@(number).gif" class="img-fluid" />
+    </div>
+
+@code {
+    private int number = 1;
+    protected override void OnInitialized()
+    {
+        Random r = new Random();
+        number = r.Next(1, 8);
+    }
+}

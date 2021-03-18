@@ -1,4 +1,4 @@
-﻿using IucMarket.Entities;
+﻿using IucMarket.Dtos;
 using IucMarket.Service;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -47,6 +47,10 @@ namespace IucMarket.Api.Controllers
                     )
                 );
             }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
@@ -70,7 +74,11 @@ namespace IucMarket.Api.Controllers
                     )
                 );
             }
-            catch(Exception ex)
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
                 return BadRequest(Error);
@@ -80,43 +88,40 @@ namespace IucMarket.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] IEnumerable<IFormFile> pictures)
         {
-            Product product = null;
+            ProductAddCommand command = null;
             try
             {
-                product = JsonConvert.DeserializeObject<Product>(Request.Form["Product"].ToString());
+                command = JsonConvert.DeserializeObject<ProductAddCommand>(Request.Form["Product"].ToString());
 
-                Dictionary<string, string> newFileNames = await UploadProductFiles
-                (pictures, null);
-
-                product.Pictures = newFileNames.Select(x => new FileInfo(x.Key, x.Value)).ToArray();
+                command.Pictures = await UploadProductFiles(pictures, null);
 
                 return Ok
                 (
-                    await service.AddAsync
-                    (
-                        product,
-                        GetPathTemplate()
-                    )
+                    await service.AddAsync(command, GetPathTemplate())
                 );
             }
             catch(DuplicateWaitObjectException ex)
             {
-                DeleteProductFiles(product);
+                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(), x.Key, x.Value)));
                 return Conflict(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                DeleteProductFiles(product);
+                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(), x.Key, x.Value)));
                 System.Diagnostics.Debug.Print(ex.ToString());
                 return BadRequest(Error);
             }
         }
 
-        private void DeleteProductFiles(Product product)
+        private void DeleteProductFiles(IEnumerable<FileInfoDto> pictures)
         {
-            if (product != null && product.Pictures != null)
+            if (pictures != null)
             {
-                foreach (var p in product.Pictures)
+                foreach (var p in pictures)
                 {
                     var path = System.IO.Path.Combine
                     (env.ContentRootPath, "images", System.IO.Path.GetFileName(new UriBuilder(p.Name).Path));
@@ -130,7 +135,7 @@ namespace IucMarket.Api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Put(string id, [FromForm] IEnumerable<IFormFile> pictures)
         {
-            Product product = null;
+            ProductAddCommand command = null;
             try
             {
                 var oldProduct = await service.GetProductAsync
@@ -139,38 +144,19 @@ namespace IucMarket.Api.Controllers
                     GetPathTemplate()
                 );
                 if (oldProduct == null)
-                    throw new KeyNotFoundException($"{nameof(Product)} {id} not found !");
+                    throw new KeyNotFoundException($"Product {id} not found !");
 
-                product = JsonConvert.DeserializeObject<Product>(Request.Form["Product"].ToString());
+                command = JsonConvert.DeserializeObject<ProductAddCommand>(Request.Form["Product"].ToString());
                 
-                Dictionary<string, string> newFileNames = await UploadProductFiles
-                (pictures, oldProduct.Pictures);
-
-                product.Pictures = newFileNames.Select(x => new FileInfo(x.Key, x.Value)).ToArray();
-
-                //if (deleteFile)
-                //{
-                //    if (fileNames.Count != 0)
-                //        DeleteProductFiles(product);
-
-                //    product.Pictures = fileNames.Count == 0
-                //        ? oldProduct.Pictures
-                //        : fileNames.Select(x => new FileInfo(x.Key, x.Value));
-                //}
-                //else
-                //{
-                //    product.Pictures = fileNames.Count == 0
-                //        ? oldProduct.Pictures
-                //        : oldProduct.Pictures.Concat(fileNames.Select(x => new FileInfo(x.Key, x.Value)));
-                //}
+                command.Pictures = await UploadProductFiles (pictures, oldProduct.Pictures);
 
                 await service.EditAsync
                 (
                     id,
-                    product,
+                    command,
                     GetPathTemplate()
                 );
-                return Ok();
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
@@ -180,6 +166,10 @@ namespace IucMarket.Api.Controllers
             {
                 return Conflict(ex.Message);
             }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.Print(ex.ToString());
@@ -188,7 +178,7 @@ namespace IucMarket.Api.Controllers
         }
 
         private async Task<Dictionary<string, string>> UploadProductFiles
-            (IEnumerable<IFormFile> pictures,  IEnumerable<FileInfo> oldFileInfos)
+            (IEnumerable<IFormFile> pictures,  IEnumerable<FileInfoDto> oldFileInfos)
         {
             var fileNames = new Dictionary<string, string>();
             if (pictures != null)
@@ -245,12 +235,16 @@ namespace IucMarket.Api.Controllers
                     GetPathTemplate()
                 );
                 await service.DeleteAsync(id);
-                DeleteProductFiles(product);
-                return Ok();
+                DeleteProductFiles(product.Pictures);
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

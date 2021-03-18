@@ -1,11 +1,14 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
-using IucMarket.Entities;
+using IucMarket.Service.Entities;
+using IucMarket.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Sockets;
 
 namespace IucMarket.Service
 {
@@ -14,28 +17,30 @@ namespace IucMarket.Service
         
         public readonly string Table = "Products";
         private readonly UserService userService;
+        private readonly CategoryService categoryService;
 
-        public ProductService(UserService userService)
+        public ProductService(UserService userService, CategoryService categoryService)
         {
             this.userService = userService;
+            this.categoryService = categoryService;
         }
-        /// <summary>
-        /// Log in with firebase authentication
-        /// </summary>
-        /// <param name="command">An instance of login command object</param>
-        /// <exception cref="System.UnauthorizedAccessException">Thrown when username or password is invalid</exception>
-        /// <returns>A Service.Product</returns>
-        public async Task<Product> GetProductAsync(string key, string path)
+        public async Task<ProductDto> GetProductAsync(string id, string path)
         {
             try
             {
                 var product = await FirebaseClient
                        .Child(Table)
-                       .Child(key)
+                       .Child(id)
                        .OnceSingleAsync<Product>();
 
-                await SetProduct(product, key, path);
-                return product;
+                return GetProductDto
+                (
+                    id,
+                    product,
+                    path,
+                    await categoryService.GetCategoryAsync(product.CategoryId),
+                    await userService.GetUserAsync(product.UserId)
+                );
             }
             catch (Exception)
             {
@@ -43,7 +48,7 @@ namespace IucMarket.Service
             }
         }
 
-        private async Task<Product> GetProductByReferenceAsync(string reference, string path)
+        private async Task<ProductDto> GetProductByReferenceAsync(string reference, string path)
         {
             try
             {
@@ -53,9 +58,22 @@ namespace IucMarket.Service
                        .EqualTo(reference)
                        .OnceAsync<Product>();
 
-                var product = products?.FirstOrDefault()?.Object;
-                await SetProduct(product, products?.FirstOrDefault()?.Key, path);
-                return product;
+                var product = products?.FirstOrDefault();
+
+                return GetProductDto
+                (
+                    product?.Key,
+                    product?.Object,
+                    path,
+                    await categoryService.GetCategoryAsync(product?.Object.CategoryId),
+                    await userService.GetUserAsync(product?.Object.UserId)
+                );
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
             }
             catch (Exception)
             {
@@ -63,30 +81,52 @@ namespace IucMarket.Service
             }
         }
 
-        private async Task SetProduct(Product product, string key, string path)
-        {
-            if (product != null)
-            {
-                product.Key = key;
-                product.Pictures = product.Pictures?.Select(x => new FileInfo(string.Format(path, x.Name, x.ContentType), x.ContentType)).ToArray();
-                product.Owner = await GetUserAsync(product.UserKey);
-            }
-        }
-
-        public async Task<Product> AddAsync(Product product, string path)
+        public async Task<ProductDto> AddAsync(ProductAddCommand command, string path)
         {            
             try
             {
-                if(await GetProductByReferenceAsync(product.Reference, path) != null)
-                    throw new DuplicateWaitObjectException($"{nameof(product.Reference)} already exists !");
+                if(await GetProductByReferenceAsync(command.Reference, path) != null)
+                    throw new DuplicateWaitObjectException($"{nameof(command.Reference)} already exists !");
 
                 var result = await FirebaseClient
                   .Child(Table)
-                  .PostAsync(JsonConvert.SerializeObject(product));
+                  .PostAsync(JsonConvert.SerializeObject(command));
 
-                await SetProduct(product, result?.Key, path);
+                return GetProductDto
+                (
+                    result.Key,
+                    new Product
+                    (
+                        command.Reference,
+                        command.Name,
+                        command.Description,
+                        command.Price,
+                        command.Currency,
+                        command.Pictures.Select
+                        (
+                            x =>
+                            new FileInfo
+                            (
+                                x.Key,
+                                x.Value
 
-                return product;
+                            )
+                        ).ToArray(),
+                        command.CategoryId,
+                        command.OwnerId,
+                        command.CreatedAt,
+                        command.Status
+                    ),
+                    path,
+                    await categoryService.GetCategoryAsync(command.CategoryId),
+                    await userService.GetUserAsync(command.OwnerId)
+                );
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -95,22 +135,54 @@ namespace IucMarket.Service
         }
 
 
-        public async Task EditAsync(string uid, Product product, string path)
+        public async Task EditAsync(string id, ProductAddCommand command, string path)
         {
             try
             {
-                var oldProduct1 = await GetProductAsync(uid, path);
+                var oldProduct1 = await GetProductAsync(id, path);
                 if (oldProduct1 == null)
-                    throw new KeyNotFoundException($"{nameof(Product)} {uid} not found");
+                    throw new KeyNotFoundException($"{nameof(ProductDto)} {id} not found");
 
-                var oldProduct2 = await GetProductByReferenceAsync(uid, path);
-                if (oldProduct2 != null && oldProduct2.Key != uid)
-                    throw new DuplicateWaitObjectException($"{nameof(Product)} {product.Reference} already exists !");
-    
-                    await FirebaseClient
-                      .Child(Table)
-                      .Child(uid)
-                      .PutAsync(JsonConvert.SerializeObject(product));
+                var oldProduct2 = await GetProductByReferenceAsync(id, path);
+                if (oldProduct2 != null && oldProduct2.Id != id)
+                    throw new DuplicateWaitObjectException($"{nameof(ProductDto)} {command.Reference} already exists !");
+
+                await FirebaseClient
+                  .Child(Table)
+                  .Child(id)
+                  .PutAsync
+                  (
+                    JsonConvert.SerializeObject
+                    (
+                        new Product
+                        (
+                            command.Reference,
+                            command.Name,
+                            command.Description,
+                            command.Price,
+                            command.Currency,
+                            command.Pictures.Select
+                            (
+                                x =>
+                                new FileInfo
+                                (
+                                    x.Key,
+                                    x.Value
+
+                                )
+                            ).ToArray(),
+                            command.CategoryId,
+                            command.OwnerId,
+                            command.CreatedAt,
+                            command.Status
+                        )
+                    )
+                );
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
             }
             catch (Exception ex)
             {
@@ -118,11 +190,11 @@ namespace IucMarket.Service
             }
         }
 
-        public async Task<ProductList> GetProductsAsync(string path , int pageIndex = 1, int pageSize = 100)
+        public async Task<ListDto<ProductDto>> GetProductsAsync(string path , int pageIndex = 1, int pageSize = 100)
         {
-            ProductList productList = new ProductList();
-            productList.PageIndex = pageIndex;
-            productList.PageSize = pageSize;
+            var list = new ListDto<ProductDto>();
+            list.PageIndex = pageIndex;
+            list.PageSize = pageSize;
             try
             {
                 var products = await FirebaseClient
@@ -131,35 +203,44 @@ namespace IucMarket.Service
 
                 foreach(var p in products)
                 {
-                    var product = new Product
+
+                    list.Items.Add
                     (
-                        p.Key,
-                        p.Object.Reference,
-                        p.Object.Name,
-                        p.Object.Description,
-                        p.Object.Price,
-                        p.Object.Currency,
-                        p.Object.Pictures,
-                        p.Object.UserKey,
-                        p.Object.Owner,
-                        p.Object.CreatedAt,
-                        p.Object.Status
+                        GetProductDto
+                        (
+                            p.Key,
+                            new Product
+                            (
+                                p.Object.Reference,
+                                p.Object.Name,
+                                p.Object.Description,
+                                p.Object.Price,
+                                p.Object.Currency,
+                                p.Object.Pictures,
+                                p.Object.CategoryId,
+                                p.Object.UserId,
+                                p.Object.CreatedAt,
+                                p.Object.Status
+                            ), 
+                            path,
+                            await categoryService.GetCategoryAsync(p.Object.CategoryId),
+                            await userService.GetUserAsync(p.Object.UserId)
+                        )
                     );
-                    await SetProduct(product, p.Key, path);
-                    productList.Products.Add(product);
                 }
+            }
+            catch(Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return productList;
+            return list;
         }
 
-        private async Task<User> GetUserAsync(string userId)
-        {
-            return await userService.GetUserAsync(userId);
-        }
 
         public async Task DeleteAsync(string uid)
         {
@@ -172,12 +253,46 @@ namespace IucMarket.Service
             }
             catch (FirebaseAdmin.FirebaseException)
             {
-                throw new KeyNotFoundException($"{nameof(Product)} {uid} not found");
+                throw new KeyNotFoundException($"{nameof(ProductDto)} {uid} not found");
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
+
+         internal static ProductDto GetProductDto
+        (string key, Product product, string picturePath, CategoryDto category, UserDto user)
+        {
+            return new ProductDto
+            (
+                key,
+                product.Reference,
+                product.Name,
+                product.Description,
+                product.Price,
+                product.Currency,
+                product.Pictures?.Select
+                (
+                    x => 
+                    new FileInfoDto
+                    (
+                        picturePath, 
+                        x.Name, 
+                        x.ContentType
+                    )
+                ).ToArray(),
+                category,
+                user,
+                product.CreatedAt,
+                product.Status
+            );
+        }
     }
+
 }

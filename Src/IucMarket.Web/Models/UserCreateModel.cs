@@ -1,4 +1,5 @@
 ﻿using ExpressiveAnnotations.Attributes;
+using IucMarket.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -39,7 +40,7 @@ namespace IucMarket.Web.Models
         [Display(Name = "Phone number")]
         public long? PhoneNumber { get; set; }
 
-        public Entities.Person.RoleOptions Role { get; set; }
+        public RoleOptions Role { get; set; }
         public bool Status { get; set; }
 
         public UserCreateModel()
@@ -50,7 +51,7 @@ namespace IucMarket.Web.Models
 
         public UserCreateModel(string id, string email, string password, 
             string confirmPassword, string fullname, string phoneCountryCode, long? phoneNumber,
-            Entities.Person.RoleOptions role, bool status):this()
+            RoleOptions role, bool status):this()
         {
             Id = id;
             Email = email;

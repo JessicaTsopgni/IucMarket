@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IucMarket.Mobile.Views.ItemsPage"
+             Title="{Binding Title}"
+             xmlns:local="clr-namespace:IucMarket.Mobile.ViewModels"  
+             xmlns:model="clr-namespace:IucMarket.Mobile.Models"  
+            xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+            x:Name="BrowseItemsPage">
+
+    <Shell.TitleView>
+        <StackLayout Orientation="Horizontal" Padding="0, 20, 10, 0">
+            <Label Text="{Binding Title}"
+                   VerticalOptions="Center"
+                   TextColor="{DynamicResource Light}"
+                   FontSize="Title"
+                   FontAttributes="Bold"/>
+            <StackLayout Orientation="Horizontal"
+                         HorizontalOptions="EndAndExpand"
+                         VerticalOptions="Center">
+                <Label Text="{x:Static helpers:IconFontSolid.ShoppingCart}"
+                       FontFamily="fas"
+                   TextColor="{DynamicResource Light}"
+                   FontSize="Title"/>
+            </StackLayout>
+        </StackLayout>
+    </Shell.TitleView>
+
+    <!--
+      x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
+      https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
+    -->
+    <RefreshView x:DataType="local:ProductsViewModel" 
+                 Command="{Binding LoadProductsCommand}" 
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+        <CollectionView x:Name="ProductsListView"
+                        ItemsSource="{Binding Products}"
+                        SelectionMode="None"
+                        BackgroundColor="Transparent">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" 
+                                 Span="{OnIdiom Tablet=3, Phone=2}"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="5">
+                        <Frame CornerRadius="10"
+                                Padding="0"
+                                BorderColor="{DynamicResource BorderColor}"
+                                IsClippedToBounds="True"
+                                HasShadow="True">
+                            <StackLayout x:DataType="model:ProductModel">
+                                <Grid>
+                                    <Image Source="{Binding Picture}"
+                                           HeightRequest="{OnIdiom Tablet=200, Phone=150}"
+                                           Aspect="AspectFill"/>
+                                    <Grid HorizontalOptions="End"
+                                          VerticalOptions="Start"
+                                          Margin="0, 10, 5, 0"
+                                          IsVisible="{Binding ShowImageMultipleIcon}">
+                                        <ContentView BackgroundColor="Black" 
+                                                     Opacity="0.3" 
+                                                     VerticalOptions="FillAndExpand" />
+                                        <StackLayout Orientation="Horizontal"
+                                                     Padding="5">
+                                            <Label Text="{x:Static helpers:IconFontSolid.Images}"
+                                                   FontFamily="fas"
+                                                   VerticalOptions="Start"
+                                                   HorizontalOptions="End"
+                                                   TextColor="WhiteSmoke"
+                                                   FontSize="Medium"
+                                                   Opacity="1"/>
+                                            <Label Text="{Binding PicturesCount}"
+                                                   FontSize="Small" 
+                                                   Opacity="1"
+                                                   TextColor="WhiteSmoke"/>
+                                        </StackLayout>
+                                    </Grid>
+                                </Grid>
+                                <StackLayout Padding="5, 0, 5, 0">
+                                    <Label Text="{Binding Name}"
+                                           LineBreakMode="TailTruncation"
+                                           FontAttributes="Bold"
+                                           FontSize="Small" />
+                                    <BoxView HorizontalOptions="Fill"
+                                             HeightRequest="1"
+                                             Color="{DynamicResource BorderColor}"/>
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal"
+                                             Padding="5, 0, 5, 0">
+                                    <Label Text="{Binding PriceWithCurrency}"
+                                           LineBreakMode="TailTruncation"
+                                           FontSize="Small" />
+                                    <StackLayout Orientation="Horizontal"
+                                                 HorizontalOptions="EndAndExpand"
+                                                 Spacing="2">
+                                        <Label Text="{x:Static helpers:IconFontSolid.MapMarker}"
+                                               FontFamily="fas"
+                                               VerticalOptions="Center"/>
+                                        <Label Text="{Binding Category.Name}" 
+                                               LineBreakMode="TailTruncation"
+                                               VerticalOptions="Center"
+                                               FontSize="Small" />
+                                    </StackLayout>
+                                </StackLayout>
+                                <StackLayout Orientation="Horizontal"
+                                             VerticalOptions="Center"
+                                             BackgroundColor="{DynamicResource Secondary}"
+                                             Padding="5">
+                                    <StackLayout Orientation="Horizontal" 
+                                                 Spacing="2">
+                                        <Label Text="{x:Static helpers:IconFontRegular.CheckCircle}" 
+                                               FontFamily="far"
+                                               VerticalOptions="Center"
+                                               TextColor="{Binding AvailableColor}"/>
+                                        <Label Text="{Binding AvailableText}"
+                                               LineBreakMode="TailTruncation"
+                                               FontSize="Micro" />
+                                    </StackLayout>
+                                    <StackLayout Orientation="Horizontal"
+                                                 HorizontalOptions="EndAndExpand"
+                                                 Spacing="10">
+                                        <StackLayout Orientation="Horizontal"
+                                                     Spacing="2">
+                                            <Label Text="{x:Static helpers:IconFontRegular.Frown}" 
+                                                   FontFamily="far"
+                                                   VerticalOptions="Center"
+                                                   TextColor="IndianRed"/>
+                                            <Label Text="{Binding AbusesText}"
+                                                   LineBreakMode="TailTruncation"
+                                                   VerticalOptions="Center"
+                                                   FontSize="Micro" />
+                                        </StackLayout>
+                                        <StackLayout Orientation="Horizontal"
+                                                     Spacing="2">
+                                            <Label Text="{x:Static helpers:IconFontSolid.Star}"
+                                                   FontFamily="fas"
+                                                   TextColor="Gold"
+                                                   VerticalOptions="Center"/>
+                                            <Label Text="{Binding StarsText}"
+                                                   LineBreakMode="TailTruncation"
+                                                   VerticalOptions="Center"
+                                                   FontSize="Micro" />
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:ProductsViewModel}}, Path=StarTappedCommand}"
+                                                          CommandParameter="{Binding .}">
+                                                </TapGestureRecognizer>
+                                            </StackLayout.GestureRecognizers>
+                                        </StackLayout>
+                                    </StackLayout>
+                                </StackLayout>
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:ProductsViewModel}}, Path=ProductSelectedCommand}"
+                                                          CommandParameter="{Binding .}">
+                                    </TapGestureRecognizer>
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

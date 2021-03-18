@@ -10,19 +10,19 @@ namespace IucMarket.Web.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
-        public DateTime ExpiresIn { get; set; }
+        public DateTime ExpiresAt { get; private set; }
 
         public TokenModel()
         {
 
         }
 
-        public TokenModel(string name, string email, string token, DateTime expiresIn)
+        public TokenModel(string name, string email, string token, int expiresIn)
         {
             Name = name;
             Email = email;
             Token = token;
-            ExpiresIn = expiresIn;
+            ExpiresAt = DateTime.Now.AddSeconds(expiresIn);
         }
     }
 }

@@ -5,7 +5,7 @@
     <span class="fas fa-arrow-left"></span></a> Edit a product</h2>
 @if (!isLoaded)
 {
-    <p><em>Loading...</em></p>
+    <Loading></Loading>
 }
 else
 {
@@ -37,7 +37,7 @@ else
                     </div>
                     <div class="mb-3">
                         <div id="carouselExampleControls" class="carousel border" data-ride="carousel">
-                            <div class="carousel-inner text-center" style="height:200px">
+                            <div class="carousel-inner text-center" style="height:250px">
                                 @if(model.Pictures != null)
                                 {
                                     int i = 0;
@@ -118,9 +118,29 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
+                                <span class="input-group-text" id="Category"><i style="width:20px" class="fas fa-layer-group"></i></span>
+                            </div>
+                            <InputSelect @bind-Value="model.CategoryId" class="form-control" aria-label="Category" aria-describedby="Category">
+                                @if (model.Categories != null)
+                                {
+                                    <option value="">Choose the product category</option>
+                                    foreach (var category in model.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.CategoryId)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
                                 <span class="input-group-text" id="Owner"><i style="width:20px" class="far fa-copyright"></i></span>
                             </div>
-                            <InputSelect @bind-Value="model.OwnerId" class="form-control" aria-label="Role" aria-describedby="Owner">
+                            <InputSelect @bind-Value="model.OwnerId" class="form-control" aria-label="Owner" aria-describedby="Owner">
                                 @if (model.Owners != null)
                                 {
                                     <option value="">Choose the product owner</option>
@@ -142,13 +162,13 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Descriptioname"><i style="width:20px" class="fas fa-info-circle"></i></span>
                             </div>
-                            <InputTextArea style="height:145px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
+                            <InputTextArea style="height:200px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Description)" />
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div>
                         <div class="custom-control custom-checkbox mt-4">
                             <InputCheckbox class="custom-control-input" id="Status" @bind-Value="model.Status" />
                             <label class="custom-control-label" for="Status">Enable/Disable</label>
@@ -173,7 +193,7 @@ else
     private MessageType messageType = MessageType.danger;
     private string message = string.Empty;
     private ProductCreateModel model = new ProductCreateModel();
-    private Entities.Product product = null;
+    private ProductDto product = null;
     private EditContext context;
 
     private long maxFileSize = 1024 * 1024 * 5;
@@ -187,69 +207,92 @@ else
         try
         {
             isLoaded = false;
-            var response = await Http.GetAsync($"account/owners");
+            var response = await Http.GetAsync($"Account/Owners");
+            string json = string.Empty;
             if (response.IsSuccessStatusCode)
             {
-                var json = await response.Content.ReadAsStringAsync();
-                var users = JsonConvert.DeserializeObject<IEnumerable<Entities.User>>(json);
-                model.Owners = users.Select
+                json = await response.Content.ReadAsStringAsync();
+                var list = JsonConvert.DeserializeObject<ListDto<UserDto>>(json);
+                model.Owners = list.Items.Select
                 (
                     x =>
-                    new UserCreateModel
+                    new UserListModel
                     (
-                        x.Id,
+                        x.UserId,
                         x.Email,
-                        null,
-                        null,
                         x.FullName,
-                        x.PhoneCountryCode,
-                        x.PhoneNumber,
+                        x.CreatedAt,
                         x.Role,
                         x.Status
                     )
-                ).ToArray();
-                if (!string.IsNullOrEmpty(Id))
-                {
-                    response = await Http.GetAsync($"article/{Id}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        json = await response.Content.ReadAsStringAsync();
-                        product = JsonConvert.DeserializeObject<Entities.Product>(json);
-                        model = new ProductCreateModel
-                        (
-                            product.Key,
-                            product.Reference,
-                            product.Name,
-                            product.Description,
-                            product.Price,
-                            product.Currency,
-                            product.Pictures?.Select
-                            (
-                                x =>
-                                new FileInfoModel
-                                (
-                                    x.Name,
-                                    System.IO.Path.GetFileName(new UriBuilder(x.Name).Path),
-                                    x.ContentType
-                                )
-                            ).ToList() ?? new List<FileInfoModel>(),
-                            product.Owner?.Id,
-                            model.Owners,
-                            product.Status
-                        );
-                    }
-                    else
-                    {
-                        messageType = MessageType.danger;
-                        message = await response.Content.ReadAsStringAsync();
-                    }
-                }
+                );
             }
             else
             {
                 messageType = MessageType.danger;
                 message = await response.Content.ReadAsStringAsync();
             }
+
+            response = await Http.GetAsync($"ArticleType/Index");
+            if (response.IsSuccessStatusCode)
+            {
+                json = await response.Content.ReadAsStringAsync();
+                var list = JsonConvert.DeserializeObject<ListDto<CategoryDto>>(json);
+                model.Categories = list.Items.Select
+                (
+                    x =>
+                    new CategoryListModel
+                    (
+                        x.Id,
+                        x.Name
+                    )
+                );
+            }
+            else
+            {
+                messageType = MessageType.danger;
+                message = await response.Content.ReadAsStringAsync();
+            }
+
+            if (!string.IsNullOrEmpty(Id))
+            {
+                response = await Http.GetAsync($"Article/{Id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    json = await response.Content.ReadAsStringAsync();
+                    product = JsonConvert.DeserializeObject<ProductDto>(json);
+                    model = new ProductCreateModel
+                    (
+                        product.Id,
+                        product.Reference,
+                        product.Name,
+                        product.Description,
+                        product.Price,
+                        product.Currency,
+                        product.Pictures?.Select
+                        (
+                            x =>
+                            new FileInfoModel
+                            (
+                                x.Path,
+                                x.Name,
+                                x.ContentType
+                            )
+                        ).ToList() ?? new List<FileInfoModel>(),
+                        product.Category?.Id,
+                        model.Categories,
+                        product.Owner?.UserId,
+                        model.Owners,
+                        product.Status
+                    );
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+
         }
         catch (Exception ex)
         {
@@ -282,7 +325,7 @@ else
                     );
                     if (response.IsSuccessStatusCode)
                     {
-                        model = new ProductCreateModel(model.Owners);
+                        model = new ProductCreateModel(model.Categories, model.Owners);
                         messageType = MessageType.success;
                         message = "Save done !";
                         await InvokeAsync(StateHasChanged);
@@ -334,18 +377,16 @@ else
         MultipartFormDataContent content = new MultipartFormDataContent();
         var json = JsonConvert.SerializeObject
         (
-            new Entities.Product
+            new ProductAddCommand
             (
-                product?.Key,
                 model.Reference,
                 model.Name,
                 model.Description,
                 model.Price ?? 0,
                 model.Currency,
-                model.Pictures?.Select(x => new Entities.FileInfo(x.FileName, x.ContentType)),
+                model.Pictures?.ToDictionary(x => x.FileName, y=> y.ContentType),
+                model.CategoryId,
                 model.OwnerId,
-                null,
-                product?.CreatedAt ?? DateTime.UtcNow,
                 model.Status
             )
         );

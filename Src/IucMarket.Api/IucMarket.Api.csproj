@@ -2,9 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>6662b31a-c761-49c0-a3d7-9ca4f1409a62</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\IucMarket.Dtos\IucMarket.Dtos.csproj" />
     <ProjectReference Include="..\IucMarket.Service\IucMarket.Service.csproj" />
     <ProjectReference Include="..\IucMarket.Web\IucMarket.Web.csproj" />
   </ItemGroup>

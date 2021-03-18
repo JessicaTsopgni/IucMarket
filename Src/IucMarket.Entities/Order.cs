@@ -1,16 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace IucMarket.Entities
 {
     public class Order
     {
-        [JsonIgnore]
-        public string Key { get; set; }
-        [JsonProperty(nameof(Key))]
-        public string KeySetter { set => Key = value; }
         public IEnumerable<OrderDetail> Details { get; set; }
         public User Customer { get; set; }
 
@@ -19,9 +13,8 @@ namespace IucMarket.Entities
 
         }
 
-        public Order(string key, IEnumerable<OrderDetail> details, User customer)
+        public Order(IEnumerable<OrderDetail> details, User customer)
         {
-            Key = key;
             Details = details;
             Customer = customer;
         }

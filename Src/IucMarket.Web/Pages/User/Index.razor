@@ -2,7 +2,7 @@
 @page "/user/index"
 @inject HttpClient Http
 @inject IJSRuntime JS;
-<h2>User list</h2>
+<h2>Users list</h2>
 <div class="text-right mb-2">
     <NavLink class="btn btn-success" href="user/edit">
         <span class="fas fa-plus" aria-hidden="true"></span> New
@@ -17,7 +17,7 @@
 </div>
 @if (isLoadingData)
 {
-    <p><em>Loading...</em></p>
+    <Loading></Loading>
 }
 else
 {
@@ -43,7 +43,7 @@ else
                     <td>@user.Role</td>
                     <td>@user.CreatedDate.ToShortDateString()</td>
                     <td>@user.Status</td>
-                    <td>
+                    <td class="text-right">
                         <a disabled="@isBusy" href="user/edit/@user.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
                         <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(user.Id, user.Fullname)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
                     </td>
@@ -53,7 +53,7 @@ else
             else
             {
                 <tr>
-                    <td colspan="6"><em>User not found !</em></td>
+                    <td colspan="6"><em>Category not found !</em></td>
                 </tr>
             }
         </tbody>
@@ -85,14 +85,14 @@ else
         {
             isLoadingData = true;
 
-            var response = await Http.GetAsync($"account/index");
+            var response = await Http.GetAsync($"Account/Index");
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var userList = JsonConvert.DeserializeObject<Entities.UserList>(json);
-                users = userList.Users.Select(x => new UserListModel
+                var userList = JsonConvert.DeserializeObject<ListDto<UserDto>>(json);
+                users = userList.Items.Select(x => new UserListModel
                 (
-                    x.Id,
+                    x.UserId,
                     x.Email,
                     x.FullName,
                     x.CreatedAt,
@@ -126,7 +126,7 @@ else
             var result = await JS.InvokeAsync<bool>("confirmDelete", name);
             if (result)
             {
-                var response = await Http.DeleteAsync($"account/{id}");
+                var response = await Http.DeleteAsync($"Account/{id}");
                 if (response.IsSuccessStatusCode)
                 {
                     messageType = MessageType.success;

@@ -1,0 +1,147 @@
+﻿@page "/category"
+@page "/category/index"
+@inject HttpClient Http
+@inject IJSRuntime JS;
+<h2>Categories list</h2>
+<div class="text-right mb-2">
+    <NavLink class="btn btn-success" href="category/edit">
+        <span class="fas fa-plus" aria-hidden="true"></span> New
+    </NavLink>
+</div>
+<div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+    <div class="col-sm-12">
+        <div class="alert alert-@messageType text-truncate">
+            @message
+        </div>
+    </div>
+</div>
+@if (isLoadingData)
+{
+    <Loading></Loading>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (categories != null && categories.Count() != 0)
+            {
+                foreach (var category in categories)
+                {
+                <tr>
+                    <td>@category.Name</td>
+                    <td class="text-right">
+                        <a disabled="@isBusy" href="category/edit/@category.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
+                        <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(category.Id, category.Name)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
+                    </td>
+                </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2"><em>Category not found !</em></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<CategoryListModel> categories;
+    private string message = string.Empty;
+    private MessageType messageType = MessageType.danger;
+    private bool isBusy = false;
+    private bool isLoadingData = false;
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch(Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoadingData = true;
+
+            var response = await Http.GetAsync($"ArticleType/Index");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var categoryList = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
+                categories = categoryList.Items.Select
+                (
+                    x => new CategoryListModel
+                    (
+                        x.Id,
+                        x.Name
+                    )
+                ).ToArray();
+
+            }
+            else
+            {
+                messageType = MessageType.danger;
+                message = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch(Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            isLoadingData = false;
+        }
+    }
+
+    private async Task HandleDelete(string id, string name)
+    {
+        try
+        {
+            isBusy = true;
+            messageType = MessageType.info;
+            message = "Processing...";
+            var result = await JS.InvokeAsync<bool>("confirmDelete", name);
+            if (result)
+            {
+                var response = await Http.DeleteAsync($"ArticleType/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    messageType = MessageType.success;
+                    message = "Delete done !";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(1000);
+                    await LoadData();
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

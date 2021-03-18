@@ -2,7 +2,7 @@
 @page "/product/index"
 @inject HttpClient Http
 @inject IJSRuntime JS
-<h2>Product list</h2>
+<h2>Products list</h2>
 <div class="text-right mb-2">
     <NavLink class="btn btn-success" href="product/edit">
         <span class="fas fa-plus" aria-hidden="true"></span> New
@@ -17,7 +17,7 @@
 </div>
 @if (isLoadingData)
 {
-    <p><em>Loading...</em></p>
+    <Loading></Loading>
 }
 else
 {
@@ -34,7 +34,7 @@ else
                         <div class="card-body">
                             <div class="card-title">
                                 <div><h5 class="text-truncate" title="@product.Name">@product.Name</h5></div>
-                                <div class="text-primary text-truncate"  title="@product.Owner?.Fullname" style="font-size:12px">By @product.Owner?.Fullname</div>
+                                <div class="text-primary text-truncate" title="@product.Category?.Name" style="font-size:12px">@product.Category?.Name</div>
                             </div>
                             <div class="card-text text-truncate">
                                 @product.Description
@@ -43,8 +43,8 @@ else
 
                         </div> 
                         <div class="card-footer text-right">
-                            <a href="product/edit/@product.Id" class="text-primary"><span class="oi oi-pencil" aria-hidden="true"></span></a>
-                            <a href="javascript:;" @onclick="(() => HandleDelete(product.Id, product.Name))" class="text-danger"><sapn class="oi oi-trash" aria-hidden="true"></sapn></a>
+                            <a disabled="@isBusy" href="product/edit/@product.Id" class="text-primary"><span class="oi oi-pencil" aria-hidden="true"></span></a>
+                            <a disable="@isBusy" href="javascript:;" @onclick="(() => HandleDelete(product.Id, product.Name))" class="text-danger"><sapn class="oi oi-trash" aria-hidden="true"></sapn></a>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,9 @@ else
         }
         else
         {
-            <em>Product not found !</em>
+            <div class="col-sm-12">
+                <em>Product not found !</em>
+            </div>
         }
     </div>
 }
@@ -82,16 +84,16 @@ else
         {
             isLoadingData = true;
 
-            var response = await Http.GetAsync($"article/index");
+            var response = await Http.GetAsync($"Article/Index");
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var productList = JsonConvert.DeserializeObject<Entities.ProductList>(json);
-                products = productList.Products.Select
+                var productList = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
+                products = productList.Items.Select
                 (
                     x => new ProductListModel
                     (
-                        x.Key,
+                        x.Id,
                         x.Reference,
                         x.Name,
                         x.Description,
@@ -99,22 +101,27 @@ else
                         x.Currency,
                         x.Pictures?.Select
                         (
-                            x =>
+                            y =>
                             new FileInfoModel
                             (
-                                x.Name,
-                                System.IO.Path.GetFileName(new UriBuilder(x.Name).Path),
-                                x.ContentType
+                                y.Path,
+                                y.Name,
+                                y.ContentType
                             )
                         ).ToList(),
                         x.CreatedAt,
+                        new CategoryListModel
+                        (
+                            x.Category?.Id,
+                            x.Category?.Name
+                        ),
                         new UserListModel
                         (
-                            x.Owner?.Id,
+                            x.Owner?.UserId,
                             x.Owner?.Email,
                             x.Owner?.FullName,
                             x.Owner?.CreatedAt ?? DateTime.MinValue,
-                            x.Owner?.Role ?? Entities.Person.RoleOptions.Other,
+                            x.Owner?.Role ?? RoleOptions.Other,
                             x.Owner?.Status ?? false
                         ),
                         x.Status
@@ -147,7 +154,7 @@ else
             var result = await JS.InvokeAsync<bool>("confirmDelete", name);
             if (result)
             {
-                var response = await Http.DeleteAsync($"article/{id}");
+                var response = await Http.DeleteAsync($"Article/{id}");
                 if (response.IsSuccessStatusCode)
                 {
                     messageType = MessageType.success;

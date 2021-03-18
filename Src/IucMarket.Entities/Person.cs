@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 
 namespace IucMarket.Entities
 {
@@ -11,9 +10,7 @@ namespace IucMarket.Entities
             Other
         }
 
-        [JsonIgnore]
-        public string Key { get; set; }
-        public string Id { get; set; }
+        public string UserId { get; set; }
         public string FullName { get; set; }
         public string PhoneCountryCode { get; set; }
         public long PhoneNumber { get; set; }
@@ -25,11 +22,10 @@ namespace IucMarket.Entities
 
         }
 
-        public Person(string key, string id, string fullName, string phoneCountryCode, long phoneNumber,
+        public Person(string userId, string fullName, string phoneCountryCode, long phoneNumber,
             DateTime createdAt, RoleOptions role, bool status)
         {
-            Key = key;
-            Id = id;
+            UserId = userId;
             FullName = fullName;
             PhoneCountryCode = string.IsNullOrEmpty(phoneCountryCode) ? "+237" : phoneCountryCode;
             PhoneNumber = phoneNumber;

@@ -1,0 +1,163 @@
+﻿@page "/category/edit/{id?}"
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+<h2><a href="category" class="text-dark" style="text-decoration:none">
+    <span class="fas fa-arrow-left"></span></a> Edit a category</h2>
+@if (!isLoaded)
+{
+    <Loading></Loading>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" autocomplete="off">
+        <DataAnnotationsValidator />
+        <div class="offset-sm-4">
+            <div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+                <div class="col-sm-6">
+                    <div class="alert alert-@messageType text-truncate">
+                        @message
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Name"><i style="width:20px" class="fas fa-edit"></i></span>
+                            </div>
+                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Enter category name" aria-label="Name" aria-describedby="Name" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Name)" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
+}
+@code{
+    private bool isBusy = false;
+    private bool isLoaded = true;
+    private MessageType messageType = MessageType.danger;
+    private string message = string.Empty;
+    private CategoryCreateModel model = new CategoryCreateModel();
+    private CategoryDto category = null;
+    private EditContext context;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoaded = false;
+            if (!string.IsNullOrEmpty(Id))
+            {
+                var response = await Http.GetAsync($"ArticleType/{Id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    category = JsonConvert.DeserializeObject<CategoryDto>(json);
+                    model = new CategoryCreateModel(category.Id, category.Name);
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isLoaded = true;
+            context = new EditContext(model);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (context.Validate())
+            {
+                isBusy = true;
+                messageType = MessageType.info;
+                message = "Processing...";
+                if (string.IsNullOrEmpty(Id))
+                {
+                    var response = await Http.PostAsJsonAsync
+                    (
+                        $"ArticleType",
+                        new CategoryAddCommand
+                        (
+                            model.Name
+                        )
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        model = new CategoryCreateModel();
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Delay(2000);
+                        message = string.Empty;
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+                else
+                {
+                    var response = await Http.PutAsJsonAsync
+                    (
+                        $"ArticleType/{Id}",
+                        new CategoryAddCommand
+                        (
+                            model.Name
+                        )
+                    );
+                    if (response.IsSuccessStatusCode)
+                    {
+                        messageType = MessageType.success;
+                        message = "Save done !";
+                        await InvokeAsync(StateHasChanged);
+                        await Task.Delay(2000);
+                        navigationManager.NavigateTo("category");
+                    }
+                    else
+                    {
+                        messageType = MessageType.danger;
+                        message = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}
