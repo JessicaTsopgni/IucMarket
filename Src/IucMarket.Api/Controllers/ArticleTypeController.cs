@@ -3,10 +3,8 @@ using IucMarket.Service;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -43,7 +41,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -66,7 +65,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -91,7 +91,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -128,7 +129,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -153,7 +155,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

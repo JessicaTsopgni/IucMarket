@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -18,55 +19,26 @@ namespace IucMarket.Mobile.ViewModels
     public class LoginViewModel : BaseViewModel
     {
         public Command LoginCommand { get; }
-        public Command CountrySelectedCommand { get; }
-        public Command WhatsAppLabelCommand { get; }
-        public Command ChangeLanguageCommand { get; }
 
-        private Color enButtonColor;
-        public Color EnButtonColor
+        private string email;
+        public string Email
         {
-            get { return enButtonColor; }
-            set { SetProperty(ref enButtonColor, value); }
-        }
-
-        private Color frButtonColor;
-        public Color FrButtonColor
-        {
-            get { return frButtonColor; }
-            set { SetProperty(ref frButtonColor, value); }
-        }
-
- 
-
-        private string phoneNumber;
-        public string PhoneNumber
-        {
-            get { return phoneNumber; }
+            get { return email; }
             set 
             {
-                SetProperty(ref phoneNumber, value, onChanged: validate);
+                SetProperty(ref email, value, onChanged: validate);
             }
         }
 
-        private bool isWhatsApp;
-        public bool IsWhatsApp
+        private string password;
+        public string Password
         {
-            get { return isWhatsApp; }
+            get { return password; }
             set 
             {
-                SetProperty(ref isWhatsApp, value, onChanged: validate);
+                SetProperty(ref password, value, onChanged: validate);
             }
         }
-
-        private void ChangeCanExecute()
-        {
-            LoginCommand?.ChangeCanExecute();
-            WhatsAppLabelCommand?.ChangeCanExecute();
-            ChangeLanguageCommand?.ChangeCanExecute();
-        }
-
-
-        private LoginPageData loginPageData;
 
         IUserDataStore OwnerDataStore => DependencyService.Get<IUserDataStore>();
         ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
@@ -75,19 +47,13 @@ namespace IucMarket.Mobile.ViewModels
         {
            
             LoginCommand = new Command(OnLoginClicked, x => !IsBusy);
-            WhatsAppLabelCommand = new Command(OnWhatsAppLabelClicked);
-
-            loginPageData = Application.Current.Properties.FirstOrDefault(x => x.Key == nameof(LoginPageData)).Value as LoginPageData;
-            IsWhatsApp = loginPageData?.IsWhatsApp ?? false;
-            PhoneNumber = loginPageData?.PhoneNumber;
 
             //validate();
         }
 
         public void OnAppearing()
         {
-            //if (App.IsAuthenticate)
-            //    await Shell.Current.GoToAsync($"//{nameof(TrucksPage)}");
+            Email = SecureStorage.Get("Email");
         }
 
 
@@ -112,34 +78,11 @@ namespace IucMarket.Mobile.ViewModels
             }
         }
 
-        private void OnWhatsAppLabelClicked(object obj)
-        {
-            IsWhatsApp = !IsWhatsApp;
-        }
-
-
         private void validate()
         {
-            IsBusy = false;
+            Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+            IsBusy = !regex.IsMatch(Email) && string.IsNullOrEmpty(Email) && string.IsNullOrEmpty(Password);
         }
     }
 
-    public class LoginPageData
-    {
-        public string PhoneNumber { get; set; }
-        public bool IsWhatsApp { get; set; }
-        public LanguageOptions LanguageOptions { get; set; }
-        public UserModel Owner { get; set; }
-        public LoginPageData()
-        {
-
-        }
-
-        public LoginPageData(string phoneNumber, bool isWhatsApp, UserModel owner)
-        {
-            PhoneNumber = phoneNumber;
-            IsWhatsApp = isWhatsApp;
-            Owner = owner;
-        }
-    }
 }

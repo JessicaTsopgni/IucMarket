@@ -12,10 +12,17 @@ namespace IucMarket.Mobile.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LoginPage : ContentPage
     {
+        LoginViewModel _viewModel = new LoginViewModel();
         public LoginPage()
         {
             InitializeComponent();
-            this.BindingContext = new LoginViewModel();
+            this.BindingContext = _viewModel;
+        }
+
+        protected override void OnAppearing()
+        {
+            _viewModel.OnAppearing();
+            base.OnAppearing();
         }
     }
 }

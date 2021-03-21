@@ -15,15 +15,16 @@
     <Shell.Resources>
         <ResourceDictionary>
             <Style x:Key="BaseStyle" TargetType="Element">
-                <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
-                <Setter Property="Shell.ForegroundColor" Value="White" />
-                <Setter Property="Shell.TitleColor" Value="White" />
+                <Setter Property="Shell.NavBarHasShadow" Value="False"/>
+                <Setter Property="Shell.BackgroundColor" Value="{DynamicResource Primary}" />
+                <Setter Property="Shell.ForegroundColor" Value="{DynamicResource Light}" />
+                <Setter Property="Shell.TitleColor" Value="{DynamicResource Light}" />
                 <Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
                 <Setter Property="Shell.UnselectedColor" Value="#95FFFFFF" />
-                <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource Primary}" />
-                <Setter Property="Shell.TabBarForegroundColor" Value="White"/>
+                <Setter Property="Shell.TabBarBackgroundColor" Value="{DynamicResource Primary}" />
+                <Setter Property="Shell.TabBarForegroundColor" Value="{DynamicResource Light}"/>
                 <Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF"/>
-                <Setter Property="Shell.TabBarTitleColor" Value="White"/>
+                <Setter Property="Shell.TabBarTitleColor" Value="{DynamicResource Light}"/>
             </Style>
             <Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
             <Style TargetType="FlyoutItem" BasedOn="{StaticResource BaseStyle}" />
@@ -31,12 +32,18 @@
     </Shell.Resources>
 
     <TabBar>
-        <ShellContent Title="About" Icon="{FontImage FontFamily=fas, 
+        <ShellContent Title="Home" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.Home}}" 
-                      Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
-        <ShellContent Title="Browse" Icon="{FontImage FontFamily=fas, 
+                      Route="HomePage" ContentTemplate="{DataTemplate local:HomePage}" />
+        <ShellContent Title="Search" Icon="{FontImage FontFamily=fas, 
+                            Glyph={x:Static helpers:IconFontSolid.Search}}"
+                      ContentTemplate="{DataTemplate local:AboutPage}" />
+        <ShellContent Title="Orders" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.List}}"
-                      ContentTemplate="{DataTemplate local:ItemsPage}" />
+                      ContentTemplate="{DataTemplate local:AboutPage}" />
+        <ShellContent Title="Profile" Icon="{FontImage FontFamily=fas, 
+                            Glyph={x:Static helpers:IconFontSolid.User}}"
+                      ContentTemplate="{DataTemplate local:AboutPage}" />
     </TabBar>
 
     <!--

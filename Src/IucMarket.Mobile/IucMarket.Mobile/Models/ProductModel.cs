@@ -71,11 +71,14 @@ namespace IucMarket.Mobile.Models
             }
         }
 
-        public string PriceWithCurrency => $"{Price.ToString("N:0")} {Currency}";
+        public string PriceWithCurrency => $"{Price.ToString("N0")} {Currency}";
 
-        public double StarsMax => 5;
+        public static int StarsMax => 5;
 
         private double starsCount;
+
+        public IEnumerable<int> Stars => Enumerable.Range(0, StarNumber).ToArray();
+
         public double StarsCount
         {
             get => starsCount;
@@ -85,20 +88,56 @@ namespace IucMarket.Mobile.Models
                 OnPropertyChanged(nameof(StarsText));
             }
         }
-        public string StarsText => $"{Math.Round(StarsCount / VotesCount, 1)}/{StarsMax}";
+        public int StarNumber { get; }
+        public string StarsText => $"{StarNumber}/{StarsMax}";
 
-        private double abusesCount;
-        public double AbusesCount
+        private double likesCount;
+        public double LikesCount
         {
-            get => abusesCount;
+            get => likesCount;
             set
             {
-                SetProperty(ref abusesCount, value);
-                OnPropertyChanged(nameof(AbusesText));
+                SetProperty(ref likesCount, value);
+                OnPropertyChanged(nameof(LikesText));
             }
         }
+        public string LikesText => LikesCount > 0 ? LikesCount.ToKorM() : "Like";
 
-        public string AbusesText => AbusesCount.ToKorM();
+        private double commentsCount;
+        public double CommentsCount
+        {
+            get => commentsCount;
+            set
+            {
+                SetProperty(ref commentsCount, value);
+                OnPropertyChanged(nameof(CommentsText));
+            }
+        }
+        public string CommentsText => CommentsCount > 0 ? CommentsCount.ToKorM() : "Review";
+
+        private double salesCount;
+        public double SalesCount
+        {
+            get => salesCount;
+            set
+            {
+                SetProperty(ref salesCount, value);
+                OnPropertyChanged(nameof(SalesText));
+            }
+        }
+        public string SalesText => SalesCount > 0 ? SalesCount.ToKorM() : "Sale";
+
+        private double sharesCount;
+        public double SharesCount
+        {
+            get => sharesCount;
+            set
+            {
+                SetProperty(ref sharesCount, value);
+                OnPropertyChanged(nameof(SharesText));
+            }
+        }
+        public string SharesText => SharesCount.ToKorM();
 
         private double votesCount;
         public double VotesCount
@@ -110,7 +149,7 @@ namespace IucMarket.Mobile.Models
                 OnPropertyChanged(nameof(VotesText));
             }
         }
-        public string VotesText => $"{VotesCount.ToKorM()} {(VotesCount > 1 ? "Votes" : "Vote")}";
+        public string VotesText => $"{VotesCount.ToKorM()} {(VotesCount > 1 ? "votes" : "vote")}";
 
         private bool isAvailable;
         public bool IsAvailable
@@ -170,7 +209,8 @@ namespace IucMarket.Mobile.Models
 
         public ProductModel(string id, string reference, string name, string description, CategoryModel category,
             double price, string currency,  double starsCount, double votesCount,
-            double abusesCount, bool isAvailable, IEnumerable<string> pictures, 
+            double likesCount, double commentsCount, double sellsCount, double sharesCount, 
+            bool isAvailable, IEnumerable<string> pictures, 
             UserModel owner, DateTime createdDate)
             : base(id)
         {
@@ -181,12 +221,16 @@ namespace IucMarket.Mobile.Models
             Price = price;
             Currency = currency;
             StarsCount = starsCount;
-            AbusesCount = abusesCount;
+            LikesCount = likesCount;
+            CommentsCount = commentsCount;
+            SalesCount = sellsCount;
+            SharesCount = sharesCount;
             VotesCount = votesCount;
             IsAvailable = isAvailable;
             Pictures = new ObservableCollection<string>(pictures);
             Owner = owner;
             CreatedDate = createdDate;
+            StarNumber = (int)Math.Round(StarsCount / VotesCount, 1);
         }
     }
 

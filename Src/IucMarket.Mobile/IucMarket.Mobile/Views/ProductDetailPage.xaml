@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IucMarket.Mobile.Views.ProductDetailPage"
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"
+             xmlns:model="clr-namespace:IucMarket.Mobile.Models" 
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"             
+             x:DataType="viewModels:ProductDetailViewModel"
+             Title="{Binding HomePageData.Product.Name}" Padding="0">
+    <ScrollView x:Name="scrollView">
+        <StackLayout Spacing="0" Padding="0, 0, 0, 10">
+            <CarouselView ItemsSource="{Binding HomePageData.Product.Pictures}"
+                          HeightRequest="300"
+                          IndicatorView="indicatorView">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Image Source="{Binding .}" Aspect="AspectFill"/>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+            <IndicatorView Count="{Binding HomePageData.Product.PicturesCount}"
+                           IsVisible="{Binding HomePageData.Product.ShowImageMultipleIcon}"
+                           IndicatorColor="{DynamicResource Secondary}"
+                           SelectedIndicatorColor="{DynamicResource Primary}"
+                           x:Name="indicatorView"
+                           HorizontalOptions="CenterAndExpand"
+                           Padding="0, 5, 0, 5"/>
+            <StackLayout Spacing="1" Padding="10, 10, 10, 0">
+                <Label Text="{Binding HomePageData.Product.Name}"
+                        LineBreakMode="WordWrap"
+                        FontAttributes="Bold"/>
+                <StackLayout  Orientation="Horizontal">
+                    <Label Text="{Binding HomePageData.Product.Category.Name}" 
+                            LineBreakMode="TailTruncation"
+                            VerticalOptions="Center"
+                            HorizontalOptions="StartAndExpand"/>
+                    <StackLayout VerticalOptions="Center"
+                                 HorizontalOptions="End"
+                                 Spacing="0">
+                        <StackLayout BindableLayout.ItemsSource="{Binding HomePageData.Product.Stars}"
+                                     Orientation="Horizontal"
+                                     HorizontalOptions="End">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Text="{x:Static helpers:IconFontSolid.Star}"
+                                           FontFamily="fas"
+                                           TextColor="Gold"
+                                           FontSize="Small"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+                        <Label Text="{Binding HomePageData.Product.VotesText}"
+                               FontSize="Micro"
+                               VerticalOptions="Center"
+                               HorizontalOptions="End"/>
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ProductDetailViewModel}}, Path=StarTappedCommand}"
+                                                CommandParameter="{Binding HomePageData.Product}">
+                            </TapGestureRecognizer>
+                        </StackLayout.GestureRecognizers>
+                    </StackLayout>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal"
+                             Padding="0, 5, 0, 5">
+                    <Label Text="{Binding HomePageData.Product.PriceWithCurrency}"
+                            LineBreakMode="TailTruncation"
+                            TextColor="{DynamicResource Danger}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="StartAndExpand"
+                           FontAttributes="Bold"/>
+                    <Frame BorderColor="{DynamicResource Danger}"
+                            CornerRadius="5"
+                            HasShadow="False"
+                            Padding="5, 3, 5, 3">
+                        <Label Text="BUY NOW"
+                               TextColor="{DynamicResource Danger}"
+                                HorizontalOptions="End"/>
+                    </Frame>
+                </StackLayout>
+            </StackLayout>
+            <BoxView HeightRequest="1" Color="{DynamicResource BorderColor}" Margin="0, 5, 0, 0" />
+            <xct:Expander Padding="10, 15, 10, 10">
+                <xct:Expander.Header>
+                    <Grid>
+                        <Label Text="Description"
+                               VerticalOptions="Center"
+                               HorizontalOptions="StartAndExpand"/>
+                        <Label Text="{x:Static helpers:IconFontSolid.AngleDown}"
+                                FontFamily="fas"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding Source={RelativeSource AncestorType={x:Type xct:Expander}}, Path=IsExpanded}" Value="True">
+                                    <Setter Property="Text" Value="{x:Static helpers:IconFontSolid.AngleUp}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Grid>
+                </xct:Expander.Header>
+                <StackLayout>
+                    <Label Text="{Binding HomePageData.Product.Description}"
+                           FontSize="Small"/>
+                </StackLayout>
+            </xct:Expander>
+            <BoxView HeightRequest="1" Color="{DynamicResource BorderColor}" Margin="0, 5, 0, 0" />
+            <Grid VerticalOptions="Center" Margin="0, 8, 0, 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackLayout Grid.Column="0" 
+                                Orientation="Vertical"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                Spacing="1">
+                        <Label  Text="{x:Static helpers:IconFontRegular.Heart}" 
+                                FontFamily="far"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+                        <Label Text="{Binding HomePageData.Product.LikesText}"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="1" 
+                                Orientation="Vertical"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                Spacing="1">
+                        <Label Text="{x:Static helpers:IconFontRegular.CommentAlt}" 
+                                FontFamily="far"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+                        <Label Text="{Binding HomePageData.Product.CommentsText}"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+                    </StackLayout>
+                    <StackLayout Grid.Column="2" 
+                                Orientation="Vertical"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                Spacing="1">
+                        <Label Text="{x:Static helpers:IconFontSolid.CartPlus}" 
+                                FontFamily="fas"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+                        <Label Text="{Binding HomePageData.Product.SalesText}"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="3" 
+                                Orientation="Vertical"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                                Spacing="1">
+                        <Label Text="{x:Static helpers:IconFontSolid.ShareAlt}" 
+                                FontFamily="fas"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+                        <Label Text="{Binding HomePageData.Product.SharesText}"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center" />
+                    </StackLayout>
+                </Grid>
+            <StackLayout Padding="10"
+                         BackgroundColor="{DynamicResource BorderColor}"
+                         IsVisible="{Binding ShowSimilarProducts}">
+                <Label Text="Similar products"
+                            TextColor="{DynamicResource ForegroundColor}"
+                            FontAttributes="Bold" 
+                            FontSize="Medium"/>
+                <BoxView HeightRequest="1" Color="{DynamicResource BorderColor}" />
+            </StackLayout>
+            <RefreshView Padding="0, 5, 0, 10"
+                 x:DataType="viewModels:ProductDetailViewModel"
+                 Command="{Binding LoadProductsCommand}" 
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+                <CollectionView x:Name="ProductsListView"
+                            ItemsSource="{Binding SameProducts}"
+                            SelectionMode="None"
+                            BackgroundColor="Transparent">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" 
+                                     Span="{OnIdiom Tablet=3, Phone=2}"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackLayout Padding="5">
+                                        <Frame CornerRadius="10"
+                                            Padding="0"
+                                            BorderColor="{DynamicResource BorderColor}"
+                                            IsClippedToBounds="True"
+                                            HasShadow="False">
+                                            <StackLayout x:DataType="model:ProductModel">
+                                                <Grid>
+                                                    <Image Source="{Binding Picture}"
+                                                                HeightRequest="{OnIdiom Tablet=200, Phone=150}"
+                                                                Aspect="AspectFill"/>
+                                                </Grid>
+                                                <StackLayout Spacing="1" Padding="10, 0, 10, 0">
+                                                    <Label Text="{Binding Name}"
+                                                               LineBreakMode="TailTruncation"
+                                                               FontAttributes="Bold"
+                                                               FontSize="Small" />
+                                                    <StackLayout  Orientation="Horizontal">
+                                                        <Label Text="{Binding Category.Name}" 
+                                                                LineBreakMode="TailTruncation"
+                                                                VerticalOptions="Center"
+                                                                HorizontalOptions="Start"
+                                                                FontSize="Micro" />
+                                                        <StackLayout BindableLayout.ItemsSource="{Binding Stars}"  
+                                                                    VerticalOptions="Center"
+                                                                    Orientation="Horizontal"
+                                                                    HorizontalOptions="EndAndExpand"
+                                                                    Grid.Column="1">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Label Text="{x:Static helpers:IconFontSolid.Star}"
+                                                                            FontFamily="fas"
+                                                                            FontSize="Micro"
+                                                                            TextColor="Gold"/>
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                            <StackLayout.GestureRecognizers>
+                                                                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=StarTappedCommand}"
+                                                                                  CommandParameter="{Binding .}">
+                                                                </TapGestureRecognizer>
+                                                            </StackLayout.GestureRecognizers>
+                                                        </StackLayout>
+                                                    </StackLayout>
+                                                    <StackLayout Orientation="Horizontal"
+                                                                 Padding="0, 10, 0, 10">
+                                                        <Label Text="{Binding PriceWithCurrency}"
+                                                                       LineBreakMode="TailTruncation"
+                                                                       TextColor="{DynamicResource Danger}"
+                                                                       FontSize="Small" 
+                                                                       VerticalOptions="Center"
+                                                                       HorizontalOptions="Start"/>
+                                                        <Frame BorderColor="{DynamicResource Danger}"
+                                                                CornerRadius="5"
+                                                                HasShadow="False"
+                                                                Padding="5, 3, 5, 3"
+                                                                HorizontalOptions="EndAndExpand">
+                                                            <Label Text="BUY"
+                                                                    FontSize="Micro"
+                                                                    TextColor="{DynamicResource Danger}"
+                                                                    HorizontalOptions="End"/>
+                                                        </Frame>
+                                                    </StackLayout>
+                                                </StackLayout>
+                                            </StackLayout>
+                                        </Frame>
+                                    </StackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+            </RefreshView>
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

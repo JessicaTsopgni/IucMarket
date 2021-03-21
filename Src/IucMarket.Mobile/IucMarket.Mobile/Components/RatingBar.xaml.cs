@@ -53,16 +53,16 @@ namespace IucMarket.Mobile.Components
         public static readonly BindableProperty FontSizeIconProperty = BindableProperty.Create
         (
             propertyName: nameof(FontSizeIcon),
-            returnType: typeof(double),
+            returnType: typeof(NamedSize),
             declaringType: typeof(RatingBar),
             defaultBindingMode: BindingMode.TwoWay,
             propertyChanged: FontSizeIconPropertyChanged
         );
 
-        private double fontSizeIcon;
-        public double FontSizeIcon
+        private NamedSize fontSizeIcon;
+        public NamedSize FontSizeIcon
         {
-            get { return (double)base.GetValue(FontSizeIconProperty); }
+            get { return (NamedSize)base.GetValue(FontSizeIconProperty); }
             set
             {
                 fontSizeIcon = value;
@@ -75,7 +75,7 @@ namespace IucMarket.Mobile.Components
             var control = (RatingBar)bindable;
             if (control != null)
             {
-                control.FontSizeIcon = (double)newValue;
+                control.FontSizeIcon = (NamedSize)newValue;
                 initRate(control);
             }
         }
@@ -393,36 +393,49 @@ namespace IucMarket.Mobile.Components
         {
             for (int i = 0; i < obj.rates.Count; i++)
             {
-                if(obj.fontSizeIcon > 0)
-                    obj.rates[i].FontSize = obj.fontSizeIcon;
+                if(Device.GetNamedSize(obj.fontSizeIcon, typeof(Label)) > 0)
+                    obj.rates[i].FontSize = Device.GetNamedSize(obj.fontSizeIcon, typeof(Label));
                 if (selectedValue >= i + 1)
                 {
-                    obj.rates[i].FontFamily = obj.fillFontFamilyIcon;
+                    //obj.rates[i].FontFamily = obj.fillFontFamilyIcon;
                     if (selectedValue == i + 1)
                     {
-                        obj.rates[i].Text = obj.rates[i].Text != obj.fillRateIcon ? obj.fillRateIcon : obj.emptyRateIcon;
-                        obj.rates[i].TextColor = obj.rates[i].TextColor != obj.fillRateIconColor ? obj.fillRateIconColor : obj.emptyRateIconColor;
-                    }
-                    else
-                    {
-                        if (obj.rates[i].Text != obj.fillRateIcon)
+                        if (IsNotFillRate(obj, obj.rates[i]))
                         {
+                            obj.rates[i].FontFamily = obj.fillFontFamilyIcon;
                             obj.rates[i].Text = obj.fillRateIcon;
                             obj.rates[i].TextColor = obj.fillRateIconColor;
                         }
-
+                        else
+                        {
+                            obj.rates[i].FontFamily = obj.emptyFontFamilyIcon;
+                            obj.rates[i].Text = obj.emptyRateIcon;
+                            obj.rates[i].TextColor = obj.emptyRateIconColor;
+                        }
+                    }
+                    else
+                    {                   
+                            obj.rates[i].FontFamily = obj.fillFontFamilyIcon;
+                            obj.rates[i].Text = obj.fillRateIcon;
+                            obj.rates[i].TextColor = obj.fillRateIconColor;
                     }
                 }
                 else
                 {
-                    obj.rates[i].FontFamily = obj.emptyFontFamilyIcon;
-                    if (obj.rates[i].Text != obj.emptyRateIcon)
-                    {
+                    
+                        obj.rates[i].FontFamily = obj.emptyFontFamilyIcon;
                         obj.rates[i].Text = obj.emptyRateIcon;
                         obj.rates[i].TextColor = obj.emptyRateIconColor;
-                    }
+                    
                 }
             }
+        }
+
+        private static bool IsNotFillRate(RatingBar rate, Label label)
+        {
+            return label.Text != rate.fillRateIcon ||
+                    label.FontFamily != rate.fillFontFamilyIcon ||
+                    label.TextColor != rate.fillRateIconColor;
         }
 
         private static void initRate(RatingBar obj)

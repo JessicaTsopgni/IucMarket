@@ -15,7 +15,6 @@ namespace IucMarket.Mobile.Services
     {
         List<ProductModel> items;
 
-        IDataStore<CategoryModel> CategoryDataStore => DependencyService.Get<IDataStore<CategoryModel>>();
         IDataStore<UserModel> UserDataStore => DependencyService.Get<IDataStore<UserModel>>();
 
         public ProductDataStore()
@@ -25,55 +24,68 @@ namespace IucMarket.Mobile.Services
 
         private async Task LoadItems()
         {
-
             try
             {
-                using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
+                if (App.HasNetwork)
                 {
-                    var response = await client.GetAsync($"article/index");
-                    if (response.IsSuccessStatusCode)
+                    using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
                     {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
-                        var r = new Random();
-                        items = list.Items.Select
-                        (
-                            x =>
-                            {
-                                var starsCount = r.Next(0, 10000);
-                                return new ProductModel
-                                (
-                                    x.Id,
-                                    x.Reference,
-                                    x.Name,
-                                    x.Description,
-                                    new CategoryModel(x.Category.Id, x.Category.Name),
-                                    x.Price,
-                                    x.Currency,
-                                    starsCount,
-                                    starsCount * r.Next(1, 3),
-                                    r.Next(0, 10000000),
-                                    r.Next(0, 2) == 1 ? true : false,
-                                    x.Pictures?.Select(y => y.Path).ToArray(),
-                                    new UserModel
+                        var response = await client.GetAsync($"Article/Index");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var json = await response.Content.ReadAsStringAsync();
+                            var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
+                            var r = new Random();
+                            items = list.Items.Select
+                            (
+                                x =>
+                                {
+                                    var votesCount = r.Next(0, 10000);
+                                    return new ProductModel
                                     (
-                                        x.Owner?.UserId,
-                                        x.Owner?.Email,
-                                        x.Owner?.FullName,
-                                        x.Owner?.CreatedAt ?? DateTime.MinValue,
-                                        x.Owner?.Token,
-                                        x.Owner.TokenExpiresIn
-                                    ),
-                                    x.CreatedAt
-                                );
-                            }
-                        ).ToList();
-                    }
-                    else
-                    {
-                        throw new Exception(await response.Content.ReadAsStringAsync());
+                                        x.Id,
+                                        x.Reference,
+                                        x.Name,
+                                        x.Description,
+                                        new CategoryModel(x.Category.Id, x.Category.Name),
+                                        x.Price,
+                                        x.Currency,
+                                        r.Next(0, votesCount * ProductModel.StarsMax),
+                                        votesCount,
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 2) == 1 ? true : false,
+                                        x.Pictures?.Select(y => y.Path).ToArray(),
+                                        new UserModel
+                                        (
+                                            x.Owner?.UserId,
+                                            x.Owner?.Email,
+                                            x.Owner?.FullName,
+                                            x.Owner?.CreatedAt ?? DateTime.MinValue,
+                                            x.Owner?.Token,
+                                            x.Owner.TokenExpiresIn
+                                        ),
+                                        x.CreatedAt
+                                    );
+                                }
+                            ).ToList();
+                        }
+                        else
+                        {
+                            throw new Exception(await response.Content.ReadAsStringAsync());
+                        }
                     }
                 }
+                else
+                {
+                    throw new Exception("No internet connection !");
+                }
+            }
+            catch(TaskCanceledException)
+            {
+                throw new Exception("Cannot join the server!");
             }
             catch (Exception ex)
             {
@@ -111,15 +123,74 @@ namespace IucMarket.Mobile.Services
 
         public async Task<IEnumerable<ProductModel>> GetAsync(ProductModel item)
         {
-            return await Task.FromResult
-            (
-                items.Where
-                (
-                    x => 
-                    x.Category.Id == item.Category.Id &&
-                    x.Id != item.Id
-                ).ToArray()
-            );
+            try
+            {
+                if (App.HasNetwork)
+                {
+                    using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
+                    {
+                        var response = await client.GetAsync($"Article/Categories/{item.Category.Id}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var json = await response.Content.ReadAsStringAsync();
+                            var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
+                            var r = new Random();
+                            return list.Items.Where(x => x.Id != item.Id).Select
+                            (
+                                x =>
+                                {
+                                    var votesCount = r.Next(0, 10000);
+                                    return new ProductModel
+                                    (
+                                        x.Id,
+                                        x.Reference,
+                                        x.Name,
+                                        x.Description,
+                                        new CategoryModel(x.Category.Id, x.Category.Name),
+                                        x.Price,
+                                        x.Currency,
+                                        r.Next(0, votesCount * ProductModel.StarsMax),
+                                        votesCount,
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 1000000),
+                                        r.Next(0, 2) == 1 ? true : false,
+                                        x.Pictures?.Select(y => y.Path).ToArray(),
+                                        new UserModel
+                                        (
+                                            x.Owner?.UserId,
+                                            x.Owner?.Email,
+                                            x.Owner?.FullName,
+                                            x.Owner?.CreatedAt ?? DateTime.MinValue,
+                                            x.Owner?.Token,
+                                            x.Owner.TokenExpiresIn
+                                        ),
+                                        x.CreatedAt
+                                    );
+                                }
+                            ).ToArray();
+                        }
+                        else
+                        {
+                            throw new Exception(await response.Content.ReadAsStringAsync());
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("No internet connection !");
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                throw new Exception("Cannot join the server!");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
 
         public async Task<ProductModel> GetByUniqIdAsync(string uniqId)

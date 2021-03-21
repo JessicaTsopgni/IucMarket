@@ -1,14 +1,7 @@
-﻿using Acr.UserDialogs;
-using IucMarket.Mobile.Common;
-using IucMarket.Mobile.Models;
-using IucMarket.Mobile.Services;
+﻿using IucMarket.Mobile.Services;
 using IucMarket.Mobile.Views;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -41,16 +34,6 @@ namespace IucMarket.Mobile.ViewModels
             }
         }
 
-        private bool isBusy;
-        public bool IsBusy
-        {
-            get { return isBusy; }
-            set
-            {
-                SetProperty(ref isBusy, value, onChanged: ChangeCanExecute);
-            }
-        }
-
         private void ChangeCanExecute()
         {
             ValidateCodeCommand?.ChangeCanExecute();
@@ -58,7 +41,6 @@ namespace IucMarket.Mobile.ViewModels
             ChangeNumberCommand?.ChangeCanExecute();
         }
 
-       private LoginPageData loginPageData;
         IUserDataStore OwnerDataStore => DependencyService.Get<IUserDataStore>();
         ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
 
@@ -66,13 +48,7 @@ namespace IucMarket.Mobile.ViewModels
 
         public LoginCodeViewModel()
         {
-            loginPageData = Application.Current.Properties.FirstOrDefault(x => x.Key == nameof(LoginPageData)).Value as LoginPageData;
-            if (loginPageData == null)
-            {
-                Task.Run(async () => await Shell.Current.GoToAsync($"//{nameof(LoginPage)}"));
-                return;
-            }
-            
+           
                 
             CodeValidation = string.Empty;
 
@@ -88,19 +64,4 @@ namespace IucMarket.Mobile.ViewModels
         }
     }
 
-    public class LoginCodePageData
-    {
-        public LoginPageData LoginPageData { get; set; }
-        public string CodeValidation { get; set; }
-        public LoginCodePageData()
-        {
-
-        }
-
-        public LoginCodePageData(LoginPageData loginPageData, string codeValidation)
-        {
-            LoginPageData = loginPageData;
-            CodeValidation = codeValidation;
-        }
-    }
 }

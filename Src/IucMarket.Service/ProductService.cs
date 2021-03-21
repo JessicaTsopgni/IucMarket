@@ -81,6 +81,61 @@ namespace IucMarket.Service
             }
         }
 
+        public async Task<ListDto<ProductDto>> GetProductsByCategoryAsync(string id, string path, int pageIndex, int pageSize)
+        {
+            var list = new ListDto<ProductDto>();
+            try
+            {
+                list.PageIndex = pageIndex;
+                list.PageSize = pageSize;
+
+                var products = await FirebaseClient
+                       .Child(Table)
+                       .OrderBy("CategoryId")
+                       .EqualTo(id)
+                       .OnceAsync<Product>();
+
+                foreach (var p in products)
+                {
+                    list.Items.Add
+                    (
+                        GetProductDto
+                        (
+                            p.Key,
+                            new Product
+                            (
+                                p.Object.Reference,
+                                p.Object.Name,
+                                p.Object.Description,
+                                p.Object.Price,
+                                p.Object.Currency,
+                                p.Object.Pictures,
+                                p.Object.CategoryId,
+                                p.Object.UserId,
+                                p.Object.CreatedAt,
+                                p.Object.Status
+                            ),
+                            path,
+                            await categoryService.GetCategoryAsync(p.Object.CategoryId),
+                            await userService.GetUserAsync(p.Object.UserId)
+                        )
+                    );
+                }
+
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return list;
+        }
+
         public async Task<ProductDto> AddAsync(ProductAddCommand command, string path)
         {            
             try
@@ -133,7 +188,6 @@ namespace IucMarket.Service
                 throw ex;
             }
         }
-
 
         public async Task EditAsync(string id, ProductAddCommand command, string path)
         {
@@ -240,7 +294,6 @@ namespace IucMarket.Service
             }
             return list;
         }
-
 
         public async Task DeleteAsync(string uid)
         {

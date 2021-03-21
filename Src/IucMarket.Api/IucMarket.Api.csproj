@@ -15,4 +15,18 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\uploads\1eofdwuk.yk3" />
+    <None Include="wwwroot\uploads\43zfhy3q.ghw" />
+    <None Include="wwwroot\uploads\bhgb2mov.wov" />
+    <None Include="wwwroot\uploads\c1duv13a.czb" />
+    <None Include="wwwroot\uploads\gv4ohtji.iro" />
+    <None Include="wwwroot\uploads\hhiym5oi.0eb" />
+    <None Include="wwwroot\uploads\jul1egvt.fdl" />
+    <None Include="wwwroot\uploads\lfbxndpv.50n" />
+    <None Include="wwwroot\uploads\lmwqeb4l.ff3" />
+    <None Include="wwwroot\uploads\q33bcqc0.d1b" />
+    <None Include="wwwroot\uploads\voz3jajt.e5p" />
+  </ItemGroup>
+
 </Project>

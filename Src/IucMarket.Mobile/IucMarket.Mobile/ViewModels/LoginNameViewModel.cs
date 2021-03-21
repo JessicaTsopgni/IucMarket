@@ -66,17 +66,14 @@ namespace IucMarket.Mobile.ViewModels
 
     public class LoginNamePageData
     {
-        public LoginCodePageData LoginCodePageData { get; set; }
         public string ProfileName { get; set; }
         public LoginNamePageData()
         {
 
         }
 
-        public LoginNamePageData(LoginCodePageData loginCodePageData, string profileName)
-        {
-            LoginCodePageData = loginCodePageData;
-            ProfileName = profileName;
+        public LoginNamePageData(string profileName)
+        {            ProfileName = profileName;
         }
     }
 }

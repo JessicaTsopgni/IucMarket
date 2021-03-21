@@ -57,6 +57,8 @@ namespace IucMarket.Service
             }
             catch (Firebase.Auth.FirebaseAuthException ex)
             {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
                 throw new UnauthorizedAccessException("Email or password is invalid !", ex);
             }
             catch (Exception ex)
@@ -98,6 +100,12 @@ namespace IucMarket.Service
                     if (person != null)
                         return new KeyValuePair<string, Person>(personId, person);
                 }
+            }
+            catch (Firebase.Auth.FirebaseAuthException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
             }
             catch (Firebase.Database.FirebaseException ex)
             {
@@ -189,6 +197,12 @@ namespace IucMarket.Service
                         null
                     )
                 );
+            }
+            catch (Firebase.Auth.FirebaseAuthException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
             }
             catch (Firebase.Database.FirebaseException ex)
             {
@@ -474,6 +488,12 @@ namespace IucMarket.Service
                     throw new KeyNotFoundException($"{nameof(command.Email)} {command.Email} doesn't exists !");
 
                 await FirebaseAuthProvider.SendPasswordResetEmailAsync(command.Email);
+            }
+            catch (Firebase.Auth.FirebaseAuthException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
             }
             catch (Exception ex)
             {

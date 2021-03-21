@@ -4,9 +4,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace IucMarket.Web.Common
@@ -82,6 +80,7 @@ namespace IucMarket.Web.Common
             claims.Add(new Claim(ClaimTypes.NameIdentifier, tokenModel.Token));
             claims.Add(new Claim(ClaimTypes.Name, tokenModel.Name));
             claims.Add(new Claim(ClaimTypes.Expiration, tokenModel.ExpiresIn.ToString()));
+            claims.Add(new Claim(ClaimTypes.Role, tokenModel.Role.ToString()));
             return claims;
             //var payload = token.Split('.')[1];
             //var jsonBytes = ParseBase64WithoutPadding(payload);

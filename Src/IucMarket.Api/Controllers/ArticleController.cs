@@ -19,7 +19,7 @@ namespace IucMarket.Api.Controllers
         private const string Error = "An error occured. Please try again later.";
         private readonly ProductService service;
         private readonly IWebHostEnvironment env;
-
+        private const string Upload_Folder = "Uploads";
         public ArticleController(ProductService service, IWebHostEnvironment env)
         {
             this.service = service;
@@ -28,7 +28,7 @@ namespace IucMarket.Api.Controllers
 
         private string GetPathTemplate()
         {
-            return Request.Scheme + "://" + Request.Host.Value + "/article/image/{0}?contentType={1}";
+            return Request.Scheme + "://" + Request.Host.Value + "/Article/Downlaod/{0}?contentType={1}";
         }
 
         [HttpGet]
@@ -49,7 +49,37 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.ToString());
+                return BadRequest(Error);
+            }
+        }
+
+        [HttpGet]
+        [Route("[action]/{id}")]
+        public async Task<IActionResult> Categories(string id, int pageIndex = 1, int pageSize = 100)
+        {
+            try
+            {
+                return Ok
+                (
+                    await service.GetProductsByCategoryAsync
+                    (
+                        id,
+                        GetPathTemplate(),
+                        pageIndex,
+                        pageSize
+                    )
+                );
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -76,7 +106,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -107,7 +138,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -123,9 +155,9 @@ namespace IucMarket.Api.Controllers
             {
                 foreach (var p in pictures)
                 {
-                    var path = System.IO.Path.Combine
-                    (env.ContentRootPath, "images", System.IO.Path.GetFileName(new UriBuilder(p.Name).Path));
-                    if(System.IO.File.Exists(path))
+                    var fileName = System.IO.Path.GetFileName(new UriBuilder(p.Name).Path);
+                    var path = GetPath(fileName);
+                    if (System.IO.File.Exists(path))
                         System.IO.File.Delete(path);
                 }
             }
@@ -168,7 +200,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -189,12 +222,7 @@ namespace IucMarket.Api.Controllers
                     if (picture.Length > 0)
                     {
                         fileName = System.IO.Path.GetRandomFileName();
-                        var path = System.IO.Path.Combine
-                        (
-                            env.ContentRootPath,
-                            "images",
-                            fileName
-                        );
+                        var path = GetPath(fileName);
                         System.IO.FileInfo f = new System.IO.FileInfo(path);
                         if (!f.Directory.Exists)
                             f.Directory.Create();
@@ -213,14 +241,19 @@ namespace IucMarket.Api.Controllers
                     var oldFileName = System.IO.Path.GetFileName(new UriBuilder(oldf.Name).Path);
                     if (!pictures.Any(x=> x.FileName == oldFileName))
                     {
-                        var path = System.IO.Path.Combine(env.ContentRootPath, "images", oldFileName);
-                        if(System.IO.File.Exists(path))
+                        string path = GetPath(oldFileName);
+                        if (System.IO.File.Exists(path))
                             System.IO.File.Delete(path);
                     }
                 }
             }
 
             return fileNames;
+        }
+
+        private string GetPath(string oldFileName)
+        {
+            return System.IO.Path.Combine(env.WebRootPath, Upload_Folder, oldFileName);
         }
 
         [HttpDelete]
@@ -244,7 +277,8 @@ namespace IucMarket.Api.Controllers
             }
             catch (HttpRequestException ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -255,11 +289,11 @@ namespace IucMarket.Api.Controllers
 
         [HttpGet]
         [Route("[action]/{id}")]
-        public FileContentResult Image(string id, string contentType)
+        public FileContentResult Downlaod(string id, string contentType)
         {
             try
             {     
-                var path = System.IO.Path.Combine(env.ContentRootPath, "images", id);
+                var path = GetPath(id);
                 if (System.IO.File.Exists(path))
                 {
                     var myfile = System.IO.File.ReadAllBytes(path);

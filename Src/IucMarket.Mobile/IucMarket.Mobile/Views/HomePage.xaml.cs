@@ -12,15 +12,15 @@ using Xamarin.Forms.Xaml;
 
 namespace IucMarket.Mobile.Views
 {
-    public partial class ItemsPage : ContentPage
+    public partial class HomePage : ContentPage
     {
-        ProductsViewModel _viewModel;
+        HomeViewModel _viewModel;
 
-        public ItemsPage()
+        public HomePage()
         {
             InitializeComponent();
 
-            BindingContext = _viewModel = new ProductsViewModel();
+            BindingContext = _viewModel = new HomeViewModel();
         }
 
         protected override void OnAppearing()

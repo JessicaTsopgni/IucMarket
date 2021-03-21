@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IucMarket.Common;
 
 namespace IucMarket.Web.Models
 {
@@ -9,6 +6,7 @@ namespace IucMarket.Web.Models
     {
         public string Name { get; set; }
         public string Email { get; set; }
+        public RoleOptions Role { get; set; }
         public string Token { get; set; }
         public int ExpiresIn { get; set; }
 
@@ -17,10 +15,11 @@ namespace IucMarket.Web.Models
 
         }
 
-        public TokenModel(string name, string email, string token, int expiresIn)
+        public TokenModel(string name, string email, RoleOptions role, string token, int expiresIn)
         {
             Name = name;
             Email = email;
+            Role = role;
             Token = token;
             ExpiresIn = expiresIn;
         }

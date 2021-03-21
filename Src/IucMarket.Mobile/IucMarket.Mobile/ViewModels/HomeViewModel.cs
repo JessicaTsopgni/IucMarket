@@ -15,7 +15,7 @@ using Plugin.SecureStorage;
 
 namespace IucMarket.Mobile.ViewModels
 {
-    public class ProductsViewModel : BaseViewModel
+    public class HomeViewModel : BaseViewModel
     {
         public ObservableCollection<ProductModel> Products { get; }
         public Command LoadProductsCommand { get; }
@@ -25,11 +25,11 @@ namespace IucMarket.Mobile.ViewModels
 
         private bool isFirstLoad;
 
-        private LoginNamePageData loginNamePageData;
+        //private LoginNamePageData loginNamePageData;
         public IProductDataStore ProductDataStore => DependencyService.Get<IProductDataStore>();
         public ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
 
-        public ProductsViewModel()
+        public HomeViewModel()
         {
             //loginNamePageData = Application.Current.Properties.FirstOrDefault(x => x.Key == nameof(LoginNamePageData)).Value as LoginNamePageData;
             //if (loginNamePageData == null)
@@ -61,6 +61,11 @@ namespace IucMarket.Mobile.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+                await UserDialogs.Instance.AlertAsync
+                (
+                    ex.Message,
+                    "Error"
+                );
             }
             finally
             {
@@ -98,22 +103,25 @@ namespace IucMarket.Mobile.ViewModels
         {
             if (product == null)
                 return;
-            if (!SecureStorage.Exist(App.SessionKeyName))
-            {
-                await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
-            }
-            else
-            {
+            //if (!SecureStorage.Exist(App.SessionKeyName))
+            //{
+            //    await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+            //}
+            //else
+            //{
                 selectedProduct = product;
                 await Shell.Current.Navigation.PushPopupAsync(new RatePopup(SetStarsCount));
-            }
+            //}
         }
 
         async Task SetStarsCount(int numberOfStarSelected)
         {
-            var owner = JsonConvert.DeserializeObject<UserModel>(CrossSecureStorage.Current.GetValue(App.SessionKeyName));
-
-            await ProductDataStore.Rate(selectedProduct, owner, numberOfStarSelected);
+            var json = CrossSecureStorage.Current.GetValue(App.SessionKeyName);
+            if (!string.IsNullOrEmpty(json))
+            {
+                var owner = JsonConvert.DeserializeObject<UserModel>(CrossSecureStorage.Current.GetValue(App.SessionKeyName));
+                await ProductDataStore.Rate(selectedProduct, owner, numberOfStarSelected);
+            }
         }
 
         async void OnProductSelected(ProductModel product)
@@ -124,10 +132,10 @@ namespace IucMarket.Mobile.ViewModels
                 if (product == null)
                     return;
 
-                Application.Current.Properties[nameof(ProductsPageData)] = new ProductsPageData(loginNamePageData, product);
+                Application.Current.Properties[nameof(HomePageData)] = new HomePageData(product);
 
                 // This will push the ProductDetailPage onto the navigation stack
-                //await Shell.Current.GoToAsync($"/{nameof(ProductDetailPage)}");
+                await Shell.Current.GoToAsync($"/{nameof(ProductDetailPage)}");
 
             }
             catch (Exception ex)
@@ -147,19 +155,17 @@ namespace IucMarket.Mobile.ViewModels
         }
     }
 
-    public class ProductsPageData
+    public class HomePageData
     {
-        public LoginNamePageData LoginNamePageData { get; set; }
         public ProductModel Product { get; set; }
 
-        public ProductsPageData()
+        public HomePageData()
         {
 
         }
 
-        public ProductsPageData(LoginNamePageData loginNamePageData, ProductModel product)
+        public HomePageData(ProductModel product)
         {
-            LoginNamePageData = loginNamePageData;
             Product = product;
         }
     }

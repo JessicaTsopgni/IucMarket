@@ -6,7 +6,7 @@
 
 <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" class="mt-sm-5">
     <DataAnnotationsValidator />
-    <div class="offset-sm-3">
+    <div class="offset-sm-0 offset-lg-3">
         <div class="row small">
             <div class="col-sm-6">
                 <h2>Sign in</h2>
@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-lg-6">
                 <div class="mb-3">
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -75,7 +75,7 @@
             {
                 var json = await response.Content.ReadAsStringAsync();
                 var user = JsonConvert.DeserializeObject<UserDto>(json);
-                var tokenModel = new TokenModel(user.FullName, user.Email, user.Token, user.TokenExpiresIn);
+                var tokenModel = new TokenModel(user.FullName, user.Email, user.Role, user.Token, user.TokenExpiresIn);
                 await authStateProvider.SetTokenAsync(JsonConvert.SerializeObject(tokenModel), tokenModel.ExpiresIn);
                 if(user.Role == RoleOptions.Admin)
                     navigationManager.NavigateTo("");

@@ -21,7 +21,7 @@
     <StackLayout
         Spacing="10"
         VerticalOptions="Center"
-        BackgroundColor="{DynamicResource BackgroundColor}"
+        BackgroundColor="{DynamicResource Light}"
         Padding="20"
         Margin="20">
         <Component:RatingBar 
@@ -29,7 +29,7 @@
             HorizontalOptions="Center"
             FillFontFamilyIcon="fas"
             EmptyFontFamilyIcon="far"
-            FontSizeIcon="30"
+            FontSizeIcon="Medium"
             FillRateIcon="{x:Static helpers:IconFontSolid.Star}"
             EmptyRateIcon="{x:Static helpers:IconFontRegular.Star}"
             NumberOfRates="5"
