@@ -1,4 +1,7 @@
-﻿using IucMarket.Mobile.Services;
+﻿using IucMarket.Mobile.Models;
+using IucMarket.Mobile.Services;
+using Newtonsoft.Json;
+using Plugin.SecureStorage;
 using Xamarin.Forms;
 
 namespace IucMarket.Mobile
@@ -7,6 +10,7 @@ namespace IucMarket.Mobile
     {
         public static readonly string ApiAddress = "http://192.168.127.1:8096";
         public static readonly string SessionKeyName = "UserSession";
+        public static readonly string SessionCartName = "CartSession";
         public static readonly string Name = "IUC Market";
 
         public App()
@@ -19,6 +23,13 @@ namespace IucMarket.Mobile
             DependencyService.Register<ProductDataStore>();
             DependencyService.Register<UserDataStore>();
             DependencyService.Register<SecureStorage>();
+
+            var json = CrossSecureStorage.Current.GetValue(SessionCartName);
+            if (string.IsNullOrEmpty(json))
+            {
+                var cart = new OrderModel();
+                CrossSecureStorage.Current.SetValue(SessionCartName, JsonConvert.SerializeObject(cart));
+            }
 
             MainPage = new AppShell();
         }

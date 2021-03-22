@@ -9,4 +9,11 @@ namespace IucMarket.Common
         Admin,
         Other
     }
+
+    public enum DeliveryPlaceOptions
+    {
+        CampusA,
+        CampusB,
+        CampusC
+    }
 }

@@ -150,7 +150,7 @@
                                 FontFamily="fas"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center"/>
-                        <Label Text="{Binding HomePageData.Product.SalesText}"
+                        <Label Text="{Binding HomePageData.Product.CartsText}"
                                 LineBreakMode="TailTruncation"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center" />

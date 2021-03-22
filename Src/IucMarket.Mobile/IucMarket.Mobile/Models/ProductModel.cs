@@ -57,6 +57,9 @@ namespace IucMarket.Mobile.Models
             {
                 SetProperty(ref price, value);
                 OnPropertyChanged(nameof(PriceWithCurrency));
+                OnPropertyChanged(nameof(Amount));
+                OnPropertyChanged(nameof(AmountText));
+                OnPropertyChanged(nameof(AmountWithCurrency));
             }
         }
 
@@ -68,6 +71,9 @@ namespace IucMarket.Mobile.Models
             {
                 SetProperty(ref currency, value);
                 OnPropertyChanged(nameof(PriceWithCurrency));
+                OnPropertyChanged(nameof(Amount));
+                OnPropertyChanged(nameof(AmountText));
+                OnPropertyChanged(nameof(AmountWithCurrency));
             }
         }
 
@@ -115,17 +121,27 @@ namespace IucMarket.Mobile.Models
         }
         public string CommentsText => CommentsCount > 0 ? CommentsCount.ToKorM() : "Review";
 
-        private double salesCount;
-        public double SalesCount
+        private double cartsCount;
+        public double CartsCount
         {
-            get => salesCount;
+            get => cartsCount;
             set
             {
-                SetProperty(ref salesCount, value);
-                OnPropertyChanged(nameof(SalesText));
+                SetProperty(ref cartsCount, value);
+                OnPropertyChanged(nameof(CartsText));
+                OnPropertyChanged(nameof(Amount));
+                OnPropertyChanged(nameof(AmountText));
+                OnPropertyChanged(nameof(AmountWithCurrency));
+                OnPropertyChanged(nameof(IsInsideCart));
             }
         }
-        public string SalesText => SalesCount > 0 ? SalesCount.ToKorM() : "Sale";
+        public string CartsText => CartsCount > 0 ? CartsCount.ToKorM() : "+Cart";
+
+        public double Amount => Price  * CartsCount;
+        public string AmountWithCurrency => $"{AmountText} {Currency}";
+        public string AmountText => Amount.ToString("N0");
+        public bool IsInsideCart => CartsCount > 0;
+        
 
         private double sharesCount;
         public double SharesCount
@@ -209,7 +225,7 @@ namespace IucMarket.Mobile.Models
 
         public ProductModel(string id, string reference, string name, string description, CategoryModel category,
             double price, string currency,  double starsCount, double votesCount,
-            double likesCount, double commentsCount, double sellsCount, double sharesCount, 
+            double likesCount, double commentsCount, double cartCount, double sharesCount, 
             bool isAvailable, IEnumerable<string> pictures, 
             UserModel owner, DateTime createdDate)
             : base(id)
@@ -223,7 +239,7 @@ namespace IucMarket.Mobile.Models
             StarsCount = starsCount;
             LikesCount = likesCount;
             CommentsCount = commentsCount;
-            SalesCount = sellsCount;
+            CartsCount = cartCount;
             SharesCount = sharesCount;
             VotesCount = votesCount;
             IsAvailable = isAvailable;

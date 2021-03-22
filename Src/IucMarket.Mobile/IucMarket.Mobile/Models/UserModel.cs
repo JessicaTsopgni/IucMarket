@@ -45,6 +45,11 @@ namespace IucMarket.Mobile.Models
         public string Token { get; set; }
         public int TokenExpiresIn { get; set; }
 
+
+        public UserModel()
+        {
+
+        }
         public UserModel(string id):base(id)
         {
             productsRated = new ObservableCollection<ProductModel>();

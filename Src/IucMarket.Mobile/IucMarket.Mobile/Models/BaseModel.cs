@@ -29,12 +29,12 @@ namespace IucMarket.Mobile.Models
         public override bool Equals(object obj)
         {
             return obj is BaseModel model &&
-                   Id.Equals(model.Id);
+                   (Id?.Equals(model.Id) ?? false);
         }
 
         public override int GetHashCode()
         {
-            return 2108858624 + Id.GetHashCode();
+            return 2108858624 + (Id?.GetHashCode() ?? 0);
         }
 
         protected bool SetProperty<T>(ref T backingStore, T value,

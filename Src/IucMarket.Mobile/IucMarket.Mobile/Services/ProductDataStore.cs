@@ -1,6 +1,7 @@
 ﻿using IucMarket.Dtos;
 using IucMarket.Mobile.Models;
 using Newtonsoft.Json;
+using Plugin.SecureStorage;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,6 +37,14 @@ namespace IucMarket.Mobile.Services
                             var json = await response.Content.ReadAsStringAsync();
                             var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
                             var r = new Random();
+
+                            json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
+                            OrderModel cart = null;
+                            if (!string.IsNullOrEmpty(json))
+                            {
+                                cart = JsonConvert.DeserializeObject<OrderModel>(json);
+                            }
+
                             items = list.Items.Select
                             (
                                 x =>
@@ -54,7 +63,7 @@ namespace IucMarket.Mobile.Services
                                         votesCount,
                                         r.Next(0, 1000000),
                                         r.Next(0, 1000000),
-                                        r.Next(0, 1000000),
+                                        cart?.Products?.FirstOrDefault(y => y.Id == x.Id)?.CartsCount ?? 0,
                                         r.Next(0, 1000000),
                                         r.Next(0, 2) == 1 ? true : false,
                                         x.Pictures?.Select(y => y.Path).ToArray(),

@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="IucMarket.Mobile.Views.HomePage"
              Title="{Binding Title}"
+             x:DataType="viewModels:HomeViewModel"
              xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"  
              xmlns:model="clr-namespace:IucMarket.Mobile.Models"  
-            xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts">
-
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit">
     <Shell.TitleView>
         <StackLayout Orientation="Horizontal">
             <StackLayout.Padding>
@@ -25,16 +26,24 @@
                    FontAttributes="Bold"/>
             <StackLayout Orientation="Horizontal"
                          HorizontalOptions="End"
-                         VerticalOptions="Center"
-                         Spacing="10">
-                <Label Text="{x:Static helpers:IconFontSolid.Bell}"
+                         VerticalOptions="Center">
+                <xct:BadgeView Text="{Binding BellBadgeText}" FontSize="Micro"
+                         Margin="{Binding BellBadgeMargin}">                    
+                    <Label Text="{x:Static helpers:IconFontSolid.Bell}"
+                           FontFamily="fas"
+                       TextColor="{DynamicResource Light}"
+                       FontSize="Title"/>
+                </xct:BadgeView>
+                <xct:BadgeView Text="{Binding CartBadgeText}" 
+                               BackgroundColor="{DynamicResource Danger}" 
+                               TextColor="{DynamicResource Light}"
+                               FontSize="Micro"
+                         Margin="{Binding CartBadgeMargin}">
+                    <Label Text="{x:Static helpers:IconFontSolid.ShoppingCart}"
                        FontFamily="fas"
-                   TextColor="{DynamicResource Light}"
-                   FontSize="Title"/>
-                <Label Text="{x:Static helpers:IconFontSolid.ShoppingCart}"
-                       FontFamily="fas"
-                   TextColor="{DynamicResource Light}"
-                   FontSize="Title"/>
+                       TextColor="{DynamicResource Light}"
+                       FontSize="Title"/>
+                </xct:BadgeView>
             </StackLayout>
         </StackLayout>
     </Shell.TitleView>
@@ -44,7 +53,6 @@
       https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
     -->
     <RefreshView Padding="0, 5, 0, 10"
-                 x:DataType="viewModels:HomeViewModel"
                  Command="{Binding LoadProductsCommand}" 
                  IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
         <CollectionView x:Name="ProductsListView"
@@ -61,7 +69,6 @@
                         <StackLayout.Margin>
                             <OnPlatform x:TypeArguments="Thickness">
                                 <On Platform="iOS" Value="3"/>
-                                <On Platform="Android" Value="3"/>
                             </OnPlatform>
                         </StackLayout.Margin>
                         <Frame CornerRadius="10"
@@ -137,18 +144,18 @@
                                     <StackLayout Orientation="Horizontal">
                                         <Label Text="{Binding PriceWithCurrency}"
                                                LineBreakMode="TailTruncation"
-                                               TextColor="{DynamicResource Danger}"
+                                               TextColor="{DynamicResource Info}"
                                                FontSize="Small" 
                                                VerticalOptions="Center"
                                                HorizontalOptions="Start"/>
-                                        <Frame BorderColor="{DynamicResource Danger}"
+                                        <Frame BorderColor="{DynamicResource Info}"
                                                CornerRadius="5"
                                                HasShadow="False"
                                                Padding="5, 3, 5, 3"
                                                HorizontalOptions="EndAndExpand">                                            
                                             <Label Text="BUY"
                                                    FontSize="Micro"
-                                                   TextColor="{DynamicResource Danger}"
+                                                   TextColor="{DynamicResource Info}"
                                                    HorizontalOptions="End"/>
                                         </Frame>
                                     </StackLayout>
@@ -201,12 +208,32 @@
                                         <Label Text="{x:Static helpers:IconFontSolid.CartPlus}" 
                                                 FontFamily="fas"
                                                 VerticalOptions="Center"
-                                                HorizontalOptions="Center"/>
-                                        <Label Text="{Binding SalesText}"
+                                                HorizontalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                Binding="{Binding Source={RelativeSource AncestorType={x:Type model:ProductModel }}, Path=IsInsideCart, Mode=TwoWay}" Value="True">
+                                                    <Setter Property="TextColor" Value="{x:DynamicResource Danger}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <Label Text="{Binding CartsText}"
                                                 LineBreakMode="TailTruncation"
                                                 VerticalOptions="Center"
                                                 HorizontalOptions="Center"
-                                                FontSize="Micro" />
+                                                FontSize="Micro">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                Binding="{Binding Source={RelativeSource AncestorType={x:Type model:ProductModel }}, Path=IsInsideCart, Mode=TwoWay}" Value="True">
+                                                    <Setter Property="TextColor" Value="{x:DynamicResource Danger}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <StackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer NumberOfTapsRequired="1"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=AddToCartCommand}"
+                                                          CommandParameter="{Binding .}">
+                                            </TapGestureRecognizer>
+                                        </StackLayout.GestureRecognizers>
                                     </StackLayout>
                                     <StackLayout Grid.Column="3" 
                                                  Orientation="Vertical"

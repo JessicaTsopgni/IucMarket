@@ -19,7 +19,7 @@ namespace IucMarket.Mobile.ViewModels
     {
         public ObservableCollection<ProductModel> Products { get; }
         public Command LoadProductsCommand { get; }
-        public Command AddProductCommand { get; }
+        public Command AddToCartCommand { get; }
         public Command<ProductModel> ProductSelectedCommand { get; }
         public Command<ProductModel> StarTappedCommand { get; }
 
@@ -29,6 +29,45 @@ namespace IucMarket.Mobile.ViewModels
         public IProductDataStore ProductDataStore => DependencyService.Get<IProductDataStore>();
         public ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
 
+        private Thickness bellBadgeMargin;
+        public Thickness BellBadgeMargin 
+        { 
+            get => bellBadgeMargin; 
+            set
+            {
+                SetProperty(ref bellBadgeMargin, value);
+            }
+        }
+
+        private string bellBadgeText;
+        public string BellBadgeText
+        {
+            get => bellBadgeText;
+            set
+            {
+                SetProperty(ref bellBadgeText, value);
+            }
+        }
+
+        private Thickness cartBadgeMargin;
+        public Thickness CartBadgeMargin
+        {
+            get => cartBadgeMargin;
+            set
+            {
+                SetProperty(ref cartBadgeMargin, value);
+            }
+        }
+
+        private string cartBadgeText;
+        public string CartBadgeText
+        {
+            get => cartBadgeText;
+            set
+            {
+                SetProperty(ref cartBadgeText, value);
+            }
+        }
         public HomeViewModel()
         {
             //loginNamePageData = Application.Current.Properties.FirstOrDefault(x => x.Key == nameof(LoginNamePageData)).Value as LoginNamePageData;
@@ -41,8 +80,25 @@ namespace IucMarket.Mobile.ViewModels
             LoadProductsCommand = new Command(async () => await ExecuteLoadProductsCommand());
             ProductSelectedCommand = new Command<ProductModel>(OnProductSelected);
             StarTappedCommand = new Command<ProductModel>(OnStarTapped);
-            AddProductCommand = new Command(OnAddProduct);
-            //Task.Run(async () => await ExecuteLoadProductsCommand());
+            AddToCartCommand = new Command<ProductModel>(OnAddToCart);
+            BellBadgeMargin = new Thickness(0, 18, 10, 0);
+            CartBadgeMargin = new Thickness(0, 18, 0, 0);
+            SetCartBadge();
+        }
+
+        private void SetCartBadge(OrderModel cart = null)
+        {
+            if (cart == null)
+            {
+                var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
+                cart = JsonConvert.DeserializeObject<OrderModel>(json);
+            }
+            var count = cart?.Products.Count ?? 0;
+            if (count > 0)
+            {
+                CartBadgeText = count > 9 ? "9+" : count.ToString();
+                CartBadgeMargin = new Thickness(0, 5, 10, 0);
+            }
         }
 
         async Task ExecuteLoadProductsCommand()
@@ -94,9 +150,24 @@ namespace IucMarket.Mobile.ViewModels
             }
         }
 
-        private async void OnAddProduct(object obj)
+        private void OnAddToCart(ProductModel product)
         {
-            await Shell.Current.GoToAsync(nameof(NewItemPage));
+            if (product == null)
+                return;
+
+            var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
+            if (string.IsNullOrEmpty(json))
+                return; // init cart to App class
+
+            var cart = JsonConvert.DeserializeObject<OrderModel>(json);
+            cart.Add(product);
+
+            SetCartBadge(cart);
+
+            json = JsonConvert.SerializeObject(cart);
+            CrossSecureStorage.Current.SetValue(App.SessionCartName, json);
+
+            //await Shell.Current.GoToAsync(nameof(NewItemPage));
         }
 
         private async void OnStarTapped(ProductModel product)
