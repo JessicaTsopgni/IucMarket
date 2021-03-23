@@ -188,3 +188,9 @@ a, .btn-link {
     }
 }
 
+/**Rewrite*/
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #1e7e34;
+    background-color: #218838;
+}

@@ -22,7 +22,7 @@ namespace IucMarket.Mobile.ViewModels
         public Command AddToCartCommand { get; }
         public Command<ProductModel> ProductSelectedCommand { get; }
         public Command<ProductModel> StarTappedCommand { get; }
-
+        public Command CartTappedCommand { get; }
         private bool isFirstLoad;
 
         //private LoginNamePageData loginNamePageData;
@@ -80,6 +80,7 @@ namespace IucMarket.Mobile.ViewModels
             LoadProductsCommand = new Command(async () => await ExecuteLoadProductsCommand());
             ProductSelectedCommand = new Command<ProductModel>(OnProductSelected);
             StarTappedCommand = new Command<ProductModel>(OnStarTapped);
+            CartTappedCommand = new Command(OnCartTapped);
             AddToCartCommand = new Command<ProductModel>(OnAddToCart);
             BellBadgeMargin = new Thickness(0, 18, 10, 0);
             CartBadgeMargin = new Thickness(0, 18, 0, 0);
@@ -224,15 +225,44 @@ namespace IucMarket.Mobile.ViewModels
                 IsBusy = false;
             }
         }
+
+        async void OnCartTapped()
+        {
+            try
+            {
+                // This will push the ProductDetailPage onto the navigation stack
+                await Shell.Current.GoToAsync($"/{nameof(CartPage)}");
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                await Shell.Current.DisplayAlert
+                (
+                    "Error",
+                    "An error occured Please try again later",
+                    "Cancel"
+                );
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
     }
 
     public class HomePageData
     {
         public ProductModel Product { get; set; }
+        public ObservableCollection<ProductModel> Products { get; set; }
 
         public HomePageData()
         {
 
+        }
+        public HomePageData(ObservableCollection<ProductModel> products)
+        {
+            Products = products;
         }
 
         public HomePageData(ProductModel product)

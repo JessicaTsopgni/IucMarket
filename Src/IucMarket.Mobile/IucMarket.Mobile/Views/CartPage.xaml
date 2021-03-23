@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IucMarket.Mobile.Views.CartPage"
+             Title="{Binding Title}"
+             x:DataType="viewModels:CartViewModel"
+             xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"  
+             xmlns:model="clr-namespace:IucMarket.Mobile.Models"  
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit">
+    <Shell.TitleView>
+        <StackLayout Orientation="Horizontal"
+                     Spacing="10">
+            <StackLayout.Padding>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <OnPlatform.Platforms>
+                        <On Platform="iOS" Value="0, 0, 20, 0" />
+                        <On Platform="Android" Value="0, 0, 10, 0" />
+                    </OnPlatform.Platforms>
+                </OnPlatform>
+            </StackLayout.Padding>
+            <Label Text="{Binding Title}"
+                   VerticalOptions="Center"
+                   TextColor="{DynamicResource Light}"
+                   FontSize="Title"
+                   HorizontalOptions="StartAndExpand"/>
+            <StackLayout Orientation="Horizontal"
+                         HorizontalOptions="End"
+                         VerticalOptions="Center">
+                <Label Text="{x:Static helpers:IconFontSolid.Times}"
+                      FontFamily="fas"
+                     FontSize="Title"
+                 TextColor="{DynamicResource Light}"/>
+                <!--<StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer NumberOfTapsRequired="1"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=CartTappedCommand}"/>
+
+                </StackLayout.GestureRecognizers>-->
+            </StackLayout>
+            <StackLayout Orientation="Horizontal"
+                         HorizontalOptions="End"
+                         VerticalOptions="Center">
+                <Label Text="{x:Static helpers:IconFontSolid.Check}"
+                      FontFamily="fas"
+                     FontSize="Title"
+                 TextColor="{DynamicResource Light}"/>
+                <!--<StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer NumberOfTapsRequired="1"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=CartTappedCommand}"/>
+
+                </StackLayout.GestureRecognizers>-->
+            </StackLayout>
+        </StackLayout>
+    </Shell.TitleView>
+
+    <RefreshView Padding="0, 5, 0, 10"
+                 Command="{Binding LoadProductsCommand}" 
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+        <StackLayout>
+            <CollectionView x:Name="ProductsListView"
+                            ItemsSource="{Binding Cart.Products}"
+                            SelectionMode="None"
+                            BackgroundColor="Transparent">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Padding="5">
+                            <StackLayout.Margin>
+                                <OnPlatform x:TypeArguments="Thickness">
+                                    <On Platform="iOS" Value="3"/>
+                                </OnPlatform>
+                            </StackLayout.Margin>
+                            <Frame CornerRadius="10"
+                                    Padding="0"
+                                    BorderColor="{DynamicResource BorderColor}"
+                                    IsClippedToBounds="True"
+                                    HasShadow="True">
+                                <Grid x:DataType="model:ProductModel"
+                                      ColumnDefinitions="auto,*"
+                                      Padding="10">
+                                    <xct:AvatarView Grid.Column="0" 
+                                                    Source="{Binding Picture}"
+                                                    BackgroundColor="Transparent" 
+                                                    Aspect="AspectFill"
+                                                    Size="60"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center"/>
+                                    <StackLayout Grid.Column="1"
+                                                 Spacing="0">
+                                        <Label 
+                                               Text="{Binding Name}"
+                                               FontAttributes="Bold"
+                                               LineBreakMode="TailTruncation"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Start"
+                                            Margin="15, 5, 0, 0"/>
+                                        <Label Text="{Binding AmountOperation}"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Start"
+                                               TextColor="{DynamicResource Info}"
+                                            Margin="15, 0, 0, 0"/>
+                                        <Slider Value="{Binding CartsCount}"
+                                                Minimum="1"
+                                                Maximum="100"/>
+                                    </StackLayout>
+                                </Grid>
+                            </Frame>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <StackLayout Spacing="0"
+                       Margin="10, 0">
+                <Label Text="{Binding Cart.TotalWithCurrency}"
+                       TextColor="{DynamicResource Info}"
+                       FontSize="Large"
+                       HorizontalOptions="EndAndExpand"/>
+                <!--<Button Text="ORDER"
+                        ImageSource="{FontImage FontFamily=fas, 
+                    Glyph={x:Static helpers:IconFontSolid.Check}, Size=14}"/>-->
+            </StackLayout>
+        </StackLayout>
+    </RefreshView>
+</ContentPage>

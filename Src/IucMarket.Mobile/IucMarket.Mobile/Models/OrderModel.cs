@@ -98,19 +98,37 @@ namespace IucMarket.Mobile.Models
             OnPropertyChanged(nameof(Total));
         }
 
+        public void SetQuantity(ProductModel product, int quantity)
+        {
+            var p = Products?.FirstOrDefault(x => x.Id == product.Id);
+            if (p == null)
+            {
+                product.CartsCount = 1;
+                Products.Add(product);
+            }
+            else
+            {
+                product.CartsCount = quantity;
+                p.CartsCount = quantity;
+            }
+            OnPropertyChanged(nameof(Total));
+        }
+
 
         public void Remove(ProductModel product)
         {
             var p = Products?.FirstOrDefault(x => x.Id == product.Id);
             if (p != null)
             {
-                product.CartsCount -= p.CartsCount;
+                //product.CartsCount -= p.CartsCount;
                 Products?.Remove(p);
             }
             OnPropertyChanged(nameof(Total));
         }
 
         public double Total => Products?.Sum(x => x.Amount) ?? 0;
+        public string TotalText => Total.ToString("N0");
+        public string TotalWithCurrency => $"TOTAL : {TotalText} {Products.FirstOrDefault()?.Currency}";
         public void Clear()
         {
             Id = null;

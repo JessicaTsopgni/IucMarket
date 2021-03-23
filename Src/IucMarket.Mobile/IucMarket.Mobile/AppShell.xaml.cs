@@ -9,6 +9,7 @@ namespace IucMarket.Mobile
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(ProductDetailPage), typeof(ProductDetailPage));
+            Routing.RegisterRoute(nameof(CartPage), typeof(CartPage));
             Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
         }
 

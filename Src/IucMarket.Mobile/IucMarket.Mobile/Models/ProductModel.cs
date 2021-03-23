@@ -57,6 +57,7 @@ namespace IucMarket.Mobile.Models
             {
                 SetProperty(ref price, value);
                 OnPropertyChanged(nameof(PriceWithCurrency));
+                OnPropertyChanged(nameof(PriceText));
                 OnPropertyChanged(nameof(Amount));
                 OnPropertyChanged(nameof(AmountText));
                 OnPropertyChanged(nameof(AmountWithCurrency));
@@ -71,13 +72,16 @@ namespace IucMarket.Mobile.Models
             {
                 SetProperty(ref currency, value);
                 OnPropertyChanged(nameof(PriceWithCurrency));
+                OnPropertyChanged(nameof(PriceText));
                 OnPropertyChanged(nameof(Amount));
                 OnPropertyChanged(nameof(AmountText));
                 OnPropertyChanged(nameof(AmountWithCurrency));
+                OnPropertyChanged(nameof(AmountOperation));
             }
         }
 
         public string PriceWithCurrency => $"{Price.ToString("N0")} {Currency}";
+        public string PriceText => $"{Price.ToString("N0")}";
 
         public static int StarsMax => 5;
 
@@ -121,8 +125,8 @@ namespace IucMarket.Mobile.Models
         }
         public string CommentsText => CommentsCount > 0 ? CommentsCount.ToKorM() : "Review";
 
-        private double cartsCount;
-        public double CartsCount
+        private int cartsCount;
+        public int CartsCount
         {
             get => cartsCount;
             set
@@ -133,13 +137,15 @@ namespace IucMarket.Mobile.Models
                 OnPropertyChanged(nameof(AmountText));
                 OnPropertyChanged(nameof(AmountWithCurrency));
                 OnPropertyChanged(nameof(IsInsideCart));
+                OnPropertyChanged(nameof(AmountOperation));
             }
         }
-        public string CartsText => CartsCount > 0 ? CartsCount.ToKorM() : "+Cart";
+        public string CartsText => CartsCount > 0 ? ((double)CartsCount).ToKorM() : "+Cart";
 
         public double Amount => Price  * CartsCount;
         public string AmountWithCurrency => $"{AmountText} {Currency}";
         public string AmountText => Amount.ToString("N0");
+        public string AmountOperation => $"{CartsText} x {PriceText} = {AmountWithCurrency}";
         public bool IsInsideCart => CartsCount > 0;
         
 
@@ -225,7 +231,7 @@ namespace IucMarket.Mobile.Models
 
         public ProductModel(string id, string reference, string name, string description, CategoryModel category,
             double price, string currency,  double starsCount, double votesCount,
-            double likesCount, double commentsCount, double cartCount, double sharesCount, 
+            double likesCount, double commentsCount, int cartCount, double sharesCount, 
             bool isAvailable, IEnumerable<string> pictures, 
             UserModel owner, DateTime createdDate)
             : base(id)

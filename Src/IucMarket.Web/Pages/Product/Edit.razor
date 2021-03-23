@@ -37,7 +37,7 @@ else
                     </div>
                     <div class="mb-3">
                         <div id="carouselExampleControls" class="carousel border" data-ride="carousel">
-                            <div class="carousel-inner text-center" style="height:250px">
+                            <div class="carousel-inner text-center" style="height:200px">
                                 @if(model.Pictures != null)
                                 {
                                     int i = 0;
@@ -96,23 +96,12 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Price"><i style="width:20px" class="fas fa-money-bill-alt"></i></span>
+                                <span class="input-group-text" id="Price"><span style="width:20px;font-size:11px">@model.Currency</span></span>
                             </div>
                             <InputNumber @bind-Value="model.Price" class="form-control" placeholder="Product price" aria-label="Price" aria-describedby="Price" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Price)" />
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="Currency"><i style="width:20px" class="fas fa-dollar-sign"></i></span>
-                            </div>
-                            <InputText @bind-Value="model.Currency" class="form-control text-uppercase" placeholder="Product price currency" aria-label="Currency" aria-describedby="Currency" />
-                        </div>
-                        <div class="small">
-                            <ValidationMessage For="@(() => model.Currency)" />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -162,7 +151,7 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Descriptioname"><i style="width:20px" class="fas fa-info-circle"></i></span>
                             </div>
-                            <InputTextArea style="height:200px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
+                            <InputTextArea style="height:145px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Description)" />
