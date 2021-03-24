@@ -22,10 +22,10 @@ jobs:
         dotnet-version: '5.0.x'
 
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build ${{env.DOTNET_ROOT}}/Src/IucMarket.Api/IucMarket.Api.csproj --configuration Release 
 
     - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      run: dotnet publish -c Release
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -33,4 +33,4 @@ jobs:
         app-name: 'iucmarket'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_1d9d53e9b3ca4fd399ef4bfeee529807 }}
-        package: ${{env.DOTNET_ROOT}}/myapp 
+        package: ${{env.DOTNET_ROOT}}/Src/IucMarket.Api/bin/Release/net5.0/publish
