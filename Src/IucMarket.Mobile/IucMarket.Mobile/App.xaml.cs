@@ -24,6 +24,7 @@ namespace IucMarket.Mobile
             DependencyService.Register<UserDataStore>();
             DependencyService.Register<SecureStorage>();
 
+            CrossSecureStorage.Current.DeleteKey(SessionCartName);
             var json = CrossSecureStorage.Current.GetValue(SessionCartName);
             if (string.IsNullOrEmpty(json))
             {

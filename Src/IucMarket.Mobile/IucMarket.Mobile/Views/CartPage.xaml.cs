@@ -28,5 +28,16 @@ namespace IucMarket.Mobile.Views
             base.OnAppearing();
             _viewModel.OnAppearing();
         }
+
+        protected override bool OnBackButtonPressed()
+        {
+            _viewModel.OnBackButtonPressed();
+            return base.OnBackButtonPressed();
+        }
+
+        private void ProductsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _viewModel.OnSelectionChanged((CollectionView)sender);
+        }
     }
 }

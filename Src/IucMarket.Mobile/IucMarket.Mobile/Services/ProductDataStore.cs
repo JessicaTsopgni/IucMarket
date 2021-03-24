@@ -38,13 +38,6 @@ namespace IucMarket.Mobile.Services
                             var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
                             var r = new Random();
 
-                            json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-                            OrderModel cart = null;
-                            if (!string.IsNullOrEmpty(json))
-                            {
-                                cart = JsonConvert.DeserializeObject<OrderModel>(json);
-                            }
-
                             items = list.Items.Select
                             (
                                 x =>
@@ -63,7 +56,7 @@ namespace IucMarket.Mobile.Services
                                         votesCount,
                                         r.Next(0, 1000000),
                                         r.Next(0, 1000000),
-                                        cart?.Products?.FirstOrDefault(y => y.Id == x.Id)?.CartsCount ?? 0,
+                                        0,
                                         r.Next(0, 1000000),
                                         r.Next(0, 2) == 1 ? true : false,
                                         x.Pictures?.Select(y => y.Path).ToArray(),

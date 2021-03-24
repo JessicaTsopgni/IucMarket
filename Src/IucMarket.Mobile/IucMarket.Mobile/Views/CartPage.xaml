@@ -24,42 +24,39 @@
                    TextColor="{DynamicResource Light}"
                    FontSize="Title"
                    HorizontalOptions="StartAndExpand"/>
-            <StackLayout Orientation="Horizontal"
+            <StackLayout Spacing="20" 
+                         Orientation="Horizontal"
                          HorizontalOptions="End"
                          VerticalOptions="Center">
-                <Label Text="{x:Static helpers:IconFontSolid.Times}"
-                      FontFamily="fas"
-                     FontSize="Title"
-                 TextColor="{DynamicResource Light}"/>
-                <!--<StackLayout.GestureRecognizers>
-                    <TapGestureRecognizer NumberOfTapsRequired="1"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=CartTappedCommand}"/>
-
-                </StackLayout.GestureRecognizers>-->
-            </StackLayout>
-            <StackLayout Orientation="Horizontal"
-                         HorizontalOptions="End"
-                         VerticalOptions="Center">
-                <Label Text="{x:Static helpers:IconFontSolid.Check}"
-                      FontFamily="fas"
-                     FontSize="Title"
-                 TextColor="{DynamicResource Light}"/>
-                <!--<StackLayout.GestureRecognizers>
-                    <TapGestureRecognizer NumberOfTapsRequired="1"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=CartTappedCommand}"/>
-
-                </StackLayout.GestureRecognizers>-->
+                <ImageButton Source="{FontImage Size=Title, Color={x:StaticResource Light}, FontFamily=fas, Glyph={x:Static helpers:IconFontSolid.Expand}}"
+                                BackgroundColor="Transparent"
+                                BorderColor="Transparent"
+                                Command="{Binding SelectedAllToCartCommand}"
+                                IsVisible="{Binding ShowTimesIcon}"/>
+                <ImageButton Source="{FontImage Size=Title, Color={x:StaticResource Light}, FontFamily=fas, Glyph={x:Static helpers:IconFontSolid.Times}}"
+                                BackgroundColor="Transparent"
+                                BorderColor="Transparent"
+                                Command="{Binding RemoveToCartCommand}"
+                                IsVisible="{Binding ShowTimesIcon}"/>
+                <ImageButton Source="{FontImage Size=Title, Color={x:StaticResource Light}, FontFamily=fas, Glyph={x:Static helpers:IconFontSolid.Check}}"
+                                BackgroundColor="Transparent"
+                                 BorderColor="Transparent"
+                                 Command="{Binding OrderCartCommand}"/>
             </StackLayout>
         </StackLayout>
     </Shell.TitleView>
-
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior
+        Command="{Binding GoBackCommand}" />
+    </Shell.BackButtonBehavior>
     <RefreshView Padding="0, 5, 0, 10"
                  Command="{Binding LoadProductsCommand}" 
                  IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
         <StackLayout>
             <CollectionView x:Name="ProductsListView"
                             ItemsSource="{Binding Cart.Products}"
-                            SelectionMode="None"
+                            SelectionMode="Multiple"
+                            SelectionChanged="ProductsListView_SelectionChanged"
                             BackgroundColor="Transparent">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"/>
@@ -67,6 +64,20 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <StackLayout Padding="5">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Info}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                             <StackLayout.Margin>
                                 <OnPlatform x:TypeArguments="Thickness">
                                     <On Platform="iOS" Value="3"/>
@@ -101,9 +112,10 @@
                                                HorizontalOptions="Start"
                                                TextColor="{DynamicResource Info}"
                                             Margin="15, 0, 0, 0"/>
-                                        <Slider Value="{Binding CartsCount}"
+                                        <Slider Maximum="100"
                                                 Minimum="1"
-                                                Maximum="100"/>
+                                                Value="{Binding CartQuantity}"
+                                                DragCompletedCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CartViewModel}}, Path=OnCartQuantityCommand}"/>
                                     </StackLayout>
                                 </Grid>
                             </Frame>

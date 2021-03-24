@@ -26,7 +26,15 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref products, value);
+                RiseOnTotalPropertyChanged();
             }
+        }
+
+        public void RiseOnTotalPropertyChanged()
+        {
+            OnPropertyChanged(nameof(Total));
+            OnPropertyChanged(nameof(TotalText));
+            OnPropertyChanged(nameof(TotalWithCurrency));
         }
 
         private DeliveryPlaceOptions deliveryPlace;
@@ -61,8 +69,15 @@ namespace IucMarket.Mobile.Models
         public OrderModel():base()
         {
             products = new ObservableCollection<ProductModel>();
+            products.CollectionChanged += Products_CollectionChanged;
             Number = "(Auto)";
             DeliveryPlace = DeliveryPlaceOptions.CampusA;
+        }
+
+        private void Products_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            RiseOnTotalPropertyChanged();
         }
 
         public OrderModel(ObservableCollection<ProductModel> products, 
@@ -87,31 +102,16 @@ namespace IucMarket.Mobile.Models
             var p = Products?.FirstOrDefault(x => x.Id == product.Id);
             if (p == null)
             {
-                product.CartsCount = 1;
+                product.CartQuantity = 1;
                 Products.Add(product);
             }
             else
             {
-                product.CartsCount += 1;
-                p.CartsCount += 1;
+                product.CartQuantity += 1;
+                p.CartQuantity += 1;
             }
-            OnPropertyChanged(nameof(Total));
-        }
 
-        public void SetQuantity(ProductModel product, int quantity)
-        {
-            var p = Products?.FirstOrDefault(x => x.Id == product.Id);
-            if (p == null)
-            {
-                product.CartsCount = 1;
-                Products.Add(product);
-            }
-            else
-            {
-                product.CartsCount = quantity;
-                p.CartsCount = quantity;
-            }
-            OnPropertyChanged(nameof(Total));
+            RiseOnTotalPropertyChanged();
         }
 
 
@@ -120,10 +120,11 @@ namespace IucMarket.Mobile.Models
             var p = Products?.FirstOrDefault(x => x.Id == product.Id);
             if (p != null)
             {
-                //product.CartsCount -= p.CartsCount;
+                //product.CartQuantity -= p.CartQuantity;
                 Products?.Remove(p);
             }
-            OnPropertyChanged(nameof(Total));
+
+            RiseOnTotalPropertyChanged();
         }
 
         public double Total => Products?.Sum(x => x.Amount) ?? 0;

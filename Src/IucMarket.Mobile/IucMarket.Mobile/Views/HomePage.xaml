@@ -23,7 +23,7 @@
                    TextColor="{DynamicResource Light}"
                    FontSize="Title"
                    HorizontalOptions="StartAndExpand"
-                   FontAttributes="Bold"/>
+                   />
             <StackLayout Orientation="Horizontal"
                          HorizontalOptions="End"
                          VerticalOptions="Center">

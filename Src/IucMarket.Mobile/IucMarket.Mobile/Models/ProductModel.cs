@@ -56,11 +56,7 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref price, value);
-                OnPropertyChanged(nameof(PriceWithCurrency));
-                OnPropertyChanged(nameof(PriceText));
-                OnPropertyChanged(nameof(Amount));
-                OnPropertyChanged(nameof(AmountText));
-                OnPropertyChanged(nameof(AmountWithCurrency));
+                RiseCartQuantityPropertyChanged();
             }
         }
 
@@ -71,12 +67,7 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref currency, value);
-                OnPropertyChanged(nameof(PriceWithCurrency));
-                OnPropertyChanged(nameof(PriceText));
-                OnPropertyChanged(nameof(Amount));
-                OnPropertyChanged(nameof(AmountText));
-                OnPropertyChanged(nameof(AmountWithCurrency));
-                OnPropertyChanged(nameof(AmountOperation));
+                RiseCartQuantityPropertyChanged();
             }
         }
 
@@ -125,28 +116,34 @@ namespace IucMarket.Mobile.Models
         }
         public string CommentsText => CommentsCount > 0 ? CommentsCount.ToKorM() : "Review";
 
-        private int cartsCount;
-        public int CartsCount
+        private int cartQuantity;
+        public int CartQuantity
         {
-            get => cartsCount;
+            get => cartQuantity;
             set
             {
-                SetProperty(ref cartsCount, value);
-                OnPropertyChanged(nameof(CartsText));
-                OnPropertyChanged(nameof(Amount));
-                OnPropertyChanged(nameof(AmountText));
-                OnPropertyChanged(nameof(AmountWithCurrency));
-                OnPropertyChanged(nameof(IsInsideCart));
-                OnPropertyChanged(nameof(AmountOperation));
+                SetProperty(ref cartQuantity, value);
+                RiseCartQuantityPropertyChanged();
             }
         }
-        public string CartsText => CartsCount > 0 ? ((double)CartsCount).ToKorM() : "+Cart";
 
-        public double Amount => Price  * CartsCount;
+        private void RiseCartQuantityPropertyChanged()
+        {
+            OnPropertyChanged(nameof(CartsText));
+            OnPropertyChanged(nameof(Amount));
+            OnPropertyChanged(nameof(AmountText));
+            OnPropertyChanged(nameof(AmountWithCurrency));
+            OnPropertyChanged(nameof(IsInsideCart));
+            OnPropertyChanged(nameof(AmountOperation));
+        }
+
+        public string CartsText => CartQuantity > 0 ? ((double)CartQuantity).ToKorM() : "+Cart";
+
+        public double Amount => Price  * CartQuantity;
         public string AmountWithCurrency => $"{AmountText} {Currency}";
         public string AmountText => Amount.ToString("N0");
         public string AmountOperation => $"{CartsText} x {PriceText} = {AmountWithCurrency}";
-        public bool IsInsideCart => CartsCount > 0;
+        public bool IsInsideCart => CartQuantity > 0;
         
 
         private double sharesCount;
@@ -245,7 +242,7 @@ namespace IucMarket.Mobile.Models
             StarsCount = starsCount;
             LikesCount = likesCount;
             CommentsCount = commentsCount;
-            CartsCount = cartCount;
+            CartQuantity = cartCount;
             SharesCount = sharesCount;
             VotesCount = votesCount;
             IsAvailable = isAvailable;

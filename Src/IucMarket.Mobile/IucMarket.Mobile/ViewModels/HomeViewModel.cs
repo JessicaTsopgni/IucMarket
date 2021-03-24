@@ -84,7 +84,6 @@ namespace IucMarket.Mobile.ViewModels
             AddToCartCommand = new Command<ProductModel>(OnAddToCart);
             BellBadgeMargin = new Thickness(0, 18, 10, 0);
             CartBadgeMargin = new Thickness(0, 18, 0, 0);
-            SetCartBadge();
         }
 
         private void SetCartBadge(OrderModel cart = null)
@@ -92,7 +91,8 @@ namespace IucMarket.Mobile.ViewModels
             if (cart == null)
             {
                 var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-                cart = JsonConvert.DeserializeObject<OrderModel>(json);
+                if (!string.IsNullOrEmpty(json))
+                    cart = JsonConvert.DeserializeObject<OrderModel>(json);
             }
             var count = cart?.Products.Count ?? 0;
             if (count > 0)
@@ -137,7 +137,16 @@ namespace IucMarket.Mobile.ViewModels
                 IsBusy = true;
                 isFirstLoad = true;
             }
-            //SelectedProduct = null;
+            foreach(var item in Products)
+            {
+                var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var cart = JsonConvert.DeserializeObject<OrderModel>(json);
+                    item.CartQuantity = cart.Products?.FirstOrDefault(x => x.Id == item.Id)?.CartQuantity ?? 0;
+                }
+            }
+            SetCartBadge();
         }
 
         private ProductModel selectedProduct;
@@ -207,7 +216,7 @@ namespace IucMarket.Mobile.ViewModels
                 Application.Current.Properties[nameof(HomePageData)] = new HomePageData(product);
 
                 // This will push the ProductDetailPage onto the navigation stack
-                await Shell.Current.GoToAsync($"/{nameof(ProductDetailPage)}");
+                await Shell.Current.GoToAsync($"/{nameof(ProductDetailPage)}", true);
 
             }
             catch (Exception ex)
@@ -231,7 +240,7 @@ namespace IucMarket.Mobile.ViewModels
             try
             {
                 // This will push the ProductDetailPage onto the navigation stack
-                await Shell.Current.GoToAsync($"/{nameof(CartPage)}");
+                await Shell.Current.GoToAsync($"/{nameof(CartPage)}", true);
 
             }
             catch (Exception ex)
