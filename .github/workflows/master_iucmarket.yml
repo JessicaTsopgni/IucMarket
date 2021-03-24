@@ -25,7 +25,7 @@ jobs:
       run: dotnet build Src\IucMarket.Api\IucMarket.Api.csproj --configuration Release 
 
     - name: dotnet publish
-      run: dotnet publish -c Release
+      run: dotnet publish Src\IucMarket.Api\IucMarket.Api.csproj -c Release -o Src\IucMarket.Api\bin\Release\net5.0\publish
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
