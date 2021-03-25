@@ -27,6 +27,9 @@
                            HorizontalOptions="CenterAndExpand"
                            Padding="0, 5, 0, 5"/>
             <StackLayout Spacing="1" Padding="10, 10, 10, 0">
+                <Label Text="{Binding HomePageData.Product.Reference, StringFormat='#{0}'}"
+                       LineBreakMode="WordWrap"
+                       FontSize="Small"/>
                 <Label Text="{Binding HomePageData.Product.Name}"
                         LineBreakMode="WordWrap"
                         FontAttributes="Bold"/>

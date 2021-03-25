@@ -29,6 +29,7 @@ namespace IucMarket.Api
             services.AddScoped(typeof(UserService));
             services.AddScoped(typeof(ProductService));
             services.AddScoped(typeof(CategoryService));
+            services.AddScoped(typeof(OrderService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

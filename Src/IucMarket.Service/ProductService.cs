@@ -28,10 +28,7 @@ namespace IucMarket.Service
         {
             try
             {
-                var product = await FirebaseClient
-                       .Child(Table)
-                       .Child(id)
-                       .OnceSingleAsync<Product>();
+                Product product = await GetAsync(id);
 
                 return GetProductDto
                 (
@@ -46,6 +43,14 @@ namespace IucMarket.Service
             {
                 return null;
             }
+        }
+
+        internal async Task<Product> GetAsync(string id)
+        {
+            return await FirebaseClient
+                        .Child(Table)
+                        .Child(id)
+                        .OnceSingleAsync<Product>();
         }
 
         private async Task<ProductDto> GetProductByReferenceAsync(string reference, string path)
@@ -133,6 +138,7 @@ namespace IucMarket.Service
             {
                 return null;
             }
+            list.Items = list.Items.OrderByDescending(x => x.CreatedAt).ToList();
             return list;
         }
 
@@ -222,11 +228,11 @@ namespace IucMarket.Service
             {
                 var oldProduct1 = await GetProductAsync(id, path);
                 if (oldProduct1 == null)
-                    throw new KeyNotFoundException($"{nameof(ProductDto)} {id} not found");
+                    throw new KeyNotFoundException($"{nameof(Product)} {id} not found");
 
                 var oldProduct2 = await GetProductByReferenceAsync(command.Reference, path);
                 if (oldProduct2 != null && oldProduct2.Id != id)
-                    throw new DuplicateWaitObjectException($"{nameof(ProductDto)} {command.Reference} already exists !");
+                    throw new DuplicateWaitObjectException($"{nameof(Product)} {command.Reference} already exists !");
 
                 await FirebaseClient
                   .Child(Table)
@@ -319,6 +325,8 @@ namespace IucMarket.Service
             {
                 throw ex;
             }
+
+            list.Items = list.Items.OrderByDescending(x => x.CreatedAt).ToList();
             return list;
         }
 
@@ -333,7 +341,7 @@ namespace IucMarket.Service
             }
             catch (FirebaseAdmin.FirebaseException)
             {
-                throw new KeyNotFoundException($"{nameof(ProductDto)} {uid} not found");
+                throw new KeyNotFoundException($"{nameof(Product)} {uid} not found");
             }
             catch (Firebase.Database.FirebaseException ex)
             {

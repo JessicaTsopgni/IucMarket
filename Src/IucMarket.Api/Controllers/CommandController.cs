@@ -12,13 +12,13 @@ namespace IucMarket.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ArticleTypeController : ControllerBase
+    public class CommandController : ControllerBase
     {
         private const string Error = "An error occured. Please try again later.";
-        private readonly CategoryService service;
+        private readonly OrderService service;
         private readonly IWebHostEnvironment env;
 
-        public ArticleTypeController(CategoryService service, IWebHostEnvironment env)
+        public CommandController(OrderService service, IWebHostEnvironment env)
         {
             this.service = service;
             this.env = env;
@@ -32,8 +32,9 @@ namespace IucMarket.Api.Controllers
             {
                 return Ok
                 (
-                    await service.GetCategoriesAsync
+                    await service.GetOrdersAsync
                     (
+                        ArticleController.GetPathTemplate(Request),
                         pageIndex, 
                         pageSize
                     )
@@ -60,7 +61,7 @@ namespace IucMarket.Api.Controllers
             {
                 return Ok
                 (
-                    await service.GetCategoryAsync(id)
+                    await service.GetOrderAsync(id, ArticleController.GetPathTemplate(Request))
                 );
             }
             catch (HttpRequestException ex)
@@ -76,13 +77,13 @@ namespace IucMarket.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CategoryAddCommand command)
+        public async Task<IActionResult> Post([FromBody] OrderAddCommand command)
         {
             try
             {
                 return Ok
                 (
-                    await service.AddAsync(command)
+                    await service.AddAsync(command, ArticleController.GetPathTemplate(Request))
                 );
             }
             catch(DuplicateWaitObjectException ex)
@@ -104,14 +105,15 @@ namespace IucMarket.Api.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] CategoryAddCommand command)
+        public async Task<IActionResult> Put(string id, [FromBody] OrderEditCommand command)
         {
             try
-            {                
+            {               
                 await service.EditAsync
                 (
                     id,
-                    command
+                    command,
+                    ArticleController.GetPathTemplate(Request)
                 );
                 return NoContent();
             }

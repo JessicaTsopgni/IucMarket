@@ -20,7 +20,7 @@ namespace IucMarket.Common
     public enum StateOptions
     {
         Rejected = -1,
-        Inprocess,
+        In_process,
         Validated,
         Delivered
     }

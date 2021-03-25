@@ -1,7 +1,158 @@
 ﻿@page "/"
+@page "/index"
+@inject HttpClient Http
+@inject IJSRuntime JS;
+<h2>Orders list</h2>
+@*<div class="text-right mb-2">
+    <NavLink class="btn btn-success" href="user/edit">
+        <span class="fas fa-plus" aria-hidden="true"></span> New
+    </NavLink>
+</div>*@
+<div class="row @(string.IsNullOrEmpty(message) ? "d-none": "")">
+    <div class="col-sm-12">
+        <div class="alert alert-@messageType text-truncate">
+            @message
+        </div>
+    </div>
+</div>
+@if (isLoadingData)
+{
+    <Loading></Loading>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Customer</th>
+                <th>Products</th>
+                <th>Amount</th>
+                <th>Since</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (orders != null && orders.Count() != 0)
+            {
+                foreach (var order in orders)
+                {
+                    <tr>
+                        <td>@order.Number</td>
+                        <td>@order.Customer</td>
+                        <td>@order.ProductsCount</td>
+                        <td>@order.Since</td>
+                        <td>@order.Status</td>
+                        <td class="text-right">
+                            <a disabled="@isBusy" href="user/edit/@order.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
+                            <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(order.Id, order.Number)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7"><em>Order not found !</em></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-<h1>Hello, world!</h1>
+@code {
+    private IEnumerable<OrderListModel> orders;
+    private string message = string.Empty;
+    private MessageType messageType = MessageType.danger;
+    private bool isBusy = false;
+    private bool isLoadingData = false;
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+    }
 
-Welcome to your new app.
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoadingData = true;
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            var response = await Http.GetAsync($"Command/Index");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var orderList = JsonConvert.DeserializeObject<ListDto<OrderDto>>(json);
+                orders = orderList.Items.Select(x => new OrderListModel
+                (
+                    x.Id,
+                    x.Number,
+                    x.Customer.FullName,
+                    x.Details.Count(),
+                    x.Total,
+                    x.CreatedAt,
+                    x.State
+                )).ToArray();
+            }
+            else
+            {
+                messageType = MessageType.danger;
+                message = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            isLoadingData = false;
+        }
+    }
+
+    private async Task HandleDelete(string id, string name)
+    {
+        try
+        {
+            isBusy = true;
+            messageType = MessageType.info;
+            message = "Processing...";
+            var result = await JS.InvokeAsync<bool>("confirmDelete", name);
+            if (result)
+            {
+                var response = await Http.DeleteAsync($"Command/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    messageType = MessageType.success;
+                    message = "Delete done !";
+                    await LoadData();
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(1000);
+                    message = string.Empty;
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using IucMarket.Common;
 namespace IucMarket.Dtos
 {
@@ -15,6 +16,7 @@ namespace IucMarket.Dtos
         public DeliveryPlaceOptions DeliveryPlace { get; set; }
         public DateTime? DeliveryPredicateAt { get; set; }
         public DateTime? DeliveryAt { get; set; }
+        public double Total => Details.Sum(x => x.Amount);
         public OrderDto()
         {
 
@@ -40,6 +42,7 @@ namespace IucMarket.Dtos
     {
         public ProductDto Product { get; set; }
         public int Quantity { get; set; }
+        public double Amount => Product.Price * Quantity;
 
         public OrderDetailDto()
         {

@@ -110,7 +110,9 @@ namespace IucMarket.Mobile.ViewModels
                 foreach (var item in items)
                 {
                     Products.Add(item);
+                    SetProductCartQuantity(item);
                 }
+                SetCartBadge();
             }
             catch (Exception ex)
             {
@@ -134,12 +136,20 @@ namespace IucMarket.Mobile.ViewModels
                 IsBusy = true;
                 isFirstLoad = true;
             }
-            foreach(var item in Products)
+            else
             {
-                    var cart = App.Get<OrderModel>();
-                    item.OrderQuantity = cart.Products?.FirstOrDefault(x => x.Id == item.Id)?.OrderQuantity ?? 0;
+                foreach(var item in Products)
+                {
+                    SetProductCartQuantity(item);
+                }
+                SetCartBadge();
             }
-            SetCartBadge();
+        }
+
+        private static void SetProductCartQuantity(ProductModel item)
+        {
+            var cart = App.Get<OrderModel>();
+            item.OrderQuantity = cart.Products?.FirstOrDefault(x => x.Id == item.Id)?.OrderQuantity ?? 0;
         }
 
         private ProductModel selectedProduct;

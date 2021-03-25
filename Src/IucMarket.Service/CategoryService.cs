@@ -21,7 +21,7 @@ namespace IucMarket.Service
         {
         }
 
-        private async Task<Category> GetAsync(string id)
+        internal async Task<Category> GetAsync(string id)
         {
             try
             {
@@ -103,12 +103,12 @@ namespace IucMarket.Service
             {
                 if(await GetCategoryByNameAsync(command.Name) != null)
                     throw new DuplicateWaitObjectException($"{nameof(command.Name)} already exists !");
-
+                var category = new Category(command.Name);
                 var result = await FirebaseClient
                   .Child(Table)
-                  .PostAsync(JsonConvert.SerializeObject(command));
+                  .PostAsync(JsonConvert.SerializeObject(category));
 
-                return GetCategoryDto(result.Key, new Category(command.Name));
+                return GetCategoryDto(result.Key, category);
             }
             catch (Firebase.Database.FirebaseException ex)
             {
@@ -129,11 +129,11 @@ namespace IucMarket.Service
             {
                 var oldProduct1 = await GetCategoryAsync(id);
                 if (oldProduct1 == null)
-                    throw new KeyNotFoundException($"{nameof(command)} {id} not found");
+                    throw new KeyNotFoundException($"{nameof(Category)} {id} not found");
 
-                var oldProduct2 = await GetCategoryByNameAsync(id);
+                var oldProduct2 = await GetCategoryByNameAsync(command.Name);
                 if (oldProduct2 != null && oldProduct2.Id != id)
-                    throw new DuplicateWaitObjectException($"{nameof(command)} {command.Name} already exists !");
+                    throw new DuplicateWaitObjectException($"{nameof(Category)} {command.Name} already exists !");
 
                 await FirebaseClient
                   .Child(Table)
@@ -188,6 +188,7 @@ namespace IucMarket.Service
             {
                 throw ex;
             }
+            list.Items = list.Items.OrderBy(x => x.Name).ToList();
             return list;
         }
 

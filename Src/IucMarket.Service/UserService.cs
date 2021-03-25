@@ -393,10 +393,12 @@ namespace IucMarket.Service
             //{
             //    throw ex;
             //}
+
+            list.Items = list.Items.OrderByDescending(x => x.CreatedAt).ToList();
             return list;
         }
 
-        private async Task<KeyValuePair<string, User>> GetAsync(string id)
+        internal async Task<KeyValuePair<string, User>> GetAsync(string id)
         {
             try
             {

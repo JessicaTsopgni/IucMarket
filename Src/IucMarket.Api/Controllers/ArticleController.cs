@@ -26,9 +26,9 @@ namespace IucMarket.Api.Controllers
             this.env = env;
         }
 
-        private string GetPathTemplate()
+        public static string GetPathTemplate(HttpRequest request)
         {
-            return Request.Scheme + "://" + Request.Host.Value + "/Article/Downlaod/{0}?contentType={1}";
+            return request.Scheme + "://" + request.Host.Value + "/Article/Downlaod/{0}?contentType={1}";
         }
 
         [HttpGet]
@@ -41,7 +41,7 @@ namespace IucMarket.Api.Controllers
                 (
                     await service.GetProductsAsync
                     (
-                        GetPathTemplate(), 
+                        GetPathTemplate(Request), 
                         pageIndex, 
                         pageSize
                     )
@@ -70,7 +70,7 @@ namespace IucMarket.Api.Controllers
                     await service.GetProductsByCategoryAsync
                     (
                         id,
-                        GetPathTemplate(),
+                        GetPathTemplate(Request),
                         pageIndex,
                         pageSize
                     )
@@ -100,7 +100,7 @@ namespace IucMarket.Api.Controllers
                     await service.GetProductAsync
                     (
                         id,
-                        GetPathTemplate()
+                        GetPathTemplate(Request)
                     )
                 );
             }
@@ -128,12 +128,12 @@ namespace IucMarket.Api.Controllers
 
                 return Ok
                 (
-                    await service.AddAsync(command, GetPathTemplate())
+                    await service.AddAsync(command, GetPathTemplate(Request))
                 );
             }
             catch(DuplicateWaitObjectException ex)
             {
-                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(), x.Key, x.Value)));
+                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(Request), x.Key, x.Value)));
                 return Conflict(ex.Message);
             }
             catch (HttpRequestException ex)
@@ -143,7 +143,7 @@ namespace IucMarket.Api.Controllers
             }
             catch (Exception ex)
             {
-                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(), x.Key, x.Value)));
+                DeleteProductFiles(command.Pictures?.Select(x => new FileInfoDto(GetPathTemplate(Request), x.Key, x.Value)));
                 System.Diagnostics.Debug.Print(ex.ToString());
                 return BadRequest(Error);
             }
@@ -172,7 +172,7 @@ namespace IucMarket.Api.Controllers
                 var oldProduct = await service.GetProductAsync
                 (
                     id,
-                    GetPathTemplate()
+                    GetPathTemplate(Request)
                 );
                 if (oldProduct == null)
                     throw new KeyNotFoundException($"Product {id} not found !");
@@ -185,7 +185,7 @@ namespace IucMarket.Api.Controllers
                 (
                     id,
                     command,
-                    GetPathTemplate()
+                    GetPathTemplate(Request)
                 );
                 return NoContent();
             }
@@ -263,7 +263,7 @@ namespace IucMarket.Api.Controllers
                 var product = await service.GetProductAsync
                 (
                     id,
-                    GetPathTemplate()
+                    GetPathTemplate(Request)
                 );
                 await service.DeleteAsync(id);
                 DeleteProductFiles(product.Pictures);

@@ -6,22 +6,26 @@ namespace IucMarket.Service.Entities
 {
     internal class Order
     {
-        public  StateOptions State { get; set; }
-        public string StateReason { get; set; }
+        public string Number { get; set; }
         public IEnumerable<OrderDetail> Details { get; set; }
         public User Customer { get; set; }
         public DateTime CreatedAt { get; set; }
         public DeliveryPlaceOptions DeliveryPlace { get; set; }
         public DateTime? DeliveryPredicateAt { get; set; }
         public DateTime? DeliveryAt { get; set; }
+        public  StateOptions State { get; set; }
+        public string StateReason { get; set; }
+
         public Order()
         {
 
         }
 
-        public Order(StateOptions state, string stateReason, IEnumerable<OrderDetail> details, User customer, DateTime createdAt, 
-            DeliveryPlaceOptions deliveryPlace, DateTime? deliveryPredicateAt, DateTime? deliveryAt)
+        public Order(string number,IEnumerable<OrderDetail> details, User customer, 
+            DeliveryPlaceOptions deliveryPlace,  DateTime createdAt,
+            StateOptions state, string stateReason,  DateTime? deliveryPredicateAt, DateTime? deliveryAt)
         {
+            Number = number;
             State = state;
             StateReason = stateReason;
             Details = details;
@@ -35,18 +39,20 @@ namespace IucMarket.Service.Entities
 
     internal class OrderDetail
     {
+        public string ProductId { get; set; }
         public Product Product { get; set; }
         public int Quantity { get; set; }
-
         public OrderDetail()
         {
 
         }
 
-        public OrderDetail(Product product, int quantity)
+        public OrderDetail(string productId, Product product, int quantity)
         {
+            ProductId = productId;
             Product = product;
             Quantity = quantity;
         }
     }
+
 }
