@@ -20,6 +20,7 @@ namespace IucMarket.Mobile.ViewModels
         public event EventHandler ScrolledToTop;
         public Command LoadProductsCommand { get; }
         public Command<ProductModel> StarTappedCommand { get; }
+        public Command<ProductModel> AddToCartCommand { get; }
         public Command<ProductModel> ProductSelectedCommand { get; }
 
         private HomePageData homePageData;
@@ -45,6 +46,7 @@ namespace IucMarket.Mobile.ViewModels
             ProductSelectedCommand = new Command<ProductModel>(OnProductSelected);
             LoadProductsCommand = new Command(async () => await ExecuteLoadProductsCommand());
             StarTappedCommand = new Command<ProductModel>(OnStarTapped);
+            AddToCartCommand = new Command<ProductModel>(OnAddToCart);
             SameProducts = new ObservableCollection<ProductModel>();
         }
 
@@ -97,6 +99,12 @@ namespace IucMarket.Mobile.ViewModels
         void OnStarTapped(ProductModel product)
         {
             new HomeViewModel().StarTappedCommand.Execute(product);
+        }
+
+
+        void OnAddToCart(ProductModel product)
+        {
+            new HomeViewModel().AddToCartCommand.Execute(product);
         }
     }
 }

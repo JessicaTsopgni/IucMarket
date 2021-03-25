@@ -56,7 +56,7 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref price, value);
-                RiseCartQuantityPropertyChanged();
+                RiseOrderQuantityPropertyChanged();
             }
         }
 
@@ -67,7 +67,7 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref currency, value);
-                RiseCartQuantityPropertyChanged();
+                RiseOrderQuantityPropertyChanged();
             }
         }
 
@@ -116,18 +116,18 @@ namespace IucMarket.Mobile.Models
         }
         public string CommentsText => CommentsCount > 0 ? CommentsCount.ToKorM() : "Review";
 
-        private int cartQuantity;
-        public int CartQuantity
+        private int orderQuantity;
+        public int OrderQuantity
         {
-            get => cartQuantity;
+            get => orderQuantity;
             set
             {
-                SetProperty(ref cartQuantity, value);
-                RiseCartQuantityPropertyChanged();
+                SetProperty(ref orderQuantity, value);
+                RiseOrderQuantityPropertyChanged();
             }
         }
 
-        private void RiseCartQuantityPropertyChanged()
+        private void RiseOrderQuantityPropertyChanged()
         {
             OnPropertyChanged(nameof(CartsText));
             OnPropertyChanged(nameof(Amount));
@@ -137,13 +137,13 @@ namespace IucMarket.Mobile.Models
             OnPropertyChanged(nameof(AmountOperation));
         }
 
-        public string CartsText => CartQuantity > 0 ? ((double)CartQuantity).ToKorM() : "+Cart";
+        public string CartsText => OrderQuantity > 0 ? ((double)OrderQuantity).ToKorM() : "+Cart";
 
-        public double Amount => Price  * CartQuantity;
+        public double Amount => Price  * OrderQuantity;
         public string AmountWithCurrency => $"{AmountText} {Currency}";
         public string AmountText => Amount.ToString("N0");
         public string AmountOperation => $"{CartsText} x {PriceText} = {AmountWithCurrency}";
-        public bool IsInsideCart => CartQuantity > 0;
+        public bool IsInsideCart => OrderQuantity > 0;
         
 
         private double sharesCount;
@@ -242,7 +242,7 @@ namespace IucMarket.Mobile.Models
             StarsCount = starsCount;
             LikesCount = likesCount;
             CommentsCount = commentsCount;
-            CartQuantity = cartCount;
+            OrderQuantity = cartCount;
             SharesCount = sharesCount;
             VotesCount = votesCount;
             IsAvailable = isAvailable;

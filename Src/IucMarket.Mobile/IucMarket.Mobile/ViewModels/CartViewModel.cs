@@ -13,6 +13,7 @@ using Xamarin.Forms;
 using Rg.Plugins.Popup.Extensions;
 using Plugin.SecureStorage;
 using System.Collections.Generic;
+using IucMarket.Common;
 
 namespace IucMarket.Mobile.ViewModels
 {
@@ -54,12 +55,12 @@ namespace IucMarket.Mobile.ViewModels
         public Command OrderCartCommand { get; }
         public Command GoBackCommand { get; }
         public Command SelectedAllToCartCommand { get; }
-        public Command OnCartQuantityCommand { get; }
+        public Command OnOrderQuantityCommand { get; }
         private bool isFirstLoad;
         private CollectionView collectionView;
 
         //private LoginNamePageData loginNamePageData;
-        public IProductDataStore ProductDataStore => DependencyService.Get<IProductDataStore>();
+        public IOrderDataStore OrderDataStore => DependencyService.Get<IOrderDataStore>();
         public ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
 
        
@@ -72,10 +73,10 @@ namespace IucMarket.Mobile.ViewModels
             OrderCartCommand = new Command(OnOrderCart, () => ShowOrderIcon && !IsBusy);
             GoBackCommand = new Command(OnBackButtonPressed);
             SelectedAllToCartCommand = new Command(OnSelectedAllToCartCommand);
-            OnCartQuantityCommand = new Command(OnCartQuantity);
+            OnOrderQuantityCommand = new Command(OnOrderQuantity);
         }
 
-        private void OnCartQuantity(object obj)
+        private void OnOrderQuantity(object obj)
         {
             Cart.RiseOnTotalPropertyChanged();
         }
@@ -88,10 +89,52 @@ namespace IucMarket.Mobile.ViewModels
                 collectionView.SelectedItems.Clear();
         }
 
-        private void OnOrderCart()
+        private async void OnOrderCart()
         {
-            throw new NotImplementedException();
+            if (await UserDialogs.Instance.ConfirmAsync($"You order will be submit.\n{Cart.TotalWithCurrency}", "Confirm"))
+            {
+                await Shell.Current.Navigation.PushPopupAsync(new DeliveryPlacePopup(SetDeliveryPlace));
+            }
         }
+
+        public async void SubmitCart()
+        {
+            if (App.IsAuthenticate)
+            {
+                try
+                {
+                    IsBusy = true;
+                    var cart = App.Get<OrderModel>();
+                    if (Cart.Products.Count == 0) return;
+
+                    var customer = App.Get<UserModel>();
+                    cart.Customer = customer;
+
+                    var items = await OrderDataStore.AddAsync(cart);
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    await UserDialogs.Instance.AlertAsync
+                    (
+                        ex.Message,
+                        "Error"
+                    );
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
+
+        async Task SetDeliveryPlace(DeliveryPlaceModel model)
+        {
+            await Task.FromResult(Cart.DeliveryPlace = (DeliveryPlaceOptions)int.Parse(model.Id));
+            App.Save(Cart);
+        }
+
         public void OnSelectionChanged(CollectionView sender)
         {
             collectionView = sender;           
@@ -102,10 +145,7 @@ namespace IucMarket.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-                if (string.IsNullOrEmpty(json))
-                    return;
-                Cart = JsonConvert.DeserializeObject<OrderModel>(json);
+                Cart = App.Get<OrderModel>();
                 ShowOrderIcon = (Cart?.Products.Count ?? 0) > 0;
             }
             catch (Exception ex)
@@ -121,6 +161,7 @@ namespace IucMarket.Mobile.ViewModels
             {
                 IsBusy = false;
             }
+            OrderCartCommand.ChangeCanExecute();
         }
 
         public void OnAppearing()
@@ -134,8 +175,7 @@ namespace IucMarket.Mobile.ViewModels
 
         public void OnBackButtonPressed()
         {
-            var json = JsonConvert.SerializeObject(Cart);
-            CrossSecureStorage.Current.SetValue(App.SessionCartName, json);
+            App.Save(Cart);
             Shell.Current.GoToAsync("..");
         }
 
@@ -155,6 +195,7 @@ namespace IucMarket.Mobile.ViewModels
             collectionView?.SelectedItems.Clear();
 
             ShowOrderIcon = (Cart?.Products.Count ?? 0) > 0;
+            OrderCartCommand.ChangeCanExecute();
         }
 
     }

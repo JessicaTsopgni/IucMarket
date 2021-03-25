@@ -155,8 +155,7 @@ namespace IucMarket.Api.Controllers
             {
                 foreach (var p in pictures)
                 {
-                    var fileName = System.IO.Path.GetFileName(new UriBuilder(p.Name).Path);
-                    var path = GetPath(fileName);
+                    var path = GetPath(p.Name);
                     if (System.IO.File.Exists(path))
                         System.IO.File.Delete(path);
                 }
@@ -238,10 +237,9 @@ namespace IucMarket.Api.Controllers
             {
                 foreach (var oldf in oldFileInfos)
                 {
-                    var oldFileName = System.IO.Path.GetFileName(new UriBuilder(oldf.Name).Path);
-                    if (!pictures.Any(x=> x.FileName == oldFileName))
+                    if (!pictures.Any(x=> x.FileName == oldf.Name))
                     {
-                        string path = GetPath(oldFileName);
+                        string path = GetPath(oldf.Name);
                         if (System.IO.File.Exists(path))
                             System.IO.File.Delete(path);
                     }

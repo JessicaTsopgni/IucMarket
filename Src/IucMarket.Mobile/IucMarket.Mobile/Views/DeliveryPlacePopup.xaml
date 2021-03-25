@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+             xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+             xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"
+             x:DataType="viewModels:DeliveryPlaceViewModel"
+             x:Class="IucMarket.Mobile.Views.DeliveryPlacePopup">
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation 
+            PositionIn="Center"
+            PositionOut="Center"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="400"
+            DurationOut="300"
+            EasingIn="SinOut"
+            EasingOut="SinIn"
+            HasBackgroundAnimation="True"/>
+    </pages:PopupPage.Animation>
+    <StackLayout
+        Spacing="10"
+        VerticalOptions="Center"
+        BackgroundColor="{DynamicResource Light}"
+        Padding="20"
+        Margin="20">
+        <Picker 
+            x:Name="picker"
+            ItemsSource="{Binding Places}"
+            ItemDisplayBinding="{Binding Name}"
+            Title="Choose a delivery place"/>
+        <StackLayout Orientation="Horizontal"
+                     HorizontalOptions="End">
+            <Button VerticalOptions="Center"
+                    ContentLayout="Left,0"
+                    Text="Cancel" 
+                    Clicked="Cancel_Clicked"/>
+            <Button VerticalOptions="Center"
+                    ContentLayout="Left,0"
+                    Text="Done" 
+                    Clicked="Done_Clicked"/>
+        </StackLayout>
+    </StackLayout>
+</pages:PopupPage>

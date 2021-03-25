@@ -12,8 +12,16 @@ namespace IucMarket.Common
 
     public enum DeliveryPlaceOptions
     {
-        CampusA,
-        CampusB,
-        CampusC
+        Campus_Logbessou,
+        Campus_Akwa,
+    }
+
+
+    public enum StateOptions
+    {
+        Rejected = -1,
+        Inprocess,
+        Validated,
+        Delivered
     }
 }

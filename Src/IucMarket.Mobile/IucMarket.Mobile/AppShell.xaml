@@ -32,8 +32,8 @@
     </Shell.Resources>
 
     <TabBar>
-        <ShellContent Title="Home" Icon="{FontImage FontFamily=fas, 
-                            Glyph={x:Static helpers:IconFontSolid.Home}}" 
+        <ShellContent Title="Shop" Icon="{FontImage FontFamily=fas, 
+                            Glyph={x:Static helpers:IconFontSolid.ShoppingBag}}" 
                       Route="HomePage" ContentTemplate="{DataTemplate local:HomePage}" />
         <ShellContent Title="Search" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.Search}}"

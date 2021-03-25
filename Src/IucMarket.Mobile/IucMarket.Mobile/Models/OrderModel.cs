@@ -57,6 +57,16 @@ namespace IucMarket.Mobile.Models
             }
         }
 
+        private UserModel customer;
+        public UserModel Customer
+        {
+            get => customer;
+            set
+            {
+                SetProperty(ref customer, value);
+            }
+        }
+
         private DateTime? customerReceivedDate;
         public DateTime? CustomerReceivedDate
         {
@@ -66,12 +76,34 @@ namespace IucMarket.Mobile.Models
                 SetProperty(ref customerReceivedDate, value);
             }
         }
+
+
+        private StateOptions state;
+        public StateOptions State
+        {
+            get => state;
+            set
+            {
+                SetProperty(ref state, value);
+            }
+        }
+
+
+        private string stateReason;
+        public string StateReason
+        {
+            get => stateReason;
+            set
+            {
+                SetProperty(ref stateReason, value);
+            }
+        }
         public OrderModel():base()
         {
             products = new ObservableCollection<ProductModel>();
             products.CollectionChanged += Products_CollectionChanged;
             Number = "(Auto)";
-            DeliveryPlace = DeliveryPlaceOptions.CampusA;
+            DeliveryPlace = DeliveryPlaceOptions.Campus_Logbessou;
         }
 
         private void Products_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -89,12 +121,16 @@ namespace IucMarket.Mobile.Models
         }
 
         public OrderModel(string id, string number, ObservableCollection<ProductModel> orderDetails, DeliveryPlaceOptions deliveryPlace, 
-            DateTime? deliveryPredicatedDate, DateTime? customerReceivedDate)
+            DateTime? deliveryPredicatedDate, UserModel customer, DateTime? customerReceivedDate,
+            StateOptions state, string stateReason)
             :this(orderDetails, deliveryPlace, deliveryPredicatedDate)
         {
             Id = id;
             Number = number;
+            Customer = customer;
             CustomerReceivedDate = customerReceivedDate;
+            State = state;
+            StateReason = stateReason;
         }
 
         public void Add(ProductModel product)
@@ -102,13 +138,13 @@ namespace IucMarket.Mobile.Models
             var p = Products?.FirstOrDefault(x => x.Id == product.Id);
             if (p == null)
             {
-                product.CartQuantity = 1;
+                product.OrderQuantity = 1;
                 Products.Add(product);
             }
             else
             {
-                product.CartQuantity += 1;
-                p.CartQuantity += 1;
+                product.OrderQuantity += 1;
+                p.OrderQuantity += 1;
             }
 
             RiseOnTotalPropertyChanged();
@@ -120,7 +156,7 @@ namespace IucMarket.Mobile.Models
             var p = Products?.FirstOrDefault(x => x.Id == product.Id);
             if (p != null)
             {
-                //product.CartQuantity -= p.CartQuantity;
+                //product.OrderQuantity -= p.OrderQuantity;
                 Products?.Remove(p);
             }
 
@@ -133,7 +169,7 @@ namespace IucMarket.Mobile.Models
         public void Clear()
         {
             Id = null;
-            DeliveryPlace = DeliveryPlaceOptions.CampusA;
+            DeliveryPlace = DeliveryPlaceOptions.Campus_Logbessou;
             Products?.Clear();
             DeliveryPredicatedDate = DateTime.Now;
             Number = "(Auto)";

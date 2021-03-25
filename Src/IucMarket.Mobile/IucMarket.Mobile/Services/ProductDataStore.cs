@@ -36,43 +36,8 @@ namespace IucMarket.Mobile.Services
                         {
                             var json = await response.Content.ReadAsStringAsync();
                             var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
-                            var r = new Random();
 
-                            items = list.Items.Select
-                            (
-                                x =>
-                                {
-                                    var votesCount = r.Next(0, 10000);
-                                    return new ProductModel
-                                    (
-                                        x.Id,
-                                        x.Reference,
-                                        x.Name,
-                                        x.Description,
-                                        new CategoryModel(x.Category.Id, x.Category.Name),
-                                        x.Price,
-                                        x.Currency,
-                                        r.Next(0, votesCount * ProductModel.StarsMax),
-                                        votesCount,
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 1000000),
-                                        0,
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 2) == 1 ? true : false,
-                                        x.Pictures?.Select(y => y.Path).ToArray(),
-                                        new UserModel
-                                        (
-                                            x.Owner?.UserId,
-                                            x.Owner?.Email,
-                                            x.Owner?.FullName,
-                                            x.Owner?.CreatedAt ?? DateTime.MinValue,
-                                            x.Owner?.Token,
-                                            x.Owner.TokenExpiresIn
-                                        ),
-                                        x.CreatedAt
-                                    );
-                                }
-                            ).ToList();
+                            items = list.Items.Select(x => GetProductModel(x, 0)).ToList();
                         }
                         else
                         {
@@ -94,6 +59,41 @@ namespace IucMarket.Mobile.Services
                 throw ex;
             }
                 
+        }
+
+        public static ProductModel GetProductModel(ProductDto product, int orderQuantity)
+        {
+            var r = new Random();
+            var votesCount = r.Next(0, 10000);
+
+            return new ProductModel
+            (
+                product.Id,
+                product.Reference,
+                product.Name,
+                product.Description,
+                new CategoryModel(product.Category.Id, product.Category.Name),
+                product.Price,
+                product.Currency,
+                r.Next(0, votesCount * ProductModel.StarsMax),
+                votesCount,
+                r.Next(0, 1000000),
+                r.Next(0, 1000000),
+                orderQuantity,
+                r.Next(0, 1000000),
+                r.Next(0, 2) == 1 ? true : false,
+                product.Pictures?.Select(y => y.Path).ToArray(),
+                new UserModel
+                (
+                    product.Owner?.UserId,
+                    product.Owner?.Email,
+                    product.Owner?.FullName,
+                    product.Owner?.CreatedAt ?? DateTime.MinValue,
+                    product.Owner?.Token,
+                    product.Owner.TokenExpiresIn
+                ),
+                product.CreatedAt
+            );
         }
 
         public async Task<ProductModel> AddAsync(ProductModel item)
@@ -136,42 +136,7 @@ namespace IucMarket.Mobile.Services
                         {
                             var json = await response.Content.ReadAsStringAsync();
                             var list = JsonConvert.DeserializeObject<ListDto<ProductDto>>(json);
-                            var r = new Random();
-                            return list.Items.Where(x => x.Id != item.Id).Select
-                            (
-                                x =>
-                                {
-                                    var votesCount = r.Next(0, 10000);
-                                    return new ProductModel
-                                    (
-                                        x.Id,
-                                        x.Reference,
-                                        x.Name,
-                                        x.Description,
-                                        new CategoryModel(x.Category.Id, x.Category.Name),
-                                        x.Price,
-                                        x.Currency,
-                                        r.Next(0, votesCount * ProductModel.StarsMax),
-                                        votesCount,
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 1000000),
-                                        r.Next(0, 2) == 1 ? true : false,
-                                        x.Pictures?.Select(y => y.Path).ToArray(),
-                                        new UserModel
-                                        (
-                                            x.Owner?.UserId,
-                                            x.Owner?.Email,
-                                            x.Owner?.FullName,
-                                            x.Owner?.CreatedAt ?? DateTime.MinValue,
-                                            x.Owner?.Token,
-                                            x.Owner.TokenExpiresIn
-                                        ),
-                                        x.CreatedAt
-                                    );
-                                }
-                            ).ToArray();
+                            return list.Items.Where(x => x.Id != item.Id).Select(x => GetProductModel(x, 0)).ToList();
                         }
                         else
                         {

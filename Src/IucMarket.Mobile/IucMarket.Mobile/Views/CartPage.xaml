@@ -41,7 +41,8 @@
                 <ImageButton Source="{FontImage Size=Title, Color={x:StaticResource Light}, FontFamily=fas, Glyph={x:Static helpers:IconFontSolid.Check}}"
                                 BackgroundColor="Transparent"
                                  BorderColor="Transparent"
-                                 Command="{Binding OrderCartCommand}"/>
+                                 Command="{Binding OrderCartCommand}"
+                                IsVisible="{Binding ShowOrderIcon}"/>
             </StackLayout>
         </StackLayout>
     </Shell.TitleView>
@@ -114,8 +115,8 @@
                                             Margin="15, 0, 0, 0"/>
                                         <Slider Maximum="100"
                                                 Minimum="1"
-                                                Value="{Binding CartQuantity}"
-                                                DragCompletedCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CartViewModel}}, Path=OnCartQuantityCommand}"/>
+                                                Value="{Binding OrderQuantity}"
+                                                DragCompletedCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CartViewModel}}, Path=OnOrderQuantityCommand}"/>
                                     </StackLayout>
                                 </Grid>
                             </Frame>

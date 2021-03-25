@@ -145,7 +145,34 @@ namespace IucMarket.Service
 
                 var result = await FirebaseClient
                   .Child(Table)
-                  .PostAsync(JsonConvert.SerializeObject(command));
+                  .PostAsync
+                  (
+                     JsonConvert.SerializeObject
+                     (
+                         new Product
+                        (
+                            command.Reference,
+                            command.Name,
+                            command.Description,
+                            command.Price,
+                            command.Currency,
+                            command.Pictures.Select
+                            (
+                                x =>
+                                new FileInfo
+                                (
+                                    x.Key,
+                                    x.Value
+
+                                )
+                            ).ToArray(),
+                            command.CategoryId,
+                            command.OwnerId,
+                            command.CreatedAt,
+                            command.Status
+                        )
+                     )
+                  );
 
                 return GetProductDto
                 (
@@ -197,7 +224,7 @@ namespace IucMarket.Service
                 if (oldProduct1 == null)
                     throw new KeyNotFoundException($"{nameof(ProductDto)} {id} not found");
 
-                var oldProduct2 = await GetProductByReferenceAsync(id, path);
+                var oldProduct2 = await GetProductByReferenceAsync(command.Reference, path);
                 if (oldProduct2 != null && oldProduct2.Id != id)
                     throw new DuplicateWaitObjectException($"{nameof(ProductDto)} {command.Reference} already exists !");
 
@@ -227,7 +254,7 @@ namespace IucMarket.Service
                             ).ToArray(),
                             command.CategoryId,
                             command.OwnerId,
-                            command.CreatedAt,
+                            oldProduct1.CreatedAt,
                             command.Status
                         )
                     )
@@ -322,6 +349,7 @@ namespace IucMarket.Service
          internal static ProductDto GetProductDto
         (string key, Product product, string picturePath, CategoryDto category, UserDto user)
         {
+            if (product == null) return null;
             return new ProductDto
             (
                 key,

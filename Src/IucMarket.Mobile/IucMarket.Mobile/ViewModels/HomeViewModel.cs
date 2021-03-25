@@ -89,11 +89,8 @@ namespace IucMarket.Mobile.ViewModels
         private void SetCartBadge(OrderModel cart = null)
         {
             if (cart == null)
-            {
-                var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-                if (!string.IsNullOrEmpty(json))
-                    cart = JsonConvert.DeserializeObject<OrderModel>(json);
-            }
+                 cart = App.Get<OrderModel>();
+
             var count = cart?.Products.Count ?? 0;
             if (count > 0)
             {
@@ -139,12 +136,8 @@ namespace IucMarket.Mobile.ViewModels
             }
             foreach(var item in Products)
             {
-                var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-                if (!string.IsNullOrEmpty(json))
-                {
-                    var cart = JsonConvert.DeserializeObject<OrderModel>(json);
-                    item.CartQuantity = cart.Products?.FirstOrDefault(x => x.Id == item.Id)?.CartQuantity ?? 0;
-                }
+                    var cart = App.Get<OrderModel>();
+                    item.OrderQuantity = cart.Products?.FirstOrDefault(x => x.Id == item.Id)?.OrderQuantity ?? 0;
             }
             SetCartBadge();
         }
@@ -165,19 +158,12 @@ namespace IucMarket.Mobile.ViewModels
             if (product == null)
                 return;
 
-            var json = CrossSecureStorage.Current.GetValue(App.SessionCartName);
-            if (string.IsNullOrEmpty(json))
-                return; // init cart to App class
-
-            var cart = JsonConvert.DeserializeObject<OrderModel>(json);
+            var cart = App.Get<OrderModel>();
             cart.Add(product);
 
             SetCartBadge(cart);
 
-            json = JsonConvert.SerializeObject(cart);
-            CrossSecureStorage.Current.SetValue(App.SessionCartName, json);
-
-            //await Shell.Current.GoToAsync(nameof(NewItemPage));
+            App.Save(cart);
         }
 
         private async void OnStarTapped(ProductModel product)
@@ -196,13 +182,9 @@ namespace IucMarket.Mobile.ViewModels
         }
 
         async Task SetStarsCount(int numberOfStarSelected)
-        {
-            var json = CrossSecureStorage.Current.GetValue(App.SessionKeyName);
-            if (!string.IsNullOrEmpty(json))
-            {
-                var owner = JsonConvert.DeserializeObject<UserModel>(CrossSecureStorage.Current.GetValue(App.SessionKeyName));
-                await ProductDataStore.Rate(selectedProduct, owner, numberOfStarSelected);
-            }
+        {    
+            var owner = App.Get<UserModel>();
+            await ProductDataStore.Rate(selectedProduct, owner, numberOfStarSelected);
         }
 
         async void OnProductSelected(ProductModel product)

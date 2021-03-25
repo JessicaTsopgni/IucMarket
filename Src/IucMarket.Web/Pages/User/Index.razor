@@ -131,9 +131,10 @@ else
                 {
                     messageType = MessageType.success;
                     message = "Delete done !";
+                    await LoadData();
                     await InvokeAsync(StateHasChanged);
                     await Task.Delay(1000);
-                    await LoadData();
+                    message=string.Empty;
                 }
                 else
                 {

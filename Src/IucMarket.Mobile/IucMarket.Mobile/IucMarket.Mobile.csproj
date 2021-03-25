@@ -43,9 +43,15 @@
     <Compile Update="Views\ProductDetailPage.xaml.cs">
       <DependentUpon>ProductDetailPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\DeliveryPlacePopup.xaml.cs">
+      <DependentUpon>DeliveryPlacePopup.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Views\DeliveryPlacePopup.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\RatePopup.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>

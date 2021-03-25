@@ -149,12 +149,32 @@
                         <Label Text="{x:Static helpers:IconFontSolid.CartPlus}" 
                                 FontFamily="fas"
                                 VerticalOptions="Center"
-                                HorizontalOptions="Center"/>
-                        <Label Text="{Binding HomePageData.Product.CartsText}"
-                                LineBreakMode="TailTruncation"
-                                VerticalOptions="Center"
-                                HorizontalOptions="Center" />
-                    </StackLayout>
+                                HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                                        Binding="{Binding HomePageData.Product.IsInsideCart, Mode=TwoWay}" Value="True">
+                                <Setter Property="TextColor" Value="{x:DynamicResource Danger}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="{Binding HomePageData.Product.CartsText}"
+                                    LineBreakMode="TailTruncation"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                                        Binding="{Binding HomePageData.Product.IsInsideCart, Mode=TwoWay}" Value="True">
+                                <Setter Property="TextColor" Value="{x:DynamicResource Danger}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <StackLayout.GestureRecognizers>
+                        <TapGestureRecognizer NumberOfTapsRequired="1"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ProductDetailViewModel}}, Path=AddToCartCommand}"
+                                    CommandParameter="{Binding HomePageData.Product}">
+                        </TapGestureRecognizer>
+                    </StackLayout.GestureRecognizers>
+                </StackLayout>
                     <StackLayout Grid.Column="3" 
                                 Orientation="Vertical"
                                 VerticalOptions="Center"
