@@ -8,12 +8,15 @@ on:
     branches:
       - master
     paths-ignore:
-      - Docs/**
-      - Tests/**
-      - Src/IucMarket.Mobile/**
-      - Src/IucMarket.Android/**
-      - Src/IucMarket.iOS/**
-      - .github/**
+      - 'Docs/**'
+      - 'Tests/**'
+      - 'Src/IucMarket.Mobile/**'
+      - 'Src/IucMarket.Android/**'
+      - 'Src/IucMarket.iOS/**'
+      - '.github/**'
+      - '**/README.md'
+      - '**/.gitignore'
+      - '**/.gitattributes'
   workflow_dispatch:
 
 jobs:
