@@ -51,6 +51,8 @@ namespace IucMarket.Mobile.Models
             }
         }
 
+        public string DeliveryPlaceText => DeliveryPlace.ToString().Replace("_", " ");
+
         private DateTime? deliveryPredicatedDate;
         public DateTime? DeliveryPredicatedDate
         {

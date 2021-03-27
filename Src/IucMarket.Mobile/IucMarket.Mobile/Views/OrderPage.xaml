@@ -55,7 +55,7 @@
                                     BorderColor="{DynamicResource BorderColor}"
                                     IsClippedToBounds="True"
                                     HasShadow="False">
-                                                    <Grid x:DataType="model:ProductModel"
+                                                    <Grid x:DataType="models:ProductModel"
                                       ColumnDefinitions="auto,*"
                                       Padding="10">
                                                         <xct:AvatarView Grid.Column="0" 
@@ -89,8 +89,17 @@
 
                                         <Label Text="{Binding TotalWithCurrency}"
                        TextColor="{DynamicResource Info}"
-                       FontSize="Large"
+                       FontSize="Subtitle"
                        HorizontalOptions="EndAndExpand"/>
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="{x:Static helpers:IconFontSolid.MapMarkedAlt}"
+                                                   FontFamily="far"
+                           FontSize="Subtitle"
+                           HorizontalOptions="EndAndExpand"/>
+                                            <Label Text="{Binding DeliveryPlaceText}"
+                           FontSize="Subtitle"
+                           HorizontalOptions="EndAndExpand"/>
+                                        </StackLayout>
                                     </StackLayout>
                                 </xct:Expander>
                             </StackLayout>
