@@ -39,7 +39,7 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="ResgistrationNumber"><span style="width:20px;font-size:12px">@model.RegistrationNumber</span></span>
                             </div>
-                            <InputNumber @bind-Value="model.RegistrationNumber" maxlength="20" class="form-control" placeholder="Enter registration number" aria-label="Matricule" aria-describedby="ResgistrationNumber" />
+                            <InputText @bind-Value="model.RegistrationNumber" maxlength="20" class="form-control" placeholder="Enter registration number" aria-label="Matricule" aria-describedby="ResgistrationNumber" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.RegistrationNumber)" />

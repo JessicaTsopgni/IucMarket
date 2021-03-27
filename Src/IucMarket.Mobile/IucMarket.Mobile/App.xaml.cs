@@ -16,9 +16,9 @@ namespace IucMarket.Mobile
         public App()
         {
             InitializeComponent();
-            if (Xamarin.Essentials.DeviceInfo.DeviceType == Xamarin.Essentials.DeviceType.Virtual)
-                ApiAddress = "http://192.168.127.1:8096";
-            else
+            //if (Xamarin.Essentials.DeviceInfo.DeviceType == Xamarin.Essentials.DeviceType.Virtual)
+            //    ApiAddress = "http://192.168.127.1:8096";
+            //else
                 ApiAddress = "https://iucmarket.azurewebsites.net";
 
             DependencyService.Register<MockDataStore>();
