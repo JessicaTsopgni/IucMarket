@@ -57,6 +57,7 @@ namespace IucMarket.IntegratedTests
             var command = new RegisterCommand
             (
                 email,
+                "IUC16E00678",
                 "admin12345",
                 "Integration test name",
                 "+237",
@@ -83,6 +84,7 @@ namespace IucMarket.IntegratedTests
                      new RegisterCommand
                      (
                          "jess.tsopgni@gmail.com",
+                         "",
                          "",
                          "",
                          "",

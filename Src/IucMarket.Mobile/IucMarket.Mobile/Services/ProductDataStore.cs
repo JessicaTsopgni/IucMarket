@@ -41,18 +41,22 @@ namespace IucMarket.Mobile.Services
                         }
                         else
                         {
-                            throw new Exception(await response.Content.ReadAsStringAsync());
+                            throw new HttpRequestException(await response.Content.ReadAsStringAsync());
                         }
                     }
                 }
                 else
                 {
-                    throw new Exception("No internet connection !");
+                    throw new HttpRequestException("No internet connection !");
                 }
             }
-            catch(TaskCanceledException)
+            catch (HttpRequestException ex)
             {
-                throw new Exception("Cannot join the server!");
+                throw ex;
+            }
+            catch (TaskCanceledException)
+            {
+                throw new HttpRequestException("Cannot join the server!");
             }
             catch (Exception ex)
             {
@@ -83,15 +87,6 @@ namespace IucMarket.Mobile.Services
                 r.Next(0, 1000000),
                 r.Next(0, 2) == 1 ? true : false,
                 product.Pictures?.Select(y => y.Path).ToArray(),
-                new UserModel
-                (
-                    product.Owner?.UserId,
-                    product.Owner?.Email,
-                    product.Owner?.FullName,
-                    product.Owner?.CreatedAt ?? DateTime.MinValue,
-                    product.Owner?.Token,
-                    product.Owner.TokenExpiresIn
-                ),
                 product.CreatedAt
             );
         }
@@ -140,18 +135,22 @@ namespace IucMarket.Mobile.Services
                         }
                         else
                         {
-                            throw new Exception(await response.Content.ReadAsStringAsync());
+                            throw new HttpRequestException(await response.Content.ReadAsStringAsync());
                         }
                     }
                 }
                 else
                 {
-                    throw new Exception("No internet connection !");
+                    throw new HttpRequestException("No internet connection !");
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw ex;
             }
             catch (TaskCanceledException)
             {
-                throw new Exception("Cannot join the server!");
+                throw new HttpRequestException("Cannot join the server!");
             }
             catch (Exception ex)
             {
@@ -181,7 +180,6 @@ namespace IucMarket.Mobile.Services
                 var t = items[index];
                 t.VotesCount++;
                 t.StarsCount += value;
-                owner.ProductsRated.Add(t);
                 await AddAsync(t);
                 await UserDataStore.AddAsync(owner);
 

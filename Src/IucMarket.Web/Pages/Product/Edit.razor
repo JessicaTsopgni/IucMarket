@@ -87,7 +87,7 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="Name"><i style="width:20px" class="fas fa-tag"></i></span>
                             </div>
-                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Product roduct name" aria-label="Name" aria-describedby="Name" />
+                            <InputText @bind-Value="model.Name" class="form-control" placeholder="Product name" aria-label="Name" aria-describedby="Name" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.Name)" />
@@ -149,7 +149,7 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="Descriptioname"><i style="width:20px" class="fas fa-info-circle"></i></span>
+                                <span class="input-group-text" id="Description"><i style="width:20px" class="fas fa-info-circle"></i></span>
                             </div>
                             <InputTextArea style="height:145px" @bind-Value="model.Description" class="form-control" placeholder="Product description" aria-label="Description" aria-describedby="Description" />
                         </div>
@@ -209,6 +209,9 @@ else
                     (
                         x.UserId,
                         x.Email,
+                        x.PhoneCountryCode,
+                        x.PhoneNumber,
+                        x.RegistrationNumber,
                         x.FullName,
                         x.CreatedAt,
                         x.Role,
@@ -309,7 +312,7 @@ else
                 {
                     var response = await Http.PostAsync
                     (
-                        $"article",
+                        $"Article",
                         GetContent()
                     );
                     if (response.IsSuccessStatusCode)
@@ -331,7 +334,7 @@ else
                 {
                     var response = await Http.PutAsync
                     (
-                        $"article/{Id}",
+                        $"Article/{Id}",
                         GetContent()
                     );
                     if (response.IsSuccessStatusCode)

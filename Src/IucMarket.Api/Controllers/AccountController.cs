@@ -101,7 +101,7 @@ namespace IucMarket.Api.Controllers
             try
             {
                 await service.EditAsync(id, command);
-                return NoContent();
+                return Ok(await service.GetUserAsync(id));
             }
             catch(KeyNotFoundException ex)
             {
@@ -147,6 +147,28 @@ namespace IucMarket.Api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> Send([FromBody] string token)
+        {
+            try
+            {
+                return Ok
+                (
+                    await service.SendVerificationEmailAsync(token)
+                );
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.ToString());
+                return BadRequest(Error);
+            }
+        }
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> Owners()

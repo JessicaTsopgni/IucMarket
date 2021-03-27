@@ -69,7 +69,7 @@ namespace IucMarket.Common
         }
         public static string ToRelativeDate(this DateTime date)
         {
-            TimeSpan ts = DateTime.Now.Subtract(date);
+            TimeSpan ts =DateTime.UtcNow.AddHours(1).Subtract(date);
             int intDays = ts.Days;
             int intHours = ts.Hours;
             int intMinutes = ts.Minutes;

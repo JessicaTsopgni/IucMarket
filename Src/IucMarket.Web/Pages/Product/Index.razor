@@ -27,9 +27,9 @@ else
             @foreach (var product in products)
             {
                 <div class="col-sm-6 col-md-4 col-lg-3 mb-3">
-                    <div class="card" style="height:300px">
+                    <div class="card" style="height:auto">
                         <div class="text-center" style="height:150px">
-                            <img style="height:100%;" src="@product.Pictures?.FirstOrDefault()?.Path" alt="@product.Name">
+                            <img style="height:100%;" class="img-fluid" src="@product.Pictures?.FirstOrDefault()?.Path" alt="@product.Name">
                         </div>
                         <div class="card-body">
                             <div class="card-title">
@@ -114,15 +114,6 @@ else
                         (
                             x.Category?.Id,
                             x.Category?.Name
-                        ),
-                        new UserListModel
-                        (
-                            x.Owner?.UserId,
-                            x.Owner?.Email,
-                            x.Owner?.FullName,
-                            x.Owner?.CreatedAt ?? DateTime.MinValue,
-                            x.Owner?.Role ?? RoleOptions.Other,
-                            x.Owner?.Status ?? false
                         ),
                         x.Status
                     )

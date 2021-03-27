@@ -1,0 +1,312 @@
+﻿@page "/order/edit/{id?}"
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+<h2><a href="" class="text-dark" style="text-decoration:none">
+    <span class="fas fa-arrow-left"></span></a> Edit a order</h2>
+@if (!isLoaded)
+{
+    <Loading></Loading>
+}
+else
+{
+    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <div>
+            <div class="row @(string.IsNullOrEmpty(message) ? "d-none" : "")">
+                <div class="col-sm-12">
+                    <div class="alert alert-@messageType text-truncate">
+                        @message
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <p>Order no. <strong>#@model.Number</strong></p>
+                    <p><em>@model.CreatedDate</em></p>
+                </div>
+                <div class="col-lg-6">
+                    <p>Customer <strong><a href="user/edit/@model.Customer.Id">@model.Customer.Fullname @(!string.IsNullOrEmpty(model.Customer.RegistrationNumber) ? " - " + model.Customer.RegistrationNumber : "")</a></strong></p>
+                    <p><em><a href="@model.Customer.Email">@model.Customer.Email</a> - <a href="tel:@model.Customer.FullPhoneNumber">@model.Customer.FullPhoneNumber</a></em></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <div class="list-group">
+                                @if(model.Details != null)
+                                {
+                                    foreach (var detail in model.Details)
+                                    {
+                                        <div class="list-group-item">
+                                            <div class="row">
+                                                <div class="col-lg-3">
+                                                    <img class="img-fluid rounded" style="height:60px" src="@detail.Product.Pictures.FirstOrDefault()?.Path" alt="@detail.Product.Name">
+                                                </div>
+                                                <div class="col-lg-9">
+                                                    <p><strong><a href="product/edit/@detail.Product.Id">#@detail.Product.Reference</a></strong></p>
+                                                    <div class="text-truncate" title="@detail.Product.Name">@detail.Product.Name</div>
+                                                    <div class="text-info"><em>@detail.QuantityAmountWithCurrency</em></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                        </div>
+                    </div>
+                </div>
+                <div col-sm-4>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="DeliveryPlaceId"><i style="width:20px" class="fas fa-map-marker-alt"></i></span>
+                            </div>
+                            <InputSelect @bind-Value="model.DeliveryPlaceId" class="form-control" aria-label="DeliveryPlaceId" aria-describedby="DeliveryPlaceId">
+                                @if (model.Places != null)
+                                    {
+                                    <option value="">Choose the delivery place</option>
+                                        foreach (var place in model.Places)
+                                        {
+                                        <option value="@place.Id">@place.Name</option>
+                                        }
+                                    }
+                            </InputSelect>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.DeliveryPlaceId)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="DeliveryPredicateAt"><i style="width:20px" class="far fa-calendar-alt"></i></span>
+                            </div>
+                            <InputDate @bind-Value="model.DeliveryPredicateAt" class="form-control" aria-label="DeliveryPredicateAt" aria-describedby="DeliveryPredicateAt" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.DeliveryPredicateAt)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="DeliveryAt"><i style="width:20px" class="far fa-calendar-check"></i></span>
+                            </div>
+                            <InputDate @bind-Value="model.DeliveryAt" class="form-control" aria-label="DeliveryAt" aria-describedby="DeliveryAt" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.DeliveryAt)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="StateId"><i style="width:20px" class="fas fa-tasks"></i></span>
+                            </div>
+                            <InputSelect @bind-Value="model.StateId" class="form-control" aria-label="StateId" aria-describedby="StateId">
+                                @if (model.Places != null)
+                                    {
+                                    <option value="">Select the order state</option>
+                                        foreach (var state in model.States)
+                                        {
+                                        <option value="@state.Id">@state.Name</option>
+                                        }
+                                    }
+                            </InputSelect>
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.StateId)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="Comment"><i style="width:20px" class="fas fa-info-circle"></i></span>
+                            </div>
+                            <InputTextArea style="height:145px" @bind-Value="model.Comment" class="form-control" placeholder="Enter the comment" aria-label="Comment" aria-describedby="Comment" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.Comment)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="input-group mt-4">
+                            <button type="submit" disabled="@isBusy" class="btn btn-success btn-block">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
+}
+@code{
+    private bool isBusy = false;
+    private bool isLoaded = true;
+    private MessageType messageType = MessageType.danger;
+    private string message = string.Empty;
+    private OrderCreateModel model = new OrderCreateModel();
+    private EditContext context;
+
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoaded = false;
+
+            if (!string.IsNullOrEmpty(Id))
+            {
+                var response = await Http.GetAsync($"Command/{Id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var order = JsonConvert.DeserializeObject<OrderDto>(json);
+                    model = new OrderCreateModel
+                    (
+                        order.Id,
+                        order.Number,
+                        new UserListModel
+                        (
+                            order.Customer.UserId,
+                            order.Customer.Email,
+                            order.Customer.PhoneCountryCode,
+                            order.Customer.PhoneNumber,
+                            order.Customer.RegistrationNumber,
+                            order.Customer.FullName,
+                            order.Customer.CreatedAt,
+                            order.Customer.Role,
+                            order.Customer.Status
+                        ),
+                        order.CreatedAt,
+                        order.Details?.Select
+                        (
+                            x =>
+                            new OrderDetailModel
+                            (
+                                new ProductListModel
+                                (
+                                    x.Product.Id,
+                                    x.Product.Reference,
+                                    x.Product.Name,
+                                    x.Product.Description,
+                                    x.Product.Price,
+                                    x.Product.Currency,
+                                    x.Product.Pictures?.Select
+                                    (
+                                        y =>
+                                        new FileInfoModel
+                                        (
+                                            y.Path,
+                                            y.Name,
+                                            y.ContentType
+                                        )
+                                    ).ToArray(),
+                                    x.Product.CreatedAt,
+                                    new CategoryListModel
+                                    (
+                                        x.Product.Category.Id,
+                                        x.Product.Category.Name
+                                    ),
+                                    x.Product.Status
+                                ),
+                                x.Quantity
+                            )
+                        ).ToArray(),
+                        order.DeliveryPlace,
+                        order.DeliveryPredicateAt,
+                        order.DeliveryAt,
+                        order.State,
+                        order.Comment
+                    );
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isLoaded = true;
+            context = new EditContext(model);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (context.Validate())
+            {
+                isBusy = true;
+                messageType = MessageType.info;
+                message = "Processing...";
+
+
+                var response = await Http.PutAsync
+                (
+                    $"Command/{Id}",
+                    GetContent()
+                );
+                if (response.IsSuccessStatusCode)
+                {
+                    messageType = MessageType.success;
+                    message = "Save done !";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(2000);
+                    navigationManager.NavigateTo("product");
+                }
+                else
+                {
+                    messageType = MessageType.danger;
+                    message = await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            messageType = MessageType.danger;
+            message = $"Error : {ex.Message}";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    StringContent GetContent()
+    {
+        var json = JsonConvert.SerializeObject
+        (
+            new OrderEditCommand
+            (
+                (DeliveryPlaceOptions)int.Parse(model.DeliveryPlaceId),
+                model.DeliveryPredicateAt,
+                model.DeliveryAt,
+                (StateOptions)int.Parse(model.StateId),
+                model.Comment
+            )
+        );
+        return new StringContent
+        (
+            json,
+            System.Text.Encoding.UTF8, 
+            "application/json"
+        );
+    }
+}

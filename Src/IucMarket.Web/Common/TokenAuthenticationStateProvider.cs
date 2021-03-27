@@ -36,7 +36,7 @@ namespace IucMarket.Web.Common
         public async Task RefreshTokenAsync(string token, int expiry = default)
         {
             await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authToken", token);
-            await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenDate", DateTime.Now);
+            await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenDate",DateTime.UtcNow.AddHours(1));
             await _jsRuntime.InvokeAsync<object>("localStorage.setItem", "authTokenExpiry", expiry);
         }
 
@@ -49,7 +49,7 @@ namespace IucMarket.Web.Common
             {
                 var date = DateTime.Parse(dateObj.ToString());
                 var expiry = int.Parse(expiryObj.ToString());
-                if (date.AddSeconds(expiry) > DateTime.Now)
+                if (date.AddSeconds(expiry) >DateTime.UtcNow.AddHours(1))
                 {
                     await RefreshTokenAsync(tokenObj.ToString(), expiry);
                     return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");

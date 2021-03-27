@@ -94,7 +94,9 @@ namespace IucMarket.Mobile.Views
 
         private async void Done_Clicked(object sender, EventArgs e)
         {
-            await this.setCallback(picker.SelectedItem as DeliveryPlaceModel);
+            DeliveryPlaceModel model = picker.SelectedItem as DeliveryPlaceModel;
+            model.Comment = comment.Text;
+            await this.setCallback(model);
             await Shell.Current.Navigation.PopPopupAsync();
         }
 

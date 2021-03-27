@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModel="clr-namespace:IucMarket.Mobile.ViewModels"
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             mc:Ignorable="d"
+             Title="Sign up"
+             x:Class="IucMarket.Mobile.Views.SignUpPage">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <StackLayout Padding="10, 0, 10, 0" 
+                             Spacing="10"
+                             VerticalOptions="CenterAndExpand"
+                             HorizontalOptions="FillAndExpand"
+                             x:DataType="viewModel:SignUpViewModel">
+                    <Entry Text="{Binding RegistrationNumber, Mode=TwoWay}" 
+                           Placeholder="Enter your resgistration number"/>
+                    <StackLayout Spacing="0">
+                        <Entry Keyboard="Email" 
+                               Text="{Binding Email, Mode=TwoWay}" 
+                               Placeholder="Enter your email" />
+                        <Label Text="You will receive a verification email"
+                               FontSize="Small"
+                               TextColor="{DynamicResource Warning}"
+                               FontAttributes="Italic"/>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal">
+                        <Entry Text="{Binding Password, Mode=TwoWay}" 
+                           IsPassword="True" 
+                           Placeholder="Enter your password"  
+                           HorizontalOptions="FillAndExpand"
+                               VerticalOptions="Center"/>
+                        <ImageButton Command="{Binding TogglePasswordCommand}"
+                                     BackgroundColor="Transparent"
+                                     VerticalOptions="Center"
+                                     HeightRequest="20">
+                            <ImageButton.Triggers>
+                                <DataTrigger TargetType="ImageButton"
+                                             Binding="{Binding HidePassword}"
+                                             Value="True">
+                                    <Setter Property="Source">
+                                        <Setter.Value>
+                                            <FontImageSource FontFamily="fas"
+                                                             Glyph="{x:Static helpers:IconFontSolid.Eye}"
+                                                             Color="Gray"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                                <DataTrigger TargetType="ImageButton" 
+                                             Binding="{Binding HidePassword}"
+                                             Value="False">
+                                    <Setter Property="Source">
+                                        <Setter.Value>
+                                            <FontImageSource FontFamily="far"
+                                                             Glyph="{x:Static helpers:IconFontRegular.Eye}"
+                                                             Color="Gray"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </ImageButton.Triggers>
+                        </ImageButton>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="{Binding PhoneCountryCode}"
+                               VerticalOptions="Center"/>
+                        <Entry Text="{Binding PhoneNumber, Mode=TwoWay}" 
+                               Keyboard="Numeric"
+                               HorizontalOptions="FillAndExpand"
+                               VerticalOptions="Center"/>
+                    </StackLayout>
+                    <Button VerticalOptions="Center" Text="Register" Command="{Binding SignUpCommand}"/>
+                </StackLayout>
+                <Button Text="Sign in"
+                        Command="{Binding SignInCommand}"
+                        Margin="0, 0, 0, 20"
+                        FontSize="Small"
+                        VerticalOptions="End"
+                        TextColor="{DynamicResource Primary}"
+                        BorderColor="Transparent"
+                        BackgroundColor="Transparent"/>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

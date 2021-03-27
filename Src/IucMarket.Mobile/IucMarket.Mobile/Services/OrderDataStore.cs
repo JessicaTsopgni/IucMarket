@@ -30,7 +30,7 @@ namespace IucMarket.Mobile.Services
                 {
                     using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
                     {
-                        var response = await client.GetAsync($"Order/Index");
+                        var response = await client.GetAsync($"Command/Index");
                         if (response.IsSuccessStatusCode)
                         {
                             var json = await response.Content.ReadAsStringAsync();
@@ -40,18 +40,22 @@ namespace IucMarket.Mobile.Services
                         }
                         else
                         {
-                            throw new Exception(await response.Content.ReadAsStringAsync());
+                            throw new HttpRequestException(await response.Content.ReadAsStringAsync());
                         }
                     }
                 }
                 else
                 {
-                    throw new Exception("No internet connection !");
+                    throw new HttpRequestException("No internet connection !");
                 }
             }
-            catch(TaskCanceledException)
+            catch (HttpRequestException ex)
             {
-                throw new Exception("Cannot join the server!");
+                throw ex;
+            }
+            catch (TaskCanceledException)
+            {
+                throw new HttpRequestException("Cannot join the server!");
             }
             catch (Exception ex)
             {
@@ -60,28 +64,23 @@ namespace IucMarket.Mobile.Services
                 
         }
 
-        public static OrderModel GetOrderModel(OrderDto x)
+        public static OrderModel GetOrderModel(OrderDto order)
         {
             return new OrderModel
             (
-                x.Id,
-                x.Number,
+                order.Id,
+                order.Number,
                 new ObservableCollection<ProductModel>
                 (
-                    x.Details.Select(y => ProductDataStore.GetProductModel(y.Product, y.Quantity)).ToArray()
+                    order.Details.Select(y => ProductDataStore.GetProductModel(y.Product, y.Quantity)).ToArray()
                 ),
-                x.DeliveryPlace,
-                x.DeliveryPredicateAt,
-                new UserModel
-                (
-                    x.Customer.UserId,
-                    x.Customer.Email,
-                    x.Customer.FullName,
-                    x.Customer.CreatedAt
-                ),
-                x.DeliveryAt,
-                x.State,
-                x.StateReason
+                order.DeliveryPlace,
+                order.CreatedAt,
+                order.DeliveryPredicateAt,
+                order.DeliveryAt,
+                order.Customer.UserId,
+                order.State,
+                order.Comment
             );
         }
 
@@ -93,48 +92,53 @@ namespace IucMarket.Mobile.Services
                 {
                     using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
                     {
+                        var json = JsonConvert.SerializeObject
+                        (
+                            new OrderAddCommand
+                            (
+                                item.DeliveryPlace,
+                                item.Products.ToDictionary
+                                (
+                                    x => x.Id,
+                                    y => y.OrderQuantity
+                                ),
+                                item.CustomerId
+                            )
+                        );
                         var response = await client.PostAsync
                         (
-                            $"Order",
+                            $"Command",
                             new StringContent
                             (
-                                  JsonConvert.SerializeObject
-                                  (
-                                      new OrderAddCommand
-                                      (
-                                         item.DeliveryPlace,
-                                         item.Products.ToDictionary
-                                         (
-                                              x => x.Id,
-                                              y => y.OrderQuantity
-                                          ),
-                                          item.Customer.Id
-                                      )
-                                  ),
+                                  json,
                                   System.Text.Encoding.UTF8,
                                   "application/json"
                             )
                         );
                         if (response.IsSuccessStatusCode)
                         {
-                            var json = await response.Content.ReadAsStringAsync();
+                            json = await response.Content.ReadAsStringAsync();
                             var order = JsonConvert.DeserializeObject<OrderDto>(json);
                             return GetOrderModel(order);
                         }
                         else
                         {
-                            throw new Exception(await response.Content.ReadAsStringAsync());
+                            throw new HttpRequestException(await response.Content.ReadAsStringAsync());
                         }
                     }
                 }
                 else
                 {
-                    throw new Exception("No internet connection !");
+                    throw new HttpRequestException("No internet connection !");
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw ex;
             }
             catch (TaskCanceledException)
             {
-                throw new Exception("Cannot join the server!");
+                throw new HttpRequestException("Cannot join the server!");
             }
             catch (Exception ex)
             {
@@ -171,7 +175,7 @@ namespace IucMarket.Mobile.Services
                 {
                     using (HttpClient client = new HttpClient { BaseAddress = new Uri(App.ApiAddress) })
                     {
-                        var response = await client.GetAsync($"Order/Customer/{item.Customer.Id}");
+                        var response = await client.GetAsync($"Command/Customer/{item.CustomerId}");
                         if (response.IsSuccessStatusCode)
                         {
                             var json = await response.Content.ReadAsStringAsync();
@@ -180,18 +184,22 @@ namespace IucMarket.Mobile.Services
                         }
                         else
                         {
-                            throw new Exception(await response.Content.ReadAsStringAsync());
+                            throw new HttpRequestException(await response.Content.ReadAsStringAsync());
                         }
                     }
                 }
                 else
                 {
-                    throw new Exception("No internet connection !");
+                    throw new HttpRequestException("No internet connection !");
                 }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw ex;
             }
             catch (TaskCanceledException)
             {
-                throw new Exception("Cannot join the server!");
+                throw new HttpRequestException("Cannot join the server!");
             }
             catch (Exception ex)
             {

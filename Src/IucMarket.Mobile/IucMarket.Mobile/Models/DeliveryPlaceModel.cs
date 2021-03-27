@@ -17,6 +17,16 @@ namespace IucMarket.Mobile.Models
             }
         }
 
+        private string comment;
+        public string Comment
+        {
+            get => comment;
+            set
+            {
+                SetProperty(ref comment, value);
+            }
+        }
+
         public DeliveryPlaceModel()
         {
 
@@ -25,6 +35,12 @@ namespace IucMarket.Mobile.Models
         public DeliveryPlaceModel(string id, string name) : base(id)
         {
             Name = name;
+        }
+
+        public DeliveryPlaceModel(string id, string name, string comment) : base(id)
+        {
+            Name = name;
+            Comment = comment;
         }
     }
 

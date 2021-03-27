@@ -25,6 +25,7 @@ else
         <thead>
             <tr>
                 <th>Email</th>
+                <th>Registration number</th>
                 <th>Name</th>
                 <th>Role</th>
                 <th>Created at</th>
@@ -37,23 +38,24 @@ else
             {
                 foreach (var user in users)
                 {
-                <tr>
-                    <td>@user.Email</td>
-                    <td>@user.Fullname</td>
-                    <td>@user.Role</td>
-                    <td>@user.CreatedDate.ToShortDateString()</td>
-                    <td>@user.Status</td>
-                    <td class="text-right">
-                        <a disabled="@isBusy" href="user/edit/@user.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
-                        <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(user.Id, user.Fullname)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>@user.RegistrationNumber</td>
+                        <td>@user.Fullname</td>
+                        <td>@user.Role</td>
+                        <td>@user.CreatedDate.ToShortDateString()</td>
+                        <td>@user.Status</td>
+                        <td class="text-right">
+                            <a disabled="@isBusy" href="user/edit/@user.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
+                            <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(user.Id, user.Fullname)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
+                        </td>
+                    </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="6"><em>Category not found !</em></td>
+                    <td colspan="7"><em>User not found !</em></td>
                 </tr>
             }
         </tbody>
@@ -94,6 +96,9 @@ else
                 (
                     x.UserId,
                     x.Email,
+                    x.PhoneCountryCode,
+                    x.PhoneNumber,
+                    x.RegistrationNumber,
                     x.FullName,
                     x.CreatedAt,
                     x.Role,

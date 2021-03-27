@@ -10,5 +10,7 @@ namespace IucMarket.Mobile.Services
     {
         //Task<UserModel> CheckCode(string phoneCountryCode, long phoneNumber, bool isWhatsApp, string code);
         //Task ResendCode(string fullPhoneNumber);
+        Task<UserModel> LoginAsync(string email, string password);
+        Task<bool> SendEmailAsync(string token);
     }
 }

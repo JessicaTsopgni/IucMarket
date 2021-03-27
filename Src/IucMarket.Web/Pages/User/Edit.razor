@@ -37,6 +37,17 @@ else
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
+                                <span class="input-group-text" id="ResgistrationNumber"><span style="width:20px;font-size:12px">@model.RegistrationNumber</span></span>
+                            </div>
+                            <InputNumber @bind-Value="model.RegistrationNumber" maxlength="20" class="form-control" placeholder="Enter registration number" aria-label="Matricule" aria-describedby="ResgistrationNumber" />
+                        </div>
+                        <div class="small">
+                            <ValidationMessage For="@(() => model.RegistrationNumber)" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
                                 <span class="input-group-text" id="Fullname"><i style="width:20px" class="fas fa-user"></i></span>
                             </div>
                             <InputText @bind-Value="model.Fullname" autocomplete="off" class="form-control" placeholder="Enter user full name" aria-label="Fullname" aria-describedby="Fullname" />
@@ -50,12 +61,14 @@ else
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="PhoneNumber"><span style="width:20px;font-size:12px">@model.PhoneCountryCode</span></span>
                             </div>
-                            <InputNumber @bind-Value="model.PhoneNumber" class="form-control"  placeholder="Enter user phone number" aria-label="PhoneNumber" aria-describedby="PhoneNumber"/>
+                            <InputNumber @bind-Value="model.PhoneNumber" class="form-control" placeholder="Enter user phone number" aria-label="PhoneNumber" aria-describedby="PhoneNumber" />
                         </div>
                         <div class="small">
                             <ValidationMessage For="@(() => model.PhoneNumber)" />
                         </div>
                     </div>
+                </div>
+                <div class="col-sm-5">
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -72,8 +85,6 @@ else
                             <ValidationMessage For="@(() => model.Role)" />
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-5">
                     <div class="mb-3">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -139,7 +150,7 @@ else
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     user = JsonConvert.DeserializeObject<UserDto>(json);
-                    model = new UserCreateModel(user.UserId, user.Email, null, null, user.FullName, user.PhoneCountryCode, user.PhoneNumber, user.Role, user.Status);
+                    model = new UserCreateModel(user.UserId, user.Email, user.RegistrationNumber, null, null, user.FullName, user.PhoneCountryCode, user.PhoneNumber, user.Role, user.Status);
                 }
                 else
                 {
@@ -177,6 +188,7 @@ else
                         new RegisterCommand
                         (
                             model.Email,
+                            model.RegistrationNumber,
                             model.Password,
                             model.Fullname,
                             model.PhoneCountryCode,
@@ -209,6 +221,7 @@ else
                         new RegisterCommand
                         (
                             model.Email,
+                            model.RegistrationNumber,
                             model.Password,
                             model.Fullname,
                             model.PhoneCountryCode,

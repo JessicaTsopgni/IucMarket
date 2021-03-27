@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Rg.Plugins.Popup.Extensions;
 using Plugin.SecureStorage;
+using System.Net.Http;
 
 namespace IucMarket.Mobile.ViewModels
 {
@@ -106,21 +107,29 @@ namespace IucMarket.Mobile.ViewModels
             try
             {
                 Products.Clear();
+                SetCartBadge();
                 var items = await ProductDataStore.GetAsync(true);
                 foreach (var item in items)
                 {
                     Products.Add(item);
                     SetProductCartQuantity(item);
                 }
-                SetCartBadge();
+            }
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.Message);
                 await UserDialogs.Instance.AlertAsync
                 (
-                    ex.Message,
-                    "Error"
+                   "An error occured.\nPlease try again later.",
+                   "Error"
                 );
             }
             finally
@@ -138,11 +147,11 @@ namespace IucMarket.Mobile.ViewModels
             }
             else
             {
+                SetCartBadge();
                 foreach(var item in Products)
                 {
                     SetProductCartQuantity(item);
                 }
-                SetCartBadge();
             }
         }
 
@@ -211,14 +220,21 @@ namespace IucMarket.Mobile.ViewModels
                 await Shell.Current.GoToAsync($"/{nameof(ProductDetailPage)}", true);
 
             }
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
+            }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                await Shell.Current.DisplayAlert
+                await UserDialogs.Instance.AlertAsync
                 (
-                    "Error",
-                    "An error occured Please try again later",
-                    "Cancel"
+                   "An error occured.\nPlease try again later.",
+                   "Error"
                 );
             }
             finally
@@ -235,14 +251,21 @@ namespace IucMarket.Mobile.ViewModels
                 await Shell.Current.GoToAsync($"/{nameof(CartPage)}", true);
 
             }
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
+            }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                await Shell.Current.DisplayAlert
+                await UserDialogs.Instance.AlertAsync
                 (
-                    "Error",
-                    "An error occured Please try again later",
-                    "Cancel"
+                   "An error occured.\nPlease try again later.",
+                   "Error"
                 );
             }
             finally

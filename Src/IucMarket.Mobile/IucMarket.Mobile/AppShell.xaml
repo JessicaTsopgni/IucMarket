@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Shell xmlns="http://xamarin.com/schemas/2014/forms" 
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       xmlns:local="clr-namespace:IucMarket.Mobile.Views"
+       xmlns:view="clr-namespace:IucMarket.Mobile.Views"
        xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
        Title="IucMarket.Mobile"
        x:Class="IucMarket.Mobile.AppShell">
@@ -34,25 +34,25 @@
     <TabBar>
         <ShellContent Title="Shop" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.ShoppingBag}}" 
-                      Route="HomePage" ContentTemplate="{DataTemplate local:HomePage}" />
+                      Route="HomePage" ContentTemplate="{DataTemplate view:HomePage}" />
         <ShellContent Title="Search" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.Search}}"
-                      ContentTemplate="{DataTemplate local:AboutPage}" />
+                      Route="SearchPage"  ContentTemplate="{DataTemplate view:AboutPage}" />
         <ShellContent Title="Orders" Icon="{FontImage FontFamily=fas, 
-                            Glyph={x:Static helpers:IconFontSolid.List}}"
-                      ContentTemplate="{DataTemplate local:AboutPage}" />
+                        Glyph={x:Static helpers:IconFontSolid.List}}"
+                      Route="OrderPage" ContentTemplate="{DataTemplate view:OrderPage}" />
         <ShellContent Title="Profile" Icon="{FontImage FontFamily=fas, 
                             Glyph={x:Static helpers:IconFontSolid.User}}"
-                      ContentTemplate="{DataTemplate local:AboutPage}" />
+                      Route="ProfilePage" ContentTemplate="{DataTemplate view:ProfilePage}" />
     </TabBar>
 
     <!--
         If you would like to navigate to this content you can do so by calling
         await Shell.Current.GoToAsync("//LoginPage");
     -->
-    <TabBar>
-        <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate local:LoginPage}" />
-    </TabBar>
+    <!--<TabBar>
+        <ShellContent Route="LoginPage" ContentTemplate="{DataTemplate view:LoginPage}" />
+    </TabBar>-->
 
 
 </Shell>

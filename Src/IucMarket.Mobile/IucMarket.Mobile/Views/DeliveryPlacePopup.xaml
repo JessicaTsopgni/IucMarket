@@ -29,6 +29,10 @@
             ItemsSource="{Binding Places}"
             ItemDisplayBinding="{Binding Name}"
             Title="Choose a delivery place"/>
+        <Editor x:Name="comment"
+                AutoSize="TextChanges" 
+                Keyboard="Chat"
+                Placeholder="Anything to specify? Tip here"/>
         <StackLayout Orientation="Horizontal"
                      HorizontalOptions="End">
             <Button VerticalOptions="Center"

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using Xamarin.Forms;
 
 namespace IucMarket.Mobile.Models
 {
@@ -16,6 +17,9 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref number, value);
+                OnPropertyChanged(nameof(Title));
+                OnPropertyChanged(nameof(StateText));
+                OnPropertyChanged(nameof(StateColor));
             }
         }
 
@@ -57,13 +61,13 @@ namespace IucMarket.Mobile.Models
             }
         }
 
-        private UserModel customer;
-        public UserModel Customer
+        private string customerId;
+        public string CustomerId
         {
-            get => customer;
+            get => customerId;
             set
             {
-                SetProperty(ref customer, value);
+                SetProperty(ref customerId, value);
             }
         }
 
@@ -76,6 +80,16 @@ namespace IucMarket.Mobile.Models
                 SetProperty(ref customerReceivedDate, value);
             }
         }
+        private DateTime createdAt;
+        public DateTime CreatedAt
+        {
+            get => createdAt;
+            set
+            {
+                SetProperty(ref createdAt, value);
+            }
+        }
+        public string CreatedAtText => CreatedAt.ToRelativeDate();
 
 
         private StateOptions state;
@@ -85,17 +99,29 @@ namespace IucMarket.Mobile.Models
             set
             {
                 SetProperty(ref state, value);
+                OnPropertyChanged(nameof(Title));
+                OnPropertyChanged(nameof(StateText));
+                OnPropertyChanged(nameof(StateColor));
             }
         }
+        public string Title => $"#{Number} - {CreatedAtText} - {StateText}";
 
+        public string StateText => State.ToString().Replace("_", "");
+        public Color StateColor => State == StateOptions.Delivered
+                                   ? Color.SkyBlue
+                                   : State == StateOptions.Rejected
+                                   ? Color.Red
+                                   : State == StateOptions.Validated
+                                   ? Color.Green
+                                   : Color.Gray;
 
-        private string stateReason;
-        public string StateReason
+        private string comment;
+        public string Comment
         {
-            get => stateReason;
+            get => comment;
             set
             {
-                SetProperty(ref stateReason, value);
+                SetProperty(ref comment, value);
             }
         }
         public OrderModel():base()
@@ -108,7 +134,6 @@ namespace IucMarket.Mobile.Models
 
         private void Products_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-
             RiseOnTotalPropertyChanged();
         }
 
@@ -120,17 +145,18 @@ namespace IucMarket.Mobile.Models
             DeliveryPredicatedDate = deliveryPredicatedDate;
         }
 
-        public OrderModel(string id, string number, ObservableCollection<ProductModel> orderDetails, DeliveryPlaceOptions deliveryPlace, 
-            DateTime? deliveryPredicatedDate, UserModel customer, DateTime? customerReceivedDate,
-            StateOptions state, string stateReason)
+        public OrderModel(string id, string number, ObservableCollection<ProductModel> orderDetails, DeliveryPlaceOptions deliveryPlace,
+            DateTime createdAt, DateTime? deliveryPredicatedDate, DateTime? customerReceivedDate,
+            string customerId, StateOptions state, string comment)
             :this(orderDetails, deliveryPlace, deliveryPredicatedDate)
         {
             Id = id;
             Number = number;
-            Customer = customer;
+            CustomerId = customerId;
             CustomerReceivedDate = customerReceivedDate;
             State = state;
-            StateReason = stateReason;
+            Comment = comment;
+            CreatedAt = createdAt;
         }
 
         public void Add(ProductModel product)
@@ -171,7 +197,7 @@ namespace IucMarket.Mobile.Models
             Id = null;
             DeliveryPlace = DeliveryPlaceOptions.Campus_Logbessou;
             Products?.Clear();
-            DeliveryPredicatedDate = DateTime.Now;
+            DeliveryPredicatedDate =DateTime.UtcNow.AddHours(1);
             Number = "(Auto)";
             CustomerReceivedDate = null;
             OnPropertyChanged(nameof(Total));

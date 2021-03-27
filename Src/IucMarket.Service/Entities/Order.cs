@@ -14,7 +14,7 @@ namespace IucMarket.Service.Entities
         public DateTime? DeliveryPredicateAt { get; set; }
         public DateTime? DeliveryAt { get; set; }
         public  StateOptions State { get; set; }
-        public string StateReason { get; set; }
+        public string Comment { get; set; }
 
         public Order()
         {
@@ -23,11 +23,11 @@ namespace IucMarket.Service.Entities
 
         public Order(string number,IEnumerable<OrderDetail> details, User customer, 
             DeliveryPlaceOptions deliveryPlace,  DateTime createdAt,
-            StateOptions state, string stateReason,  DateTime? deliveryPredicateAt, DateTime? deliveryAt)
+            StateOptions state, string comment,  DateTime? deliveryPredicateAt, DateTime? deliveryAt)
         {
             Number = number;
             State = state;
-            StateReason = stateReason;
+            Comment = comment;
             Details = details;
             Customer = customer;
             CreatedAt = createdAt;

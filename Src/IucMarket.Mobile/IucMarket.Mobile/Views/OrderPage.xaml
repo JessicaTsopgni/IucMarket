@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IucMarket.Mobile.Views.OrderPage"
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
+             xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"
+             xmlns:models="clr-namespace:IucMarket.Mobile.Models" 
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"             
+             x:DataType="viewModels:OrderViewModel"
+             Title="Orders" Padding="0">
+    <ScrollView x:Name="scrollView">
+        <StackLayout Spacing="0" Padding="0, 0, 0, 10">
+            <RefreshView 
+                 x:DataType="viewModels:OrderViewModel"
+                 Command="{Binding LoadOrdersCommand}" 
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+                <CollectionView x:Name="OrdersListView"
+                            ItemsSource="{Binding Orders}"
+                            SelectionMode="None"
+                            BackgroundColor="Transparent">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout x:DataType="models:OrderModel">
+                                <xct:Expander>
+                                    <xct:Expander.Header>
+                                        <StackLayout Orientation="Horizontal">
+                                                <Label Text="{Binding Title}"
+                                                     VerticalOptions="Center"
+                                                     HorizontalOptions="StartAndExpand"/>
+                                                <Label Text="{x:Static helpers:IconFontSolid.AngleDown}"
+                                                   FontFamily="fas"
+                                                   HorizontalOptions="End"
+                                                   VerticalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                     Binding="{Binding Source={RelativeSource AncestorType={x:Type xct:Expander}}, Path=IsExpanded}" Value="True">
+                                                        <Setter Property="Text" Value="{x:Static helpers:IconFontSolid.AngleUp}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </StackLayout>
+                                    </xct:Expander.Header>
+                                </xct:Expander>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

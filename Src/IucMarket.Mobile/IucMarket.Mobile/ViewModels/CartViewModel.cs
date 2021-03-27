@@ -14,6 +14,7 @@ using Rg.Plugins.Popup.Extensions;
 using Plugin.SecureStorage;
 using System.Collections.Generic;
 using IucMarket.Common;
+using System.Net.Http;
 
 namespace IucMarket.Mobile.ViewModels
 {
@@ -93,46 +94,74 @@ namespace IucMarket.Mobile.ViewModels
         {
             if (await UserDialogs.Instance.ConfirmAsync($"You order will be submit.\n{Cart.TotalWithCurrency}", "Confirm"))
             {
-                await Shell.Current.Navigation.PushPopupAsync(new DeliveryPlacePopup(SetDeliveryPlace));
+                if (App.IsAuthenticate)
+                {
+                    await Shell.Current.Navigation.PushPopupAsync(new DeliveryPlacePopup(SetDeliveryPlace));
+                }
+                else
+                {
+                    await UserDialogs.Instance.AlertAsync("You need to sign in", "Warning");
+                    await Shell.Current.GoToAsync($"/{nameof(SignInPage)}", true);
+                }
             }
         }
 
-        public async void SubmitCart()
+        public async Task<OrderModel> SubmitCart()
         {
-            if (App.IsAuthenticate)
+
+            try
             {
-                try
-                {
-                    IsBusy = true;
-                    var cart = App.Get<OrderModel>();
-                    if (Cart.Products.Count == 0) return;
+                IsBusy = true;
+                UserDialogs.Instance.ShowLoading();
+                var cart = App.Get<OrderModel>();
+                if (Cart.Products.Count == 0) return null;
 
-                    var customer = App.Get<UserModel>();
-                    cart.Customer = customer;
+                var customer = App.Get<UserModel>();
+                cart.CustomerId = customer.Id;
 
-                    var items = await OrderDataStore.AddAsync(cart);
+                var item = await OrderDataStore.AddAsync(cart);
+                return item;
 
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                    await UserDialogs.Instance.AlertAsync
-                    (
-                        ex.Message,
-                        "Error"
-                    );
-                }
-                finally
-                {
-                    IsBusy = false;
-                }
             }
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                await UserDialogs.Instance.AlertAsync
+                (
+                   "An error occured.\nPlease try again later.",
+                   "Error"
+                );
+            }
+            finally
+            {
+                IsBusy = false;
+                UserDialogs.Instance.HideLoading();
+            }
+            return null;
         }
 
         async Task SetDeliveryPlace(DeliveryPlaceModel model)
         {
+            Cart.Comment = model.Comment;
             await Task.FromResult(Cart.DeliveryPlace = (DeliveryPlaceOptions)int.Parse(model.Id));
             App.Save(Cart);
+
+            var order = await SubmitCart();
+            if (order != null)
+            {
+                App.Clear<OrderModel>();
+                Shell.Current.CurrentItem = Shell.Current.Items.FirstOrDefault(x => x.Route == nameof(OrderPage));
+                //await Shell.Current.GoToAsync($"//{nameof(OrderPage)}", true);
+            }
+
         }
 
         public void OnSelectionChanged(CollectionView sender)
@@ -148,13 +177,21 @@ namespace IucMarket.Mobile.ViewModels
                 Cart = App.Get<OrderModel>();
                 ShowOrderIcon = (Cart?.Products.Count ?? 0) > 0;
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
-                Debug.WriteLine(ex);
                 await UserDialogs.Instance.AlertAsync
                 (
-                    ex.Message,
-                    "Error"
+                   ex.Message,
+                   "Error"
+                );
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                await UserDialogs.Instance.AlertAsync
+                (
+                   "An error occured.\nPlease try again later.",
+                   "Error"
                 );
             }
             finally

@@ -4,7 +4,7 @@
              x:Class="IucMarket.Mobile.Views.ProductDetailPage"
              xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
              xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"
-             xmlns:model="clr-namespace:IucMarket.Mobile.Models" 
+             xmlns:models="clr-namespace:IucMarket.Mobile.Models" 
              xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"             
              x:DataType="viewModels:ProductDetailViewModel"
              Title="{Binding HomePageData.Product.Name}" Padding="0">
@@ -222,7 +222,7 @@
                                             BorderColor="{DynamicResource BorderColor}"
                                             IsClippedToBounds="True"
                                             HasShadow="False">
-                                            <StackLayout x:DataType="model:ProductModel">
+                                            <StackLayout x:DataType="models:ProductModel">
                                                 <Grid>
                                                     <Image Source="{Binding Picture}"
                                                                 HeightRequest="{OnIdiom Tablet=200, Phone=150}"

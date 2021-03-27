@@ -74,7 +74,7 @@ namespace IucMarket.Service
                     id,
                     order.Number,
                     order.State,
-                    order.StateReason,
+                    order.Comment,
                     order.Details.Select
                     (
                         x =>
@@ -129,7 +129,7 @@ namespace IucMarket.Service
         private async Task<string> GenerateNumber()
         {
             await Task.Delay(1000);
-            DateTime _now = DateTime.Now;
+            DateTime _now =DateTime.UtcNow.AddHours(1);
             string _dd = _now.ToString("dd"); //
             string _mm = _now.ToString("MM");
             string _yy = _now.ToString("yyyy");
@@ -208,7 +208,7 @@ namespace IucMarket.Service
                       command.DeliveryPlace,
                       oldOrder.CreatedAt,
                       command.State,
-                      command.StateReason,
+                      command.Comment,
                       command.DeliveryPredicateAt,
                       command.DeliveryAt
                   );
@@ -216,6 +216,10 @@ namespace IucMarket.Service
                   .Child(Table)
                   .Child(id)
                   .PutAsync(JsonConvert.SerializeObject(order));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw ex;
             }
             catch (Firebase.Database.FirebaseException ex)
             {
@@ -241,6 +245,46 @@ namespace IucMarket.Service
                     .OnceAsync<Order>();
 
                 foreach(var p in products)
+                {
+                    list.Items.Add
+                    (
+                        await GetOrder
+                        (
+                            p.Key,
+                            p.Object,
+                            productPicturePath
+                        )
+                    );
+                }
+            }
+            catch (Firebase.Database.FirebaseException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            list.Items = list.Items.OrderBy(x => x.CreatedAt).ToList();
+            return list;
+        }
+        public async Task<ListDto<OrderDto>> GetOrdersByCustomerAsync(string customerId,
+            string productPicturePath, int pageIndex = 1, int pageSize = 100)
+        {
+            var list = new ListDto<OrderDto>();
+            list.PageIndex = pageIndex;
+            list.PageSize = pageSize;
+            try
+            {
+                var products = await FirebaseClient
+                    .Child(Table)
+                    .OrderBy("CustomerId")
+                    .EqualTo(customerId)
+                    .OnceAsync<Order>();
+
+                foreach (var p in products)
                 {
                     list.Items.Add
                     (

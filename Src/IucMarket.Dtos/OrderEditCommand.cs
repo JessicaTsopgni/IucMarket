@@ -11,20 +11,20 @@ namespace IucMarket.Dtos
         public DateTime? DeliveryPredicateAt { get; set; }
         public DateTime? DeliveryAt { get; set; }
         public StateOptions State { get; set; }
-        public string StateReason { get; set; }
+        public string Comment { get; set; }
         public OrderEditCommand()
         {
             
         }
 
         public OrderEditCommand(DeliveryPlaceOptions deliveryPlace, DateTime? deliveryPredicateAt, 
-            DateTime? deliveryAt, StateOptions state, string stateReason)
+            DateTime? deliveryAt, StateOptions state, string comment)
         {
             DeliveryPlace = deliveryPlace;
             DeliveryPredicateAt = deliveryPredicateAt;
             DeliveryAt = deliveryAt;
             State = state;
-            StateReason = stateReason;
+            Comment = comment;
         }
     }
 

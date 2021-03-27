@@ -13,7 +13,7 @@ namespace IucMarket.Dtos
         public DateTime CreatedAt { get; set; }
         public OrderAddCommand()
         {
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.UtcNow.AddHours(1);
         }
 
         public OrderAddCommand(DeliveryPlaceOptions deliveryPlace, IDictionary<string, int> carts,

@@ -21,7 +21,6 @@ namespace IucMarket.Mobile.ViewModels
     {
         public ObservableCollection<DeliveryPlaceModel> Places { get; }
 
-       
         public DeliveryPlaceViewModel()
         {
 

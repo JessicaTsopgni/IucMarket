@@ -116,6 +116,10 @@ namespace IucMarket.Service
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
                 throw ex;
             }
+            catch (DuplicateWaitObjectException ex)
+            {
+                throw ex;
+            }
             catch (Exception ex)
             {
                 throw ex;
@@ -144,6 +148,14 @@ namespace IucMarket.Service
             {
                 if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (DuplicateWaitObjectException ex)
+            {
                 throw ex;
             }
             catch (Exception ex)

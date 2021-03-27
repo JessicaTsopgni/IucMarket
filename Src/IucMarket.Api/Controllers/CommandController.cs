@@ -76,6 +76,35 @@ namespace IucMarket.Api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("[action]/{id}")]
+        public async Task<IActionResult> Customers(string id, int pageIndex = 1, int pageSize = 100)
+        {
+            try
+            {
+                return Ok
+                (
+                    await service.GetOrdersByCustomerAsync
+                    (
+                        id,
+                        ArticleController.GetPathTemplate(Request),
+                        pageIndex,
+                        pageSize
+                    )
+                );
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, ex.Message);
+                //return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.Print(ex.ToString());
+                return BadRequest(Error);
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] OrderAddCommand command)
         {

@@ -147,7 +147,7 @@ namespace IucMarket.Service
             try
             {
                 if(await GetProductByReferenceAsync(command.Reference, path) != null)
-                    throw new DuplicateWaitObjectException($"{nameof(command.Reference)} already exists !");
+                    throw new DuplicateWaitObjectException($"{nameof(command.Reference)} {command.Reference} already exists !");
 
                 var result = await FirebaseClient
                   .Child(Table)
@@ -216,6 +216,10 @@ namespace IucMarket.Service
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
                 throw ex;
             }
+            catch (DuplicateWaitObjectException ex)
+            {
+                throw ex;
+            }
             catch (Exception ex)
             {
                 throw ex;
@@ -270,6 +274,14 @@ namespace IucMarket.Service
             {
                 if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (DuplicateWaitObjectException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {

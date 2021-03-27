@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,9 +17,10 @@ using Xamarin.Forms;
 
 namespace IucMarket.Mobile.ViewModels
 {
-    public class LoginViewModel : BaseViewModel
+    public class SignInViewModel : BaseViewModel
     {
-        public Command LoginCommand { get; }
+        public Command SignInCommand { get; }
+        public Command SignUpCommand { get; }
 
         private string email;
         public string Email
@@ -40,41 +42,58 @@ namespace IucMarket.Mobile.ViewModels
             }
         }
 
-        IUserDataStore OwnerDataStore => DependencyService.Get<IUserDataStore>();
-        ISecureStorage SecureStorage => DependencyService.Get<ISecureStorage>();
+        IUserDataStore UserDataStore => DependencyService.Get<IUserDataStore>();
 
-        public LoginViewModel()
+        public SignInViewModel()
         {
-           
-            LoginCommand = new Command(OnLoginClicked, x => !IsBusy);
+
+            SignInCommand = new Command(OnSignIn, x => !IsBusy);
+            SignUpCommand = new Command(OnSignUp, x => !IsBusy);
 
             //validate();
         }
 
+
+        private async void OnSignUp(object obj)
+        {
+            await Shell.Current.GoToAsync($"/{nameof(SignUpPage)}", true);
+        }
         public void OnAppearing()
         {
-            Email = SecureStorage.Get("Email");
+            Email = App.Get<UserModel>().Email;
         }
 
-
-        private async void OnLoginClicked(object obj)
+        private async void OnSignIn(object obj)
         {
             try
             {
-                
+                IsBusy = true;
+                UserDialogs.Instance.ShowLoading();
+                var user = await UserDataStore.LoginAsync(Email, Password);
+                App.Save(user);
+                await Shell.Current.GoToAsync("..");
             }
-            catch(Exception ex)
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
                 await UserDialogs.Instance.AlertAsync
                 (
-                   "An_error_occured_Please_try_again_later",
+                   "An error occured.\nPlease try again later.",
                    "Error"
                 );
             }
             finally
             {
                 IsBusy = false;
+                UserDialogs.Instance.HideLoading();
             }
         }
 

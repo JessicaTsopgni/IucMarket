@@ -15,13 +15,18 @@ namespace IucMarket.Common
         Campus_Logbessou,
         Campus_Akwa,
     }
-
-
     public enum StateOptions
     {
         Rejected = -1,
         In_process,
         Validated,
         Delivered
+    }
+    public enum InteractionOptions
+    {
+        Rate,
+        Like,
+        Comment,
+        Share
     }
 }

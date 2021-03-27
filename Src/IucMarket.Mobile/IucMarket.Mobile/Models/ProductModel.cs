@@ -202,13 +202,6 @@ namespace IucMarket.Mobile.Models
         public int PicturesCount => Pictures.Count();
         public bool ShowImageMultipleIcon => PicturesCount > 1;
 
-        private UserModel owner;
-        public UserModel Owner
-        {
-            get => owner;
-            set => SetProperty(ref owner, value);
-        }
-
         private DateTime createdDate;
         public DateTime CreatedDate
         {
@@ -229,8 +222,7 @@ namespace IucMarket.Mobile.Models
         public ProductModel(string id, string reference, string name, string description, CategoryModel category,
             double price, string currency,  double starsCount, double votesCount,
             double likesCount, double commentsCount, int cartCount, double sharesCount, 
-            bool isAvailable, IEnumerable<string> pictures, 
-            UserModel owner, DateTime createdDate)
+            bool isAvailable, IEnumerable<string> pictures, DateTime createdDate)
             : base(id)
         {
             Reference = reference?.ToUpper();
@@ -247,7 +239,6 @@ namespace IucMarket.Mobile.Models
             VotesCount = votesCount;
             IsAvailable = isAvailable;
             Pictures = new ObservableCollection<string>(pictures);
-            Owner = owner;
             CreatedDate = createdDate;
             StarNumber = (int)Math.Round(StarsCount / VotesCount, 1);
         }

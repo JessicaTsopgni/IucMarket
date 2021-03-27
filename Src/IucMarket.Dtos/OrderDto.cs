@@ -9,7 +9,7 @@ namespace IucMarket.Dtos
         public string Id { get; set; }
         public string Number { get; set; }
         public StateOptions State { get; set; }
-        public string StateReason { get; set; }
+        public string Comment { get; set; }
         public IEnumerable<OrderDetailDto> Details { get; set; }
         public UserDto Customer { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -22,13 +22,13 @@ namespace IucMarket.Dtos
 
         }
 
-        public OrderDto(string id, string number, StateOptions state, string stateReason, IEnumerable<OrderDetailDto> details, UserDto customer, DateTime createdAt, DeliveryPlaceOptions deliveryPlace, 
+        public OrderDto(string id, string number, StateOptions state, string comment, IEnumerable<OrderDetailDto> details, UserDto customer, DateTime createdAt, DeliveryPlaceOptions deliveryPlace, 
             DateTime? deliveryPredicateAt, DateTime? deliveryAt)
         {
             Id = id;
             Number = number;
             State = state;
-            StateReason = stateReason;
+            Comment = comment;
             Details = details;
             Customer = customer;
             CreatedAt = createdAt;

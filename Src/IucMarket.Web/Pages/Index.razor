@@ -42,10 +42,11 @@ else
                         <td>@order.Number</td>
                         <td>@order.Customer</td>
                         <td>@order.ProductsCount</td>
+                        <td>@order.Amount</td>
                         <td>@order.Since</td>
                         <td>@order.Status</td>
                         <td class="text-right">
-                            <a disabled="@isBusy" href="user/edit/@order.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
+                            <a disabled="@isBusy" href="order/edit/@order.Id" class="text-primary" title="Edit"><span class="oi oi-pencil"></span></a>
                             <a disabled="@isBusy" href="javascript:;" @onclick="() => HandleDelete(order.Id, order.Number)" title="Delete" class="text-danger"><span class="oi oi-trash"></span></a>
                         </td>
                     </tr>

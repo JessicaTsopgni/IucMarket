@@ -18,7 +18,7 @@ namespace IucMarket.Dtos
         public bool Status { get; set; }
         public ProductAddCommand()
         {
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt =DateTime.UtcNow.AddHours(1);
         }
 
         public ProductAddCommand(string reference, string name, string description, double price, string currency,

@@ -14,6 +14,9 @@ namespace IucMarket.Web.Models
         [RegularExpression(@"\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
 
+        [StringLength(20)]
+        public string RegistrationNumber { get; set; }
+
         [RequiredIf("Id == null", AllowEmptyStrings = false, ErrorMessage = "{0} is required")]
         [DataType(DataType.Password)]
         [StringLength(20, MinimumLength = 6)]
@@ -46,12 +49,13 @@ namespace IucMarket.Web.Models
             PhoneCountryCode = "+237";
         }
 
-        public UserCreateModel(string id, string email, string password, 
+        public UserCreateModel(string id, string email, string registrationNumber,  string password, 
             string confirmPassword, string fullname, string phoneCountryCode, long? phoneNumber,
             RoleOptions role, bool status):this()
         {
             Id = id;
             Email = email;
+            RegistrationNumber = registrationNumber;
             Password = password;
             ConfirmPassword = confirmPassword;
             Fullname = fullname;

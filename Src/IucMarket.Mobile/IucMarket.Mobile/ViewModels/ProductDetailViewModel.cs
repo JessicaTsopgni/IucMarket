@@ -11,6 +11,7 @@ using Xamarin.Forms;
 using IucMarket.Mobile.Models;
 using IucMarket.Mobile.Services;
 using IucMarket.Mobile.Views;
+using System.Net.Http;
 
 namespace IucMarket.Mobile.ViewModels
 {
@@ -79,9 +80,22 @@ namespace IucMarket.Mobile.ViewModels
                 }
                 ShowSimilarProducts = SameProducts.Count > 0;
             }
+            catch (HttpRequestException ex)
+            {
+                await UserDialogs.Instance.AlertAsync
+                (
+                   ex.Message,
+                   "Error"
+                );
+            }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.Message);
+                await UserDialogs.Instance.AlertAsync
+                (
+                   "An error occured.\nPlease try again later.",
+                   "Error"
+                );
             }
             finally
             {

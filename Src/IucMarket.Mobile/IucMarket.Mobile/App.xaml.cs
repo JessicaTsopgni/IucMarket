@@ -8,18 +8,20 @@ namespace IucMarket.Mobile
 {
     public partial class App : Application
     {
-        public static readonly string ApiAddress = "http://192.168.127.1:8096";
+        public static string ApiAddress;
         //public static readonly string SessionKeyName = "UserSession";
         //public static readonly string SessionCartName = "CartSession";
         public static readonly string Name = "IUC Market";
-
+        //public static readonly bool NeedToSubmitCart = false;
         public App()
         {
             InitializeComponent();
-
+            if (Xamarin.Essentials.DeviceInfo.DeviceType == Xamarin.Essentials.DeviceType.Virtual)
+                ApiAddress = "http://192.168.127.1:8096";
+            else
+                ApiAddress = "https://iucmarket.azurewebsites.net";
 
             DependencyService.Register<MockDataStore>();
-
             DependencyService.Register<ProductDataStore>();
             DependencyService.Register<UserDataStore>();
             DependencyService.Register<SecureStorage>();
@@ -39,19 +41,31 @@ namespace IucMarket.Mobile
         {
             if (item == null) return;
             ISecureStorage SecureStorage = DependencyService.Get<ISecureStorage>();
-            SecureStorage.Set(nameof(T), JsonConvert.SerializeObject(item));
+            SecureStorage.Set(typeof(T).Name, JsonConvert.SerializeObject(item));
         }
 
         public static T Get<T>() where T : new()
         {
             ISecureStorage SecureStorage = DependencyService.Get<ISecureStorage>();
-            var json = SecureStorage.Get(nameof(T));
+            var json = SecureStorage.Get(typeof(T).Name);
             return !string.IsNullOrEmpty(json)
                 ? JsonConvert.DeserializeObject<T>(json)
                 : new T();
         }
 
+        public static void Clear<T>() where T : new()
+        {
+            ISecureStorage SecureStorage = DependencyService.Get<ISecureStorage>();
+            SecureStorage.Set(typeof(T).Name, JsonConvert.SerializeObject(new T()));
+        }
+
         public static bool IsAuthenticate => !string.IsNullOrEmpty(Get<UserModel>()?.Token);
+        public static void SignOut()
+        {
+            var user = Get<UserModel>();
+            user.Token = string.Empty;
+            Save(user);
+        }
 
         protected override void OnStart()
         {

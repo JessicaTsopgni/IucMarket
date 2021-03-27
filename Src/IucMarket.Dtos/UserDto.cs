@@ -1,5 +1,6 @@
 ﻿using IucMarket.Common;
 using System;
+using System.Collections.Generic;
 
 namespace IucMarket.Dtos
 {
@@ -12,12 +13,13 @@ namespace IucMarket.Dtos
         public DateTime CreatedAt { get; set; }
         public RoleOptions Role { get; set; }
         public bool Status { get; set; }
+        public bool IsEmailVerified { get; set; }
         public string UserId { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; }
+        public string RegistrationNumber { get; set; }
         public string Token { get; set; }
         public int TokenExpiresIn { get; set; }
-
+        public IEnumerable<InteractionDto> ProductInteractions { get; set; }
         public UserDto():base()
         {
 
@@ -25,7 +27,9 @@ namespace IucMarket.Dtos
 
         public UserDto(string personId, string fullName, string phoneCountryCode, 
             long phoneNumber, DateTime createdAt, RoleOptions role,
-            bool status, string userId, string email, string password, string token, int tokenExpiresIn)
+            bool status, bool isEmailVerified, string userId, string email, string registrationNumber,
+            string token, int tokenExpiresIn,
+            IEnumerable<InteractionDto> productInteractions)
         {
             PersonId = personId;
             FullName = fullName;
@@ -34,11 +38,13 @@ namespace IucMarket.Dtos
             CreatedAt = createdAt;
             Role = role;
             Status = status;
+            IsEmailVerified = isEmailVerified;
             UserId = userId;
             Email = email;
-            Password = password;
+            RegistrationNumber = registrationNumber;
             Token = token;
             TokenExpiresIn = tokenExpiresIn;
+            ProductInteractions = productInteractions;
         }
     }
 }

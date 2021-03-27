@@ -48,7 +48,9 @@ namespace IucMarket.Service
                         person.Value?.CreatedAt ?? DateTime.MinValue,
                         person.Value?.Role ?? RoleOptions.Other,
                         firebaseLink.User.IsEmailVerified,
+                        person.Value?.Status ?? false,
                         firebaseLink.User.Email,
+                        person.Value?.RegistrationNumber,
                         null,
                         firebaseLink.FirebaseToken,
                         firebaseLink.ExpiresIn
@@ -66,6 +68,29 @@ namespace IucMarket.Service
                 throw ex;
             }
         }
+
+        public async Task<bool> SendVerificationEmailAsync(string token)
+        {
+            try
+            {
+                await FirebaseAuthProvider.SendEmailVerificationAsync
+                (
+                    token
+                );
+            }
+            catch (Firebase.Auth.FirebaseAuthException ex)
+            {
+                if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
+                    throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw new UnauthorizedAccessException("Email or password is invalid !", ex);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return false;
+        }
+
         internal static UserDto GetUserDto(string personId, User user)
         {
             if (user != null)
@@ -77,12 +102,26 @@ namespace IucMarket.Service
                     user.PhoneNumber,
                     user.CreatedAt,
                     user.Role,
+                    user.IsEmailVerified,
                     user.Status,
                     user.UserId,
                     user.Email,
-                    null,
+                    user.RegistrationNumber,
                     user.Token,
-                    user.ExpiresIn
+                    user.ExpiresIn,
+                    user.ProductInteractions?.Select
+                    (
+                        x =>
+                        new InteractionDto
+                        (
+                            x.UserId,
+                            x.ProductId,
+                            x.InteractionType,
+                            x.Count,
+                            x.Content,
+                            x.CreatedAt
+                        )
+                    ).ToArray()
                 );
             return null;
         }
@@ -170,10 +209,12 @@ namespace IucMarket.Service
                 (
                     firebaseAuthLink.User.LocalId,
                     firebaseAuthLink.User.DisplayName,
+                    command.RegistrationNumber,
                     command.PhoneCountryCode,
                     command.PhoneNumber,
                     command.CreatedAt,
                     command.Role,
+                    firebaseAuthLink.User.IsEmailVerified,
                     command.Status
                 );
 
@@ -192,8 +233,10 @@ namespace IucMarket.Service
                         newPerson.PhoneNumber,
                         newPerson.CreatedAt,
                         newPerson.Role,
+                        firebaseAuthLink.User.IsEmailVerified,
                         newPerson.Status,
                         firebaseAuthLink.User.Email,
+                        newPerson.RegistrationNumber,
                         null
                     )
                 );
@@ -208,6 +251,10 @@ namespace IucMarket.Service
             {
                 if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
+            }
+            catch (DuplicateWaitObjectException ex)
+            {
                 throw ex;
             }
             catch (Exception ex)
@@ -247,10 +294,12 @@ namespace IucMarket.Service
                     (
                         userRecord.Uid,
                         command.Name,
+                        command.RegistrationNumber,
                         command.PhoneCountryCode,
                         command.PhoneNumber,
                         command.CreatedAt,
                         command.Role,
+                        userRecord.EmailVerified,
                         command.Status
                     );
 
@@ -265,11 +314,13 @@ namespace IucMarket.Service
                     var newPerson = new Person
                     (
                         userRecord.Uid, 
+                        command.RegistrationNumber,
                         command.Name, 
                         command.PhoneCountryCode,
                         command.PhoneNumber, 
                         person.Value.CreatedAt, 
                         command.Role, 
+                        userRecord.EmailVerified,
                         command.Status
                     );
 
@@ -284,6 +335,14 @@ namespace IucMarket.Service
             {
                 if (ex.InnerException?.InnerException?.GetType() == typeof(SocketException))
                     throw new HttpRequestException("Cannot join the server. Please check your internet connexion.");
+                throw ex;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (DuplicateWaitObjectException ex)
+            {
                 throw ex;
             }
             catch (Exception ex)
@@ -309,10 +368,12 @@ namespace IucMarket.Service
                         person.Value?.FullName,
                         person.Value?.PhoneCountryCode,
                         person.Value?.PhoneNumber ?? 0,
-                        person.Value?.CreatedAt ?? DateTime.UtcNow,
+                        person.Value?.CreatedAt ??DateTime.UtcNow.AddHours(1),
                         person.Value?.Role ?? RoleOptions.Other,
+                        person.Value?.IsEmailVerified ?? false,
                         person.Value?.Status ?? false,
                         provider.Email,
+                        person.Value?.RegistrationNumber,
                         null
                     )
                 );
@@ -380,8 +441,10 @@ namespace IucMarket.Service
                                     person.Value?.PhoneNumber ?? 0,
                                     person.Value?.CreatedAt ?? DateTime.MinValue, 
                                     person.Value?.Role ?? RoleOptions.Other,
-                                    person.Value?.Status ?? true, 
+                                     person.Value?.IsEmailVerified ?? false,
+                                    person.Value?.Status ?? false, 
                                     user.Email,
+                                    person.Value?.RegistrationNumber,
                                     null
                                 ) 
                             )
@@ -418,8 +481,10 @@ namespace IucMarket.Service
                         person.Value?.PhoneNumber ?? 0,
                         person.Value?.CreatedAt ?? DateTime.MinValue,
                         person.Value?.Role ?? RoleOptions.Other,
-                        person.Value?.Status ?? true,
+                        person.Value?.IsEmailVerified ?? false,
+                        person.Value?.Status ?? false,
                         user.Email,
+                        person.Value?.RegistrationNumber,
                         null
                     )
                 );
@@ -503,7 +568,6 @@ namespace IucMarket.Service
             }
         }
 
-
         public async Task<ListDto<UserDto>> GetOwnersAsync()
         {
             try
@@ -526,8 +590,10 @@ namespace IucMarket.Service
                             x.Object.PhoneNumber,
                             x.Object.CreatedAt,
                             x.Object.Role,
+                            x.Object.IsEmailVerified,
                             x.Object.Status,
                             null,
+                            x.Object.RegistrationNumber,
                             null
                         )
                     )
