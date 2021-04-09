@@ -32,7 +32,7 @@ jobs:
         dotnet-version: '5.0.x'
 
     - name: Build with dotnet
-      run: dotnet build Src\IucMarket.Api\IucMarket.Api.csproj --configuration Release 
+      run: dotnet build Src\IucMarket.Api\IucMarket.Api.csproj --configuration Release && dotnet nuget locals all --clear
 
     - name: dotnet publish
       run: dotnet publish Src\IucMarket.Api\IucMarket.Api.csproj -c Release -o Src\IucMarket.Api\bin\Release\net5.0\publish
