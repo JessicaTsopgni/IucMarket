@@ -79,7 +79,7 @@ namespace IucMarket.Web.Models
         public string Quantity { get; set; }
         public double Amount { get; set; }
         public string AmountText => Amount.ToString("N0");
-        public string AmountWithCurrency => $"{Amount} {Product.Currency}";
+        public string AmountWithCurrency => $"{AmountText} {Product.Currency}";
         public string QuantityAmountWithCurrency => $"{Quantity} x {Product.Price.ToString("N0")} = {AmountWithCurrency}";
 
         public OrderDetailModel()

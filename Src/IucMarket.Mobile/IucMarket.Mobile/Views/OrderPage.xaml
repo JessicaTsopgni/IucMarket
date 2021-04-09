@@ -23,15 +23,25 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <StackLayout x:DataType="models:OrderModel">
+                            <StackLayout x:DataType="models:OrderModel"
+                                         Margin="0, 0, 0, 10">
                                 <xct:Expander>
                                     <xct:Expander.Header>
                                         <StackLayout Orientation="Horizontal">
-                                                <Label Text="{Binding Title}"
+                                            <StackLayout HorizontalOptions="StartAndExpand"
+                                                         Spacing="0">                                                
+                                                <Label Text="{Binding Number, StringFormat='#{0}'}"
                                                      VerticalOptions="Center"
-                                                     HorizontalOptions="StartAndExpand"
-                                                       FontSize="Subtitle"
+                                                       FontSize="Large"
                                                        TextColor="{DynamicResource Info}"/>
+                                                <Label Text="{Binding CreatedAtText}"
+                                                     VerticalOptions="Center"
+                                                       FontSize="Small"/>
+                                                <Label Text="{Binding StateText}"
+                                                     VerticalOptions="Center"
+                                                       FontSize="Subtitle"
+                                                       TextColor="{Binding StateColor}"/>
+                                            </StackLayout>
                                                 <Label Text="{x:Static helpers:IconFontSolid.AngleDown}"
                                                    FontFamily="fas"
                                                    HorizontalOptions="End"
@@ -55,10 +65,10 @@
                                     BorderColor="{DynamicResource BorderColor}"
                                     IsClippedToBounds="True"
                                     HasShadow="False">
-                                                    <Grid x:DataType="models:ProductModel"
-                                      ColumnDefinitions="auto,*"
-                                      Padding="10">
-                                                        <xct:AvatarView Grid.Column="0" 
+                                                        <Grid x:DataType="models:ProductModel"
+                                          ColumnDefinitions="auto,*"
+                                          Padding="10">
+                                                            <xct:AvatarView Grid.Column="0" 
                                                     Source="{Binding Picture}"
                                                     BackgroundColor="Transparent" 
                                                     Aspect="AspectFill"
