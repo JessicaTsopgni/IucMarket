@@ -13,7 +13,6 @@ on:
       - 'Src/IucMarket.Mobile/**'
       - 'Src/IucMarket.Android/**'
       - 'Src/IucMarket.iOS/**'
-      - '.github/**'
       - '**/README.md'
       - '**/.gitignore'
       - '**/.gitattributes'
