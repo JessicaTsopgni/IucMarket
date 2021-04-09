@@ -59,7 +59,8 @@ namespace IucMarket.Mobile
             SecureStorage.Set(typeof(T).Name, JsonConvert.SerializeObject(new T()));
         }
 
-        public static bool IsAuthenticate => !string.IsNullOrEmpty(Get<UserModel>()?.Token);
+        public static bool IsAuthenticate => Get<UserModel>()?.IsAuthenticate ?? false;
+
         public static void SignOut()
         {
             var user = Get<UserModel>();

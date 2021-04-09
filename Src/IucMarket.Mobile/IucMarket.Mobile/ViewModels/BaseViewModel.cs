@@ -25,6 +25,32 @@ namespace IucMarket.Mobile.ViewModels
             get { return title; }
             set { SetProperty(ref title, value); }
         }
+        bool isAuthenticate;
+        public bool IsAuthenticate
+        {
+            get { return isAuthenticate; }
+            set { SetProperty(ref isAuthenticate, value); }
+        }
+
+
+        bool isNotAuthenticate;
+        public bool IsNotAuthenticate
+        {
+            get { return isNotAuthenticate; }
+            set { SetProperty(ref isNotAuthenticate, value); }
+        }
+
+        public BaseViewModel()
+        {
+            //IsAuthenticate = App.IsAuthenticate;
+            //IsNotAuthenticate = !App.IsAuthenticate;
+        }
+
+        public void OnApparing()
+        {
+            IsAuthenticate = App.IsAuthenticate;
+            IsNotAuthenticate = !App.IsAuthenticate;
+        }
 
         protected bool SetProperty<T>(ref T backingStore, T value,
             [CallerMemberName] string propertyName = "",

@@ -50,6 +50,7 @@ namespace IucMarket.Mobile.Models
 
         public string Password { get; private set; }
         public bool IsEmailVerified { get; private set; }
+        public bool IsAuthenticate => !string.IsNullOrEmpty(Token);
         public RoleOptions Role { get; private set; }
         public bool Status { get; private set; }
 

@@ -73,17 +73,16 @@ namespace IucMarket.Mobile.ViewModels
             }
         }
 
-        public async void OnAppearing()
+        public void  OnAppearing()
         {
-            if(!App.IsAuthenticate)
+            base.OnApparing();//for update auth
+            if (IsAuthenticate)
             {
-                await Shell.Current.GoToAsync($"/{nameof(SignInPage)}", true);
-                return;
-            }
-            if (!isFirstLoad)
-            {
-                IsBusy = true;
-                isFirstLoad = true;
+                if (!isFirstLoad)
+                {
+                    IsBusy = true;
+                    isFirstLoad = true;
+                }
             }
         }
 

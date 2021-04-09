@@ -5,118 +5,125 @@
              xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts"
              xmlns:viewModels="clr-namespace:IucMarket.Mobile.ViewModels"
              xmlns:models="clr-namespace:IucMarket.Mobile.Models" 
-             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"             
+             xmlns:views="clr-namespace:IucMarket.Mobile.Views" 
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              x:DataType="viewModels:OrderViewModel"
              Title="Orders" Padding="10">
     <ScrollView x:Name="scrollView">
-        <StackLayout Spacing="0" Padding="0, 0, 0, 10">
-            <RefreshView 
-                 x:DataType="viewModels:OrderViewModel"
-                 Command="{Binding LoadOrdersCommand}" 
-                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
-                <CollectionView x:Name="OrdersListView"
-                            ItemsSource="{Binding Orders}"
-                            SelectionMode="None"
-                            BackgroundColor="Transparent">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical"/>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <StackLayout x:DataType="models:OrderModel"
-                                         Margin="0, 0, 0, 10">
-                                <xct:Expander>
-                                    <xct:Expander.Header>
-                                        <StackLayout Orientation="Horizontal">
-                                            <StackLayout HorizontalOptions="StartAndExpand"
-                                                         Spacing="0">                                                
-                                                <Label Text="{Binding Number, StringFormat='#{0}'}"
-                                                     VerticalOptions="Center"
-                                                       FontSize="Large"
-                                                       TextColor="{DynamicResource Info}"/>
-                                                <Label Text="{Binding CreatedAtText}"
-                                                     VerticalOptions="Center"
-                                                       FontSize="Small"/>
-                                                <Label Text="{Binding StateText}"
-                                                     VerticalOptions="Center"
-                                                       FontSize="Subtitle"
-                                                       TextColor="{Binding StateColor}"/>
+        <StackLayout>
+            <StackLayout IsVisible="{Binding IsNotAuthenticate}"
+                         VerticalOptions="CenterAndExpand">
+                <views:SignSwitch/>
+            </StackLayout>
+            <StackLayout IsVisible="{Binding IsAuthenticate}" 
+                         Spacing="0" Padding="0, 0, 0, 10">
+                <RefreshView 
+                     Command="{Binding LoadOrdersCommand}" 
+                     IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+                    <CollectionView x:Name="OrdersListView"
+                                ItemsSource="{Binding Orders}"
+                                SelectionMode="None"
+                                BackgroundColor="Transparent">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout x:DataType="models:OrderModel"
+                                             Margin="0, 0, 0, 10">
+                                    <xct:Expander>
+                                        <xct:Expander.Header>
+                                            <StackLayout Orientation="Horizontal">
+                                                <StackLayout HorizontalOptions="StartAndExpand"
+                                                             Spacing="0">                                                
+                                                    <Label Text="{Binding Number, StringFormat='#{0}'}"
+                                                         VerticalOptions="Center"
+                                                           FontSize="Large"
+                                                           TextColor="{DynamicResource Info}"/>
+                                                    <Label Text="{Binding CreatedAtText}"
+                                                         VerticalOptions="Center"
+                                                           FontSize="Small"/>
+                                                    <Label Text="{Binding StateText}"
+                                                         VerticalOptions="Center"
+                                                           FontSize="Subtitle"
+                                                           TextColor="{Binding StateColor}"/>
+                                                </StackLayout>
+                                                    <Label Text="{x:Static helpers:IconFontSolid.AngleDown}"
+                                                       FontFamily="fas"
+                                                       HorizontalOptions="End"
+                                                       VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label"
+                                                         Binding="{Binding Source={RelativeSource AncestorType={x:Type xct:Expander}}, Path=IsExpanded}" Value="True">
+                                                            <Setter Property="Text" Value="{x:Static helpers:IconFontSolid.AngleUp}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
                                             </StackLayout>
-                                                <Label Text="{x:Static helpers:IconFontSolid.AngleDown}"
-                                                   FontFamily="fas"
-                                                   HorizontalOptions="End"
-                                                   VerticalOptions="Center">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                     Binding="{Binding Source={RelativeSource AncestorType={x:Type xct:Expander}}, Path=IsExpanded}" Value="True">
-                                                        <Setter Property="Text" Value="{x:Static helpers:IconFontSolid.AngleUp}" />
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
+                                        </xct:Expander.Header>
+                                        <StackLayout Spacing="10">
+                                        <StackLayout BindableLayout.ItemsSource="{Binding Products}"
+                                         HorizontalOptions="End">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Frame CornerRadius="10"
+                                        Padding="0"
+                                        BorderColor="{DynamicResource BorderColor}"
+                                        IsClippedToBounds="True"
+                                        HasShadow="False">
+                                                            <Grid x:DataType="models:ProductModel"
+                                              ColumnDefinitions="auto,*"
+                                              Padding="10">
+                                                                <xct:AvatarView Grid.Column="0" 
+                                                        Source="{Binding Picture}"
+                                                        BackgroundColor="Transparent" 
+                                                        Aspect="AspectFill"
+                                                        Size="60"
+                                                        VerticalOptions="Center"
+                                                        HorizontalOptions="Center"/>
+                                                            <StackLayout Grid.Column="1"
+                                                     Spacing="0">
+                                                                <Label 
+                                                   Text="{Binding Name}"
+                                                   FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation"
+                                                   VerticalOptions="Center"
+                                                   HorizontalOptions="Start"
+                                                Margin="15, 5, 0, 0"/>
+                                                                <Label Text="{Binding AmountOperation}"
+                                                   VerticalOptions="Center"
+                                                   HorizontalOptions="Start"
+                                                   TextColor="{DynamicResource Info}"
+                                                Margin="15, 0, 0, 0"/>
+                                                                </StackLayout>
+                                                        </Grid>
+                                                    </Frame>
+
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
                                         </StackLayout>
-                                    </xct:Expander.Header>
-                                    <StackLayout Spacing="10">
-                                    <StackLayout BindableLayout.ItemsSource="{Binding Products}"
-                                     HorizontalOptions="End">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate>
-                                                <Frame CornerRadius="10"
-                                    Padding="0"
-                                    BorderColor="{DynamicResource BorderColor}"
-                                    IsClippedToBounds="True"
-                                    HasShadow="False">
-                                                        <Grid x:DataType="models:ProductModel"
-                                          ColumnDefinitions="auto,*"
-                                          Padding="10">
-                                                            <xct:AvatarView Grid.Column="0" 
-                                                    Source="{Binding Picture}"
-                                                    BackgroundColor="Transparent" 
-                                                    Aspect="AspectFill"
-                                                    Size="60"
-                                                    VerticalOptions="Center"
-                                                    HorizontalOptions="Center"/>
-                                                        <StackLayout Grid.Column="1"
-                                                 Spacing="0">
-                                                            <Label 
-                                               Text="{Binding Name}"
-                                               FontAttributes="Bold"
-                                               LineBreakMode="TailTruncation"
-                                               VerticalOptions="Center"
-                                               HorizontalOptions="Start"
-                                            Margin="15, 5, 0, 0"/>
-                                                            <Label Text="{Binding AmountOperation}"
-                                               VerticalOptions="Center"
-                                               HorizontalOptions="Start"
-                                               TextColor="{DynamicResource Info}"
-                                            Margin="15, 0, 0, 0"/>
-                                                            </StackLayout>
-                                                    </Grid>
-                                                </Frame>
 
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </StackLayout>
-
-                                        <Label Text="{Binding TotalWithCurrency}"
-                       TextColor="{DynamicResource Info}"
-                       FontSize="Subtitle"
-                       HorizontalOptions="EndAndExpand"/>
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="{x:Static helpers:IconFontSolid.MapMarkedAlt}"
-                                                   FontFamily="far"
+                                            <Label Text="{Binding TotalWithCurrency}"
+                           TextColor="{DynamicResource Info}"
                            FontSize="Subtitle"
                            HorizontalOptions="EndAndExpand"/>
-                                            <Label Text="{Binding DeliveryPlaceText}"
-                           FontSize="Subtitle"
-                           HorizontalOptions="EndAndExpand"/>
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="{x:Static helpers:IconFontSolid.MapMarkedAlt}"
+                                                       FontFamily="far"
+                               FontSize="Subtitle"
+                               HorizontalOptions="EndAndExpand"/>
+                                                <Label Text="{Binding DeliveryPlaceText}"
+                               FontSize="Subtitle"
+                               HorizontalOptions="EndAndExpand"/>
+                                            </StackLayout>
                                         </StackLayout>
-                                    </StackLayout>
-                                </xct:Expander>
-                            </StackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </RefreshView>
+                                    </xct:Expander>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </RefreshView>
+            </StackLayout>
         </StackLayout>
     </ScrollView>
 

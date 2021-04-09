@@ -8,23 +8,24 @@
              Title="Sign in"
              x:Class="IucMarket.Mobile.Views.SignInPage">
     <ContentPage.Content>
-        <StackLayout>
-         <StackLayout Padding="10,0,10,0" 
-                     VerticalOptions="CenterAndExpand"
-                     HorizontalOptions="FillAndExpand"
-                     x:DataType="viewModel:SignInViewModel">
-            <Label Text="Who are you ?" FontSize="Title"
-                   Margin="0, 0, 0, 20"
-                   TextColor="{DynamicResource Primary}"
-                   HorizontalOptions="CenterAndExpand"
-                   VerticalOptions="Start"/>
-            <Entry Keyboard="Email" Text="{Binding Email, Mode=TwoWay}" Placeholder="Enter your email" />
-            <Entry Text="{Binding Password, Mode=TwoWay}" 
-                   Placeholder="Enter your password"
-                   IsPassword="True"/>
-            <Button VerticalOptions="Center" Text="Log in" Command="{Binding SignInCommand}"/>
-        </StackLayout>
-            <Button Text="Sign up" 
+        <ScrollView>
+            <StackLayout>
+                <StackLayout Padding="10,0,10,0" 
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="FillAndExpand"
+                            x:DataType="viewModel:SignInViewModel">
+                    <Label Text="Who are you ?" FontSize="Title"
+                        Margin="0, 0, 0, 20"
+                        TextColor="{DynamicResource Primary}"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="Start"/>
+                    <Entry Keyboard="Email" Text="{Binding Email, Mode=TwoWay}" Placeholder="Enter your email" />
+                    <Entry Text="{Binding Password, Mode=TwoWay}" 
+                        Placeholder="Enter your password"
+                        IsPassword="True"/>
+                    <Button VerticalOptions="Center" Text="Log in" Command="{Binding SignInCommand}"/>
+                </StackLayout>
+                <Button Text="Sign up" 
                     Command="{Binding SignUpCommand}"
                     Margin="0, 0, 0, 20"
                     FontSize="Small" 
@@ -32,6 +33,7 @@
                     TextColor="{DynamicResource Primary}"
                     BorderColor="Transparent"
                     BackgroundColor="Transparent"/>
-        </StackLayout>
+            </StackLayout>
+        </ScrollView>
  </ContentPage.Content>
 </ContentPage>

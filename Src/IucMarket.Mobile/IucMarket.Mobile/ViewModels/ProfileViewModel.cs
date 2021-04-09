@@ -19,8 +19,6 @@ namespace IucMarket.Mobile.ViewModels
 {
     public class ProfileViewModel : BaseViewModel
     {
-        public Command OnSignInCommand { get; }
-        public Command OnSignUpCommand { get; }
         public Command SendVerificationEmailCommand { get; }
         public Command OnSignOutCommand { get; }
 
@@ -37,22 +35,6 @@ namespace IucMarket.Mobile.ViewModels
             set { SetProperty(ref emailVerified, value); }
         }
 
-        bool isAuthenticate;
-        public bool IsAuthenticate
-        {
-            get { return isAuthenticate; }
-            set { SetProperty(ref isAuthenticate, value); }
-        }
-
-
-        bool isNotAuthenticate;
-        public bool IsNotAuthenticate
-        {
-            get { return isNotAuthenticate; }
-            set { SetProperty(ref isNotAuthenticate, value); }
-        }
-
-
         bool isNotEmailVerified;
         public bool IsNotEmailVerified
         {
@@ -63,22 +45,22 @@ namespace IucMarket.Mobile.ViewModels
 
         public ProfileViewModel()
         {
-            OnSignInCommand = new Command(OnSignIn);
-            OnSignUpCommand = new Command(OnSignUp);
             SendVerificationEmailCommand = new Command(SendVerificationEmail);
             OnSignOutCommand = new Command(OnSignOut);
         }
 
         public void OnAppearing()
         {
-            User = App.Get<UserModel>();
-            IsAuthenticate = App.IsAuthenticate;
-            IsNotAuthenticate = !App.IsAuthenticate;            
-            IsNotEmailVerified = !User.IsEmailVerified;
-            if (IsNotEmailVerified)
-                EmailVerified = "Email not verified.";
-            else
-                EmailVerified = "Email verified !";
+            base.OnApparing();
+            if (IsAuthenticate)
+            {
+                User = App.Get<UserModel>();
+                IsNotEmailVerified = !User.IsEmailVerified;
+                if (IsNotEmailVerified)
+                    EmailVerified = "Email not verified.";
+                else
+                    EmailVerified = "Email verified !";
+            }
             
         }
 

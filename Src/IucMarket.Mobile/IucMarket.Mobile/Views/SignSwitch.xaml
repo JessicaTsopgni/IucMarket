@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IucMarket.Mobile.Views.SignSwitch"
+             xmlns:helpers="clr-namespace:IucMarket.Mobile.Resources.Fonts">
+    <ContentView.Content>
+        <StackLayout>
+            <Image Source="{FontImage Size=200, Color={x:StaticResource Primary}, FontFamily=fas, Glyph={x:Static helpers:IconFontSolid.UserCircle}}"
+                           HorizontalOptions="Center"/>
+            <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="Center"
+                           Spacing="10">
+                <Button Text="Sign in" 
+                          Command="{Binding OnSignInCommand}"        
+                        VerticalOptions="CenterAndExpand"
+                        BorderColor="{DynamicResource Primary}"
+                        TextColor="{DynamicResource Primary}"
+                        BackgroundColor="Transparent"/>
+                <Button Text="Sign up"  
+                        Command="{Binding OnSignUpCommand}" 
+                        VerticalOptions="CenterAndExpand"
+                        TextColor="{DynamicResource Primary}"
+                        BackgroundColor="Transparent"
+                        BorderColor="{DynamicResource Primary}"/>
+            </StackLayout>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>
